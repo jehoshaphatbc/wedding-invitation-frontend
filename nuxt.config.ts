@@ -2,6 +2,14 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
 
+  future: {
+    compatibilityVersion: 4,
+  },
+
+  imports: {
+    dirs: ['~/services'],
+  },
+
   modules: [
     '@pinia/nuxt',
     '@nuxtjs/tailwindcss',
@@ -11,7 +19,9 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:8080/api/v1',
+      apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NODE_ENV === 'production'
+        ? 'https://wedding-invitation-backend-alpha.vercel.app'
+        : 'http://localhost:8000'),
     },
   },
 

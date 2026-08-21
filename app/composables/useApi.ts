@@ -2,7 +2,7 @@ export function useApi() {
   const config = useRuntimeConfig()
   const authStore = useAuthStore()
 
-  const baseURL = config.public.apiBase as string
+  const baseURL = (config.public.apiBase as string || '').replace(/\/$/, '')
 
   async function request<T>(
     method: string,
@@ -13,7 +13,8 @@ export function useApi() {
       headers?: Record<string, string>
     } = {},
   ): Promise<T> {
-    const url = `${baseURL}${path}`
+    const cleanPath = path.startsWith('/') ? path : `/${path}`
+    const url = `${baseURL}${cleanPath}`
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
