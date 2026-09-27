@@ -18,11 +18,11 @@ export function handleApiError(error: unknown): ApiError {
     const status = apiError.status || apiError.statusCode || 500
     const data = apiError.data
     return new ApiError(
-      data?.message || 'An unexpected error occurred.',
+      data?.message || error.message || String(error) || 'An unexpected error occurred.',
       status,
       data?.errors,
     )
   }
 
-  return new ApiError('An unexpected error occurred.', 500)
+  return new ApiError(error instanceof Error ? (error.name + ': ' + error.message) : String(error), 500)
 }

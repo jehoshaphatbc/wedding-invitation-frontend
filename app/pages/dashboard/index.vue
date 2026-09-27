@@ -24,12 +24,12 @@
         <span
           class="inline-block px-2.5 py-0.5 rounded-full text-sm font-medium"
           :class="
-            user?.email_verified_at
+            (user?.status === 'active' || user?.email_verified_at)
               ? 'bg-green-100 text-green-800'
               : 'bg-yellow-100 text-yellow-800'
           "
         >
-          {{ user?.email_verified_at ? 'Verified' : 'Not Verified' }}
+          {{ (user?.status === 'active' || user?.email_verified_at) ? 'Verified' : 'Not Verified' }}
         </span>
       </div>
 

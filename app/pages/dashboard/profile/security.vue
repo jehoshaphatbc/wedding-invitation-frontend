@@ -1,6 +1,24 @@
 <template>
   <div>
-    <h1 class="text-2xl font-bold text-gray-900 mb-6">Security</h1>
+    <div class="mb-6">
+      <h1 class="text-2xl font-bold text-gray-900 mb-4">Account Settings</h1>
+      <div class="border-b border-gray-200">
+        <nav class="-mb-px flex gap-6">
+          <NuxtLink
+            to="/dashboard/profile"
+            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+          >
+            Profile Information
+          </NuxtLink>
+          <NuxtLink
+            to="/dashboard/profile/security"
+            class="whitespace-nowrap pb-4 px-1 border-b-2 font-medium text-sm border-blue-500 text-blue-600"
+          >
+            Security & Password
+          </NuxtLink>
+        </nav>
+      </div>
+    </div>
 
     <div class="bg-white rounded-lg shadow p-6 mb-6">
       <h2 class="text-lg font-semibold text-gray-900 mb-4">Change Password</h2>

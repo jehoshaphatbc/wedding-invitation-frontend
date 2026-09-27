@@ -99,7 +99,7 @@
       title="Delete User"
       :message="`Are you sure you want to delete ${user?.name}? This action cannot be undone.`"
       confirm-text="Delete"
-      :danger="true"
+      :danger="true" require-input="DELETE"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
     />

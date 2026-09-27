@@ -21,7 +21,7 @@ export default defineNuxtConfig({
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NODE_ENV === 'production'
         ? 'https://wedding-invitation-backend-alpha.vercel.app'
-        : 'http://localhost:8000'),
+        : 'http://localhost:8080/api/v1'),
     },
   },
 

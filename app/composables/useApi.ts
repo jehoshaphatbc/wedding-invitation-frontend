@@ -8,7 +8,7 @@ export function useApi() {
     method: string,
     path: string,
     options: {
-      body?: Record<string, unknown>
+      body?: Record<string, unknown> | any
       query?: Record<string, string | number | boolean | undefined>
       headers?: Record<string, string>
     } = {},
@@ -17,9 +17,14 @@ export function useApi() {
     const url = `${baseURL}${cleanPath}`
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
       'Accept': 'application/json',
       ...options.headers,
+    }
+
+    if (options.body && typeof globalThis.FormData !== 'undefined' && options.body instanceof globalThis.FormData) {
+      // Do not set Content-Type for FormData, fetch will set it automatically with boundary
+    } else {
+      headers['Content-Type'] = 'application/json'
     }
 
     if (authStore.accessToken) {
@@ -27,25 +32,30 @@ export function useApi() {
     }
 
     try {
-      const response = await $fetch<T>(url, {
+      return await $fetch<T>(url, {
         method: method as any,
         body: options.body,
         query: options.query,
         headers,
+        credentials: 'omit',
       })
-      return response
     } catch (error: any) {
-      if (error?.response?.status === 401 && authStore.accessToken) {
+      if (
+        error?.response?.status === 401 && 
+        authStore.accessToken && 
+        !path.includes('/auth/refresh') && 
+        !path.includes('/auth/login')
+      ) {
         try {
           await authStore.refresh()
           headers['Authorization'] = `Bearer ${authStore.accessToken}`
-          const retryResponse = await $fetch<T>(url, {
+          return await $fetch<T>(url, {
             method: method as any,
             body: options.body,
             query: options.query,
             headers,
+            credentials: 'omit',
           })
-          return retryResponse
         } catch {
           authStore.clearAuth()
           if (import.meta.client) {
@@ -61,11 +71,11 @@ export function useApi() {
   return {
     get: <T>(path: string, query?: Record<string, string | number | boolean | undefined>) =>
       request<T>('GET', path, { query }),
-    post: <T>(path: string, body?: Record<string, unknown>) =>
+    post: <T>(path: string, body?: Record<string, unknown> | any) =>
       request<T>('POST', path, { body }),
-    patch: <T>(path: string, body?: Record<string, unknown>) =>
+    patch: <T>(path: string, body?: Record<string, unknown> | any) =>
       request<T>('PATCH', path, { body }),
-    put: <T>(path: string, body?: Record<string, unknown>) =>
+    put: <T>(path: string, body?: Record<string, unknown> | any) =>
       request<T>('PUT', path, { body }),
     delete: <T>(path: string) =>
       request<T>('DELETE', path),

@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click="activeDropdown = null">
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl font-bold text-gray-900">Users</h1>
       <NuxtLink
@@ -7,12 +7,12 @@
         to="/dashboard/users/create"
         class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
       >
-        Create User
+        Add User
       </NuxtLink>
     </div>
 
     <div class="bg-white rounded-lg shadow">
-      <div class="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-3">
+      <div class="p-4 border-b border-gray-200 flex flex-wrap gap-4">
         <input
           v-model="search"
           type="text"
@@ -38,7 +38,7 @@
         No users found.
       </div>
 
-      <div v-else class="overflow-x-auto">
+      <div v-else class="overflow-visible">
         <table class="w-full text-sm text-left">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
@@ -48,7 +48,7 @@
               <th class="px-4 py-3">Status</th>
               <th class="px-4 py-3">Roles</th>
               <th class="px-4 py-3">Created At</th>
-              <th class="px-4 py-3">Actions</th>
+              <th class="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -76,26 +76,38 @@
                 </div>
               </td>
               <td class="px-4 py-3 text-gray-600">{{ new Date(u.created_at).toLocaleDateString() }}</td>
-              <td class="px-4 py-3">
-                <div class="flex gap-2">
+              <td class="px-4 py-3 text-center relative">
+                <button
+                  @click.stop="activeDropdown = activeDropdown === u.id ? null : u.id"
+                  class="p-1 rounded hover:bg-gray-200 text-gray-500"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+                
+                <div
+                  v-show="activeDropdown === u.id"
+                  class="absolute right-8 top-10 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
+                >
                   <NuxtLink
                     v-if="hasPermission('user.view')"
                     :to="`/dashboard/users/${u.id}`"
-                    class="text-blue-600 hover:text-blue-800 text-xs font-medium"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     View
                   </NuxtLink>
                   <NuxtLink
                     v-if="hasPermission('user.update')"
                     :to="`/dashboard/users/${u.id}/edit`"
-                    class="text-green-600 hover:text-green-800 text-xs font-medium"
+                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Edit
                   </NuxtLink>
                   <button
                     v-if="hasPermission('user.delete')"
-                    class="text-red-600 hover:text-red-800 text-xs font-medium"
-                    @click="confirmDelete(u)"
+                    class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                    @click.stop="confirmDelete(u); activeDropdown = null"
                   >
                     Delete
                   </button>
@@ -144,7 +156,7 @@
       title="Delete User"
       :message="`Are you sure you want to delete ${userToDelete.name}? This action cannot be undone.`"
       confirm-text="Delete"
-      :danger="true"
+      :danger="true" require-input="DELETE"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
     />
@@ -170,6 +182,7 @@ const search = ref('')
 const statusFilter = ref('')
 const currentPage = ref(1)
 
+const activeDropdown = ref<string | null>(null)
 const showDeleteModal = ref(false)
 const userToDelete = ref<User | null>(null)
 

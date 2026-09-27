@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { handleApiError } from "~/utils/errors"
 definePageMeta({ layout: 'auth' })
 
 useHead({
@@ -48,8 +49,9 @@ async function handleSubmit() {
   try {
     await login(form.email, form.password)
     router.push('/dashboard')
-  } catch {
-    toast.error('Email atau password salah.')
+  } catch (e) {
+    const err = handleApiError(e)
+    toast.error(err.message || 'Email atau password salah.')
   } finally {
     isLoading.value = false
   }
