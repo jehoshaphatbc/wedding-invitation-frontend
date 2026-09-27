@@ -1,103 +1,107 @@
 import { defineStore } from 'pinia'
 import type { User } from '~/types/user'
 
-interface AuthState {
-  user: User | null
-  accessToken: string | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  isInitialized: boolean
-}
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<User | null>(null)
+  const accessToken = useCookie<string | null>('access_token', { maxAge: 60 * 60 * 24 * 7 })
+  const isAuthenticated = ref(false)
+  const isLoading = ref(false)
+  const isInitialized = ref(false)
+  
+  const authService = useAuthService()
 
-export const useAuthStore = defineStore('auth', {
-  state: (): AuthState => ({
-    user: null,
-    accessToken: null,
-    isAuthenticated: false,
-    isLoading: false,
-    isInitialized: false,
-  }),
+  async function login(email: string, password: string) {
+    isLoading.value = true
+    try {
+      const response = await authService.login({ email, password })
+      accessToken.value = response.data.access_token
+      user.value = response.data.user
+      isAuthenticated.value = true
+      return response
+    } finally {
+      isLoading.value = false
+    }
+  }
 
-  actions: {
-    async login(email: string, password: string) {
-      this.isLoading = true
-      try {
-        const authService = useAuthService()
-        const response = await authService.login({ email, password })
-        this.accessToken = response.data.access_token
-        this.user = response.data.user
-        this.isAuthenticated = true
-        return response
-      } finally {
-        this.isLoading = false
+  async function logout() {
+    try {
+      await authService.logout()
+    } catch {
+      // Continue clearing state even if API fails
+    } finally {
+      clearAuth()
+    }
+  }
+
+  async function logoutAll() {
+    try {
+      await authService.logoutAll()
+    } catch {
+      // Continue clearing state even if API fails
+    } finally {
+      clearAuth()
+    }
+  }
+
+  async function refresh() {
+    try {
+      const response = await authService.refresh()
+      accessToken.value = response.data.access_token
+      return response
+    } catch (error) {
+      clearAuth()
+      throw error
+    }
+  }
+
+  async function fetchMe() {
+    try {
+      const response = await authService.getMe()
+      user.value = response.data
+      isAuthenticated.value = true
+      return response
+    } catch (error) {
+      clearAuth()
+      throw error
+    }
+  }
+
+  async function initialize() {
+    if (isInitialized.value) return
+
+    isLoading.value = true
+    try {
+      if (accessToken.value) {
+        await fetchMe()
+      } else {
+        clearAuth()
       }
-    },
+    } catch {
+      clearAuth()
+    } finally {
+      isLoading.value = false
+      isInitialized.value = true
+    }
+  }
 
-    async logout() {
-      try {
-        const authService = useAuthService()
-        await authService.logout()
-      } catch {
-        // Continue clearing state even if API fails
-      } finally {
-        this.clearAuth()
-      }
-    },
+  function clearAuth() {
+    user.value = null
+    accessToken.value = null
+    isAuthenticated.value = false
+  }
 
-    async logoutAll() {
-      try {
-        const authService = useAuthService()
-        await authService.logoutAll()
-      } catch {
-        // Continue clearing state even if API fails
-      } finally {
-        this.clearAuth()
-      }
-    },
-
-    async refresh() {
-      try {
-        const authService = useAuthService()
-        const response = await authService.refresh()
-        this.accessToken = response.data.access_token
-        return response
-      } catch (error) {
-        this.clearAuth()
-        throw error
-      }
-    },
-
-    async fetchMe() {
-      try {
-        const authService = useAuthService()
-        const response = await authService.getMe()
-        this.user = response.data
-        this.isAuthenticated = true
-        return response
-      } catch (error) {
-        this.clearAuth()
-        throw error
-      }
-    },
-
-    async initialize() {
-      if (this.isInitialized) return
-
-      this.isLoading = true
-      try {
-        await this.fetchMe()
-      } catch {
-        this.clearAuth()
-      } finally {
-        this.isLoading = false
-        this.isInitialized = true
-      }
-    },
-
-    clearAuth() {
-      this.user = null
-      this.accessToken = null
-      this.isAuthenticated = false
-    },
-  },
+  return {
+    user,
+    accessToken,
+    isAuthenticated,
+    isLoading,
+    isInitialized,
+    login,
+    logout,
+    logoutAll,
+    refresh,
+    fetchMe,
+    initialize,
+    clearAuth,
+  }
 })

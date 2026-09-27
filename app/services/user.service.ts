@@ -47,5 +47,9 @@ export function useUserService() {
     assignRoles(id: string, roleIds: string[]) {
       return api.put<ApiResponse<null>>(`/admin/users/${id}/roles`, { role_ids: roleIds })
     },
+
+    forceChangePassword(id: string, newPassword: string) {
+      return api.patch<ApiResponse<null>>(`/admin/users/${id}/password`, { new_password: newPassword })
+    },
   }
 }

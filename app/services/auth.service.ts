@@ -11,7 +11,7 @@ export function useAuthService() {
     },
 
     register(data: RegisterRequest) {
-      return api.post<ApiResponse<{ message: string }>>('/auth/register', data as any)
+      return api.post<ApiResponse<{ message: string, token?: string }>>('/auth/register', data as any)
     },
 
     logout() {
@@ -40,6 +40,14 @@ export function useAuthService() {
 
     verifyEmail(data: VerifyEmailRequest) {
       return api.post<ApiResponse<{ message: string }>>('/auth/verify-email', data as any)
+    },
+
+    resendVerification(data: { email: string }) {
+      return api.post<ApiResponse<{ message: string }>>('/auth/resend-verification', data as any)
+    },
+
+    changeEmail(data: { new_email: string }) {
+      return api.post<ApiResponse<{ message: string }>>('/me/email', data as any)
     },
 
     getMe() {
