@@ -20,7 +20,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || (process.env.NODE_ENV === 'production'
-        ? 'https://wedding-invitation-backend-alpha.vercel.app'
+        ? 'https://wedding-invitation-backend-alpha.vercel.app/api/v1'
         : 'http://localhost:8080/api/v1'),
     },
   },
