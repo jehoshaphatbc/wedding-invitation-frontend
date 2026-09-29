@@ -51,7 +51,6 @@ export function useUserService() {
     forceChangePassword(id: string, newPassword: string) {
       return api.patch<ApiResponse<null>>(`/admin/users/${id}/password`, { new_password: newPassword })
     },
-
     getTrashedUsers(params?: {
       page?: number
       per_page?: number
