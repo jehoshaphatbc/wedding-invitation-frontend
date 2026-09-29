@@ -16,7 +16,7 @@
           {{ viewMode === 'trash' ? 'View Active' : 'Trash' }}
         </button>
         <NuxtLink
-          v-if="viewMode === 'active' && hasPermission('role.create')"
+          v-if="viewMode === 'active' && (isSuperAdmin || hasPermission('role.create'))"
           to="/dashboard/roles/create"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
         >
@@ -85,21 +85,21 @@
                 </div>
                 <div v-else class="flex gap-2">
                   <NuxtLink
-                    v-if="hasPermission('role.update')"
+                    v-if="isSuperAdmin || hasPermission('role.update')"
                     :to="`/dashboard/roles/${role.id}/edit`"
                     class="text-green-600 hover:text-green-800 text-xs font-medium"
                   >
                     Edit
                   </NuxtLink>
                   <NuxtLink
-                    v-if="hasPermission('permission.assign')"
+                    v-if="isSuperAdmin || hasPermission('permission.assign')"
                     :to="`/dashboard/roles/${role.id}/permissions`"
                     class="text-indigo-600 hover:text-indigo-800 text-xs font-medium"
                   >
                     Permissions
                   </NuxtLink>
                   <button
-                    v-if="hasPermission('role.delete') && !role.is_system"
+                    v-if="(isSuperAdmin || hasPermission('role.delete')) && !role.is_system"
                     class="text-red-600 hover:text-red-800 text-xs font-medium"
                     @click="confirmDelete(role)"
                   >
@@ -161,8 +161,8 @@ const toast = useToast()
 const roleService = useRoleService()
 
 const authStore = useAuthStore()
-const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name === 'superadmin'))
-const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name === 'admin'))
+const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('super')))
+const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('admin') && !r.name.toLowerCase().includes('super')))
 const canViewTrash = computed(() => isSuperAdmin.value || isAdmin.value)
 
 

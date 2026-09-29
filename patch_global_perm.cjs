@@ -1,4 +1,7 @@
-import type { User } from '~/types/user'
+const fs = require('fs');
+let code = fs.readFileSync('app/composables/usePermission.ts', 'utf8');
+
+const newCode = `import type { User } from '~/types/user'
 
 export function usePermission() {
   const authStore = useAuthStore()
@@ -45,3 +48,7 @@ export function usePermission() {
     userPermissions,
   }
 }
+`;
+
+fs.writeFileSync('app/composables/usePermission.ts', newCode);
+console.log('Patched usePermission.ts');

@@ -16,7 +16,7 @@
           {{ viewMode === 'trash' ? 'View Active' : 'Trash' }}
         </button>
         <NuxtLink
-          v-if="viewMode === 'active' && hasPermission('user.create')"
+          v-if="viewMode === 'active' && (isSuperAdmin || hasPermission('user.create'))"
           to="/dashboard/users/create"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
         >
@@ -130,21 +130,21 @@
                   class="absolute right-8 top-10 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
                 >
                   <NuxtLink
-                    v-if="hasPermission('user.view')"
+                    v-if="isSuperAdmin || hasPermission('user.view')"
                     :to="`/dashboard/users/${u.id}`"
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     View
                   </NuxtLink>
                   <NuxtLink
-                    v-if="hasPermission('user.update')"
+                    v-if="isSuperAdmin || hasPermission('user.update')"
                     :to="`/dashboard/users/${u.id}/edit`"
                     class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Edit
                   </NuxtLink>
                   <button
-                    v-if="hasPermission('user.delete') && canManageTarget(u)"
+                    v-if="(isSuperAdmin || hasPermission('user.delete')) && canManageTarget(u)"
                     class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                     @click.stop="confirmDelete(u); activeDropdown = null"
                   >
@@ -240,16 +240,16 @@ const toast = useToast()
 const userService = useUserService()
 
 const authStore = useAuthStore()
-const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name === 'superadmin'))
-const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name === 'admin'))
+const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('super')))
+const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('admin') && !r.name.toLowerCase().includes('super')))
 const canViewTrash = computed(() => isSuperAdmin.value || isAdmin.value)
 
 function canManageTarget(target: User) {
   if (isSuperAdmin.value) return true
   if (isAdmin.value && !isSuperAdmin.value) {
     // Admin can only delete users who have 'customer' role and aren't admin themselves
-    const isCustomer = target.roles?.some(r => r.name === 'customer')
-    const isHigherLevel = target.roles?.some(r => ['admin', 'superadmin'].includes(r.name))
+    const isCustomer = target.roles?.some(r => r.name.toLowerCase().includes('customer'))
+    const isHigherLevel = target.roles?.some(r => r.name.toLowerCase().includes('admin'))
     return isCustomer && !isHigherLevel
   }
   return false
