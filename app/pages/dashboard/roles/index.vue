@@ -163,7 +163,7 @@ const roleService = useRoleService()
 const authStore = useAuthStore()
 const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('super')))
 const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('admin') && !r.name.toLowerCase().includes('super')))
-const canViewTrash = computed(() => isSuperAdmin.value || isAdmin.value)
+const canViewTrash = computed(() => isSuperAdmin.value)
 
 
 const roles = ref<Role[]>([])

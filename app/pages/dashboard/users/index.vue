@@ -144,7 +144,7 @@
                     Edit
                   </NuxtLink>
                   <button
-                    v-if="(isSuperAdmin || hasPermission('user.delete')) && canManageTarget(u)"
+                    v-if="canManageTarget(u)"
                     class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                     @click.stop="confirmDelete(u); activeDropdown = null"
                   >
@@ -242,15 +242,13 @@ const userService = useUserService()
 const authStore = useAuthStore()
 const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('super')))
 const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('admin') && !r.name.toLowerCase().includes('super')))
-const canViewTrash = computed(() => isSuperAdmin.value || isAdmin.value)
+const canViewTrash = computed(() => isSuperAdmin.value)
 
 function canManageTarget(target: User) {
   if (isSuperAdmin.value) return true
-  if (isAdmin.value && !isSuperAdmin.value) {
-    // Admin can only delete users who have 'customer' role and aren't admin themselves
-    const isCustomer = target.roles?.some(r => r.name.toLowerCase().includes('customer'))
-    const isHigherLevel = target.roles?.some(r => r.name.toLowerCase().includes('admin'))
-    return isCustomer && !isHigherLevel
+  if (isAdmin.value) {
+    // Admin can ONLY manage customers
+    return target.roles?.some(r => r.name.toLowerCase().includes('customer')) || false
   }
   return false
 }
