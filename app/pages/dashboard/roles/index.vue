@@ -25,15 +25,7 @@
     </div>
 
     <div class="bg-white rounded-lg shadow">
-      <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-
-      <div v-else-if="roles.length === 0" class="py-12 text-center text-gray-500">
-        No roles found.
-      </div>
-
-      <div v-else class="overflow-x-auto">
+      <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
@@ -46,8 +38,19 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="role in roles" :key="role.id" class="border-b hover:bg-gray-50">
-              <td class="px-4 py-3 font-medium text-gray-900">{{ role.name }}</td>
+            <tr v-if="loading">
+              <td colspan="6" class="py-12 text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              </td>
+            </tr>
+            <tr v-else-if="roles.length === 0">
+              <td colspan="6" class="py-12 text-center text-gray-500">
+                No roles found.
+              </td>
+            </tr>
+            <template v-else>
+              <tr v-for="role in roles" :key="role.id" class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3 font-medium text-gray-900">{{ role.name }}</td>
               <td class="px-4 py-3 text-gray-600">{{ role.display_name }}</td>
               <td class="px-4 py-3 text-gray-600">{{ role.description ?? '-' }}</td>
               <td class="px-4 py-3">
@@ -104,6 +107,7 @@
                 </div>
               </td>
             </tr>
+            </template>
           </tbody>
         </table>
       </div>

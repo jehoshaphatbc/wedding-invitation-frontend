@@ -43,15 +43,7 @@
         </select>
       </div>
 
-      <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-
-      <div v-else-if="users.length === 0" class="py-12 text-center text-gray-500">
-        No users found.
-      </div>
-
-      <div v-else class="overflow-visible">
+      <div class="overflow-visible">
         <table class="w-full text-sm text-left">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
@@ -65,7 +57,18 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="u in users" :key="u.id" class="border-b hover:bg-gray-50">
+            <tr v-if="loading">
+              <td colspan="7" class="py-12 text-center">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              </td>
+            </tr>
+            <tr v-else-if="users.length === 0">
+              <td colspan="7" class="py-12 text-center text-gray-500">
+                No users found.
+              </td>
+            </tr>
+            <template v-else>
+              <tr v-for="u in users" :key="u.id" class="border-b hover:bg-gray-50">
               <td class="px-4 py-3 font-medium text-gray-900">{{ u.name }}</td>
               <td class="px-4 py-3 text-gray-600">{{ u.email }}</td>
               <td class="px-4 py-3 text-gray-600">{{ u.phone ?? '-' }}</td>
@@ -147,6 +150,7 @@
                 </template>
               </td>
             </tr>
+            </template>
           </tbody>
         </table>
       </div>
