@@ -5,6 +5,20 @@ export function useTemplateService() {
   const api = useApi()
 
   return {
+    
+    getTrashedTemplates(params?: { page?: number; per_page?: number; search?: string; sort?: string; order?: string }) {
+      return api.get<any>('/admin/templates/trash', params as any)
+    },
+    bulkDeleteTemplates(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/templates/bulk-delete', { ids })
+    },
+    bulkRestoreTemplates(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/templates/bulk-restore', { ids })
+    },
+    bulkForceDeleteTemplates(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/templates/bulk-force-delete', { ids })
+    },
+  
     getTemplates(params?: { page?: number; per_page?: number; search?: string }) {
       return api.get<any>('/admin/templates', params as any)
     },

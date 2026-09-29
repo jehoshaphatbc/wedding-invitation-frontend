@@ -5,6 +5,20 @@ export function usePackageService() {
   const api = useApi()
 
   return {
+    
+    getTrashedPackages(params?: { page?: number; per_page?: number; search?: string; sort?: string; order?: string }) {
+      return api.get<any>('/admin/packages/trash', params as any)
+    },
+    bulkDeletePackages(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/packages/bulk-delete', { ids })
+    },
+    bulkRestorePackages(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/packages/bulk-restore', { ids })
+    },
+    bulkForceDeletePackages(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/packages/bulk-force-delete', { ids })
+    },
+  
     getPackages(params?: { page?: number; per_page?: number; search?: string }) {
       return api.get<any>('/admin/packages', params as any)
     },
