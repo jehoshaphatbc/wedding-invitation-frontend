@@ -271,9 +271,13 @@ async function handleRestore() {
 const selectedRoles = ref<string[]>([])
 
 const selectAll = computed({
-  get: () => roles.value.length > 0 && selectedRoles.value.length === roles.value.length,
+  get: () => {
+    if (!roles.value || roles.value.length === 0) return false;
+    return selectedRoles.value.length === roles.value.length;
+  },
   set: (val) => {
     if (val) {
+      if (!roles.value) return;
       selectedRoles.value = roles.value.map(r => r.id)
     } else {
       selectedRoles.value = []
@@ -335,7 +339,7 @@ async function loadRoles() {
     const response = viewMode.value === 'active' 
       ? await roleService.getRoles(params as any)
       : await roleService.getTrashedRoles(params)
-    roles.value = response.data || response // Handle both cases if response structure differs
+    roles.value = response?.data || [] || response // Handle both cases if response structure differs
 
   } catch (e) {
     const err = handleApiError(e)

@@ -419,10 +419,14 @@ function statusClass(status: string) {
 const selectedUsers = ref<string[]>([])
 
 const selectAll = computed({
-  get: () => users.value.length > 0 && selectedUsers.value.length === users.value.length,
+  get: () => {
+    if (!users.value || users.value.length === 0) return false;
+    return selectedUsers.value.length === users.value.length;
+  },
   set: (val) => {
     if (val) {
       // If admin, they can only select users they can manage
+      if (!users.value) return;
       selectedUsers.value = users.value.filter(u => isSuperAdmin.value || canManageTarget(u)).map(u => u.id)
     } else {
       selectedUsers.value = []
@@ -525,8 +529,8 @@ async function loadUsers() {
           order: sortOrder.value,
         })
 
-    users.value = response.data
-    meta.value = response.meta
+    users.value = response?.data || []
+    meta.value = response?.meta || null
   } catch (e) {
     const err = handleApiError(e)
     toast.error(err.message)
