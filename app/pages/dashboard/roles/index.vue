@@ -1,14 +1,27 @@
 <template>
   <div>
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-2xl font-bold text-gray-900">Roles</h1>
-      <NuxtLink
-        v-if="hasPermission('role.create')"
-        to="/dashboard/roles/create"
-        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-      >
-        Create Role
-      </NuxtLink>
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900">Roles</h1>
+        <p class="text-sm text-gray-500 mt-1">Manage system roles and permissions.</p>
+      </div>
+      <div class="flex gap-2">
+        <button
+          @click="toggleViewMode"
+          class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
+          :class="viewMode === 'trash' ? 'bg-red-50 text-red-600 border-red-200' : 'text-gray-700 bg-white'"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+          {{ viewMode === 'trash' ? 'View Active' : 'Trash' }}
+        </button>
+        <NuxtLink
+          v-if="viewMode === 'active' && hasPermission('role.create')"
+          to="/dashboard/roles/create"
+          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+        >
+          Create Role
+        </NuxtLink>
+      </div>
     </div>
 
     <div class="bg-white rounded-lg shadow">
@@ -50,7 +63,23 @@
                 <span class="text-gray-600">{{ role.permissions?.length ?? 0 }}</span>
               </td>
               <td class="px-4 py-3">
-                <div class="flex gap-2">
+                <div v-if="viewMode === 'trash'" class="flex gap-2">
+                  <button
+                    @click.stop="confirmRestore(role)"
+                    class="text-green-600 hover:text-green-800 text-xs font-medium"
+                    title="Restore Role"
+                  >
+                    Restore
+                  </button>
+                  <button
+                    @click.stop="confirmForceDelete(role)"
+                    class="text-red-600 hover:text-red-800 text-xs font-medium"
+                    title="Force Delete"
+                  >
+                    Force Delete
+                  </button>
+                </div>
+                <div v-else class="flex gap-2">
                   <NuxtLink
                     v-if="hasPermission('role.update')"
                     :to="`/dashboard/roles/${role.id}/edit`"
@@ -80,15 +109,37 @@
       </div>
     </div>
 
+    
     <UiConfirmModal
-      v-if="showDeleteModal && roleToDelete"
+      v-if="showDeleteModal && roleToDelete && !isForceDelete"
       title="Delete Role"
-      :message="`Are you sure you want to delete the role '${roleToDelete.display_name}'? This action cannot be undone.`"
+      :message="`Are you sure you want to delete the '${roleToDelete.display_name}' role? Users with this role might lose access.`"
       confirm-text="Delete"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
     />
+
+    <UiConfirmModal
+      v-if="showDeleteModal && roleToDelete && isForceDelete"
+      title="Force Delete Role"
+      :message="`Are you sure you want to permanently delete '${roleToDelete.display_name}'? This action cannot be undone!`"
+      confirm-text="Force Delete"
+      :danger="true" require-input="DELETE"
+      @confirm="handleForceDelete"
+      @cancel="showDeleteModal = false"
+    />
+
+    <UiConfirmModal
+      v-if="showRestoreModal && roleToRestore"
+      title="Restore Role"
+      :message="`Are you sure you want to restore '${roleToRestore.display_name}'?`"
+      confirm-text="Restore"
+      :danger="false"
+      @confirm="handleRestore"
+      @cancel="showRestoreModal = false"
+    />
+
   </div>
 </template>
 
@@ -108,11 +159,66 @@ const loading = ref(true)
 const showDeleteModal = ref(false)
 const roleToDelete = ref<Role | null>(null)
 
+const viewMode = ref<'active' | 'trash'>('active')
+const isForceDelete = ref(false)
+const showRestoreModal = ref(false)
+const roleToRestore = ref<Role | null>(null)
+
+function toggleViewMode() {
+  viewMode.value = viewMode.value === 'active' ? 'trash' : 'active'
+  loadRoles()
+}
+
+function confirmForceDelete(role: Role) {
+  roleToDelete.value = role
+  isForceDelete.value = true
+  showDeleteModal.value = true
+}
+
+function confirmRestore(role: Role) {
+  roleToRestore.value = role
+  showRestoreModal.value = true
+}
+
+async function handleForceDelete() {
+  if (!roleToDelete.value) return
+  try {
+    await roleService.forceDeleteRole(roleToDelete.value.id)
+    toast.success('Role permanently deleted.')
+    showDeleteModal.value = false
+    roleToDelete.value = null
+    loadRoles()
+  } catch (e) {
+    const err = handleApiError(e)
+    toast.error(err.message)
+  }
+}
+
+async function handleRestore() {
+  if (!roleToRestore.value) return
+  try {
+    await roleService.restoreRole(roleToRestore.value.id)
+    toast.success('Role restored successfully.')
+    showRestoreModal.value = false
+    roleToRestore.value = null
+    loadRoles()
+  } catch (e) {
+    const err = handleApiError(e)
+    toast.error(err.message)
+  }
+}
+
+
 async function loadRoles() {
   loading.value = true
+  roles.value = []
   try {
-    const response = await roleService.getRoles()
-    roles.value = response.data
+    
+    const response = viewMode.value === 'active' 
+      ? await roleService.getRoles()
+      : await roleService.getTrashedRoles()
+    roles.value = response.data || response // Handle both cases if response structure differs
+
   } catch (e) {
     const err = handleApiError(e)
     toast.error(err.message)
@@ -122,6 +228,7 @@ async function loadRoles() {
 }
 
 function confirmDelete(role: Role) {
+  isForceDelete.value = false
   roleToDelete.value = role
   showDeleteModal.value = true
 }

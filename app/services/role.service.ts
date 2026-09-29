@@ -35,5 +35,23 @@ export function useRoleService() {
     assignPermissions(id: string, permissionIds: string[]) {
       return api.put<ApiResponse<null>>(`/admin/roles/${id}/permissions`, { permission_ids: permissionIds })
     },
+
+    getTrashedRoles(params?: {
+      page?: number
+      per_page?: number
+      search?: string
+      sort?: string
+      order?: string
+    }) {
+      return api.get<any>('/admin/roles/trash', params as any)
+    },
+
+    restoreRole(id: string) {
+      return api.post<ApiResponse<null>>(`/admin/roles/${id}/restore`)
+    },
+
+    forceDeleteRole(id: string) {
+      return api.delete<ApiResponse<null>>(`/admin/roles/${id}/force`)
+    },
   }
 }

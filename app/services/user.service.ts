@@ -51,5 +51,23 @@ export function useUserService() {
     forceChangePassword(id: string, newPassword: string) {
       return api.patch<ApiResponse<null>>(`/admin/users/${id}/password`, { new_password: newPassword })
     },
+
+    getTrashedUsers(params?: {
+      page?: number
+      per_page?: number
+      search?: string
+      sort?: string
+      order?: string
+    }) {
+      return api.get<ApiPaginatedResponse<User>>('/admin/users/trash', params as any)
+    },
+
+    restoreUser(id: string) {
+      return api.post<ApiResponse<null>>(`/admin/users/${id}/restore`)
+    },
+
+    forceDeleteUser(id: string) {
+      return api.delete<ApiResponse<null>>(`/admin/users/${id}/force`)
+    },
   }
 }
