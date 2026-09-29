@@ -68,5 +68,18 @@ export function useUserService() {
     forceDeleteUser(id: string) {
       return api.delete<ApiResponse<null>>(`/admin/users/${id}/force`)
     },
+
+    bulkDeleteUsers(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/users/bulk-delete', { ids })
+    },
+    bulkRestoreUsers(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/users/bulk-restore', { ids })
+    },
+    bulkForceDeleteUsers(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/users/bulk-force-delete', { ids })
+    },
+    bulkUpdateUserStatus(ids: string[], status: string) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/users/bulk-status', { ids, status })
+    },
   }
 }

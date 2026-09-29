@@ -5,8 +5,14 @@ export function useRoleService() {
   const api = useApi()
 
   return {
-    getRoles() {
-      return api.get<ApiResponse<Role[]>>('/admin/roles')
+    getRoles(params?: {
+      page?: number
+      per_page?: number
+      search?: string
+      sort?: string
+      order?: string
+    }) {
+      return api.get<any>('/admin/roles', params as any)
     },
 
     getRole(id: string) {
@@ -52,6 +58,16 @@ export function useRoleService() {
 
     forceDeleteRole(id: string) {
       return api.delete<ApiResponse<null>>(`/admin/roles/${id}/force`)
+    },
+
+    bulkDeleteRoles(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/roles/bulk-delete', { ids })
+    },
+    bulkRestoreRoles(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/roles/bulk-restore', { ids })
+    },
+    bulkForceDeleteRoles(ids: string[]) {
+      return api.post<ApiResponse<{ success_count: number }>>('/admin/roles/bulk-force-delete', { ids })
     },
   }
 }

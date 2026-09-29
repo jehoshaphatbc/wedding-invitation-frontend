@@ -33,8 +33,21 @@
           placeholder="Search users..."
           class="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
+        
+      <div class="flex gap-2 w-full sm:w-auto">
+        <select
+          v-model="roleFilter"
+          @change="currentPage = 1; loadUsers()"
+          class="block w-full sm:w-32 px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white"
+        >
+          <option value="">All Roles</option>
+          <option value="superadmin">Superadmin</option>
+          <option value="admin">Admin</option>
+          <option value="customer">Customer</option>
+        </select>
         <select
           v-model="statusFilter"
+
           class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
         >
           <option value="">All Statuses</option>
@@ -45,33 +58,58 @@
       </div>
 
 
+      
+      <div v-if="selectedUsers.length > 0" class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex items-center justify-between">
+        <span class="text-sm text-blue-800 font-medium">{{ selectedUsers.length }} users selected</span>
+        <div class="flex gap-2 items-center">
+          <template v-if="viewMode === 'active'">
+            <div class="flex items-center gap-2 mr-4 border-r border-blue-200 pr-4">
+              <select v-model="bulkStatusTarget" class="text-sm border-gray-300 rounded-md py-1.5 pl-3 pr-8">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="suspended">Suspended</option>
+                <option value="pending">Pending</option>
+              </select>
+              <button @click="showBulkStatusModal = true" class="px-3 py-1.5 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded hover:bg-blue-50">Update Status</button>
+            </div>
+            <button @click="showBulkDeleteModal = true" class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50">Delete Selected</button>
+          </template>
+          <template v-else>
+            <button v-if="isSuperAdmin" @click="showBulkRestoreModal = true" class="px-3 py-1.5 text-sm font-medium text-green-600 bg-white border border-green-200 rounded hover:bg-green-50">Restore Selected</button>
+            <button v-if="isSuperAdmin" @click="showBulkForceDeleteModal = true" class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50">Force Delete Selected</button>
+          </template>
+        </div>
+      </div>
+
       <div class="overflow-visible">
         <table class="w-full text-sm text-left">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th class="px-4 py-3">Name</th>
-              <th class="px-4 py-3">Email</th>
+              <th class="px-4 py-3 w-4"><input type="checkbox" v-model="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"></th>
+              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">Name <span v-if="sortBy==='name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
+              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('email')">Email <span v-if="sortBy==='email'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
               <th class="px-4 py-3">Phone</th>
               <th class="px-4 py-3">Status</th>
               <th class="px-4 py-3">Roles</th>
-              <th class="px-4 py-3">Created At</th>
+              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">Created At <span v-if="sortBy==='created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
               <th class="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="7" class="py-12 text-center">
+              <td colspan="8" class="py-12 text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               </td>
             </tr>
             <tr v-else-if="!users || users.length === 0">
-              <td colspan="7" class="py-12 text-center text-gray-500">
+              <td colspan="8" class="py-12 text-center text-gray-500">
                 No users found.
               </td>
             </tr>
             <template v-else>
               <tr v-for="u in users" :key="u.id" class="border-b hover:bg-gray-50">
-              <td class="px-4 py-3 font-medium text-gray-900">{{ u.name }}</td>
+              <td class="px-4 py-3"><input type="checkbox" :value="u.id" v-model="selectedUsers" :disabled="!isSuperAdmin && !canManageTarget(u)" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 disabled:opacity-50"></td>
+                <td class="px-4 py-3 font-medium text-gray-900">{{ u.name }}</td>
               <td class="px-4 py-3 text-gray-600">{{ u.email }}</td>
               <td class="px-4 py-3 text-gray-600">{{ u.phone ?? '-' }}</td>
               <td class="px-4 py-3">
@@ -223,6 +261,45 @@
       @cancel="showRestoreModal = false"
     />
 
+  
+    <UiConfirmModal
+      v-if="showBulkDeleteModal"
+      title="Delete Selected Users"
+      :message="`Are you sure you want to delete ${selectedUsers.length} users? They will be moved to trash.`"
+      confirm-text="Delete"
+      :danger="true"
+      @confirm="handleBulkDelete"
+      @cancel="showBulkDeleteModal = false"
+    />
+
+    <UiConfirmModal
+      v-if="showBulkRestoreModal"
+      title="Restore Selected Users"
+      :message="`Are you sure you want to restore ${selectedUsers.length} users?`"
+      confirm-text="Restore"
+      @confirm="handleBulkRestore"
+      @cancel="showBulkRestoreModal = false"
+    />
+
+    <UiConfirmModal
+      v-if="showBulkForceDeleteModal"
+      title="Force Delete Selected Users"
+      :message="`Are you sure you want to permanently delete ${selectedUsers.length} users? This action cannot be undone.`"
+      confirm-text="Force Delete"
+      :danger="true" require-input="DELETE"
+      @confirm="handleBulkForceDelete"
+      @cancel="showBulkForceDeleteModal = false"
+    />
+
+    <UiConfirmModal
+      v-if="showBulkStatusModal"
+      title="Update Status"
+      :message="`Are you sure you want to update the status of ${selectedUsers.length} users to '${bulkStatusTarget}'?`"
+      confirm-text="Update Status"
+      @confirm="handleBulkStatus"
+      @cancel="showBulkStatusModal = false"
+    />
+
   </div>
 </template>
 
@@ -258,7 +335,10 @@ const users = ref<User[]>([])
 const meta = ref<ApiPaginationMeta | null>(null)
 const loading = ref(true)
 const search = ref('')
+
 const statusFilter = ref('')
+const roleFilter = ref('')
+
 const currentPage = ref(1)
 
 const activeDropdown = ref<string | null>(null)
@@ -334,7 +414,93 @@ function statusClass(status: string) {
   return 'bg-gray-100 text-gray-800'
 }
 
+
+const selectedUsers = ref<string[]>([])
+
+const selectAll = computed({
+  get: () => users.value.length > 0 && selectedUsers.value.length === users.value.length,
+  set: (val) => {
+    if (val) {
+      // If admin, they can only select users they can manage
+      selectedUsers.value = users.value.filter(u => isSuperAdmin.value || canManageTarget(u)).map(u => u.id)
+    } else {
+      selectedUsers.value = []
+    }
+  }
+})
+
+const showBulkDeleteModal = ref(false)
+const showBulkRestoreModal = ref(false)
+const showBulkForceDeleteModal = ref(false)
+const showBulkStatusModal = ref(false)
+const bulkStatusTarget = ref('active')
+
+async function handleBulkDelete() {
+  try {
+    await userService.bulkDeleteUsers(selectedUsers.value)
+    toast.success('Selected users deleted successfully')
+    showBulkDeleteModal.value = false
+    loadUsers()
+  } catch (e: any) {
+    toast.error(handleApiError(e).message)
+  }
+}
+
+async function handleBulkRestore() {
+  try {
+    await userService.bulkRestoreUsers(selectedUsers.value)
+    toast.success('Selected users restored successfully')
+    showBulkRestoreModal.value = false
+    loadUsers()
+  } catch (e: any) {
+    toast.error(handleApiError(e).message)
+  }
+}
+
+async function handleBulkForceDelete() {
+  try {
+    await userService.bulkForceDeleteUsers(selectedUsers.value)
+    toast.success('Selected users permanently deleted')
+    showBulkForceDeleteModal.value = false
+    loadUsers()
+  } catch (e: any) {
+    toast.error(handleApiError(e).message)
+  }
+}
+
+async function handleBulkStatus() {
+  try {
+    await userService.bulkUpdateUserStatus(selectedUsers.value, bulkStatusTarget.value)
+    toast.success('Selected users status updated')
+    showBulkStatusModal.value = false
+    loadUsers()
+  } catch (e: any) {
+    toast.error(handleApiError(e).message)
+  }
+}
+
+// Watch viewMode to reset selection
+watch(viewMode, () => {
+  selectedUsers.value = []
+})
+
+const sortBy = ref('created_at')
+const sortOrder = ref('desc')
+
+function toggleSort(field: string) {
+  if (sortBy.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = field
+    sortOrder.value = 'asc'
+  }
+  loadUsers()
+}
+
+
 async function loadUsers() {
+  selectedUsers.value = []
+
   loading.value = true
   users.value = []
   meta.value = null
@@ -345,12 +511,17 @@ async function loadUsers() {
           page: currentPage.value,
           per_page: 15,
           search: search.value || undefined,
+          sort: sortBy.value,
+          order: sortOrder.value,
           status: statusFilter.value || undefined,
+          role: roleFilter.value || undefined,
         })
       : await userService.getTrashedUsers({
           page: currentPage.value,
           per_page: 15,
           search: search.value || undefined,
+          sort: sortBy.value,
+          order: sortOrder.value,
         })
 
     users.value = response.data

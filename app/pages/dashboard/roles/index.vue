@@ -26,11 +26,26 @@
     </div>
 
     <div class="bg-white rounded-lg shadow">
+      
+      <div v-if="selectedRoles.length > 0" class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex items-center justify-between">
+        <span class="text-sm text-blue-800 font-medium">{{ selectedRoles.length }} roles selected</span>
+        <div class="flex gap-2">
+          <template v-if="viewMode === 'active'">
+            <button v-if="isSuperAdmin || hasPermission('role.delete')" @click="showBulkDeleteModal = true" class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50">Delete Selected</button>
+          </template>
+          <template v-else>
+            <button v-if="isSuperAdmin" @click="showBulkRestoreModal = true" class="px-3 py-1.5 text-sm font-medium text-green-600 bg-white border border-green-200 rounded hover:bg-green-50">Restore Selected</button>
+            <button v-if="isSuperAdmin" @click="showBulkForceDeleteModal = true" class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50">Force Delete Selected</button>
+          </template>
+        </div>
+      </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
-              <th class="px-4 py-3">Name</th>
+              <th class="px-4 py-3 w-4"><input type="checkbox" v-model="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"></th>
+              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">Name <span v-if="sortBy==='name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
               <th class="px-4 py-3">Display Name</th>
               <th class="px-4 py-3">Description</th>
               <th class="px-4 py-3">System Role</th>
@@ -40,17 +55,18 @@
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="6" class="py-12 text-center">
+              <td colspan="7" class="py-12 text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               </td>
             </tr>
             <tr v-else-if="!roles || roles.length === 0">
-              <td colspan="6" class="py-12 text-center text-gray-500">
+              <td colspan="7" class="py-12 text-center text-gray-500">
                 No roles found.
               </td>
             </tr>
             <template v-else>
               <tr v-for="role in roles" :key="role.id" class="border-b hover:bg-gray-50">
+                <td class="px-4 py-3"><input type="checkbox" :value="role.id" v-model="selectedRoles" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
                 <td class="px-4 py-3 font-medium text-gray-900">{{ role.name }}</td>
               <td class="px-4 py-3 text-gray-600">{{ role.display_name }}</td>
               <td class="px-4 py-3 text-gray-600">{{ role.description ?? '-' }}</td>
@@ -145,6 +161,36 @@
       @cancel="showRestoreModal = false"
     />
 
+  
+    <UiConfirmModal
+      v-if="showBulkDeleteModal"
+      title="Delete Selected Roles"
+      :message="`Are you sure you want to delete ${selectedRoles.length} roles? They will be moved to trash.`"
+      confirm-text="Delete"
+      :danger="true"
+      @confirm="handleBulkDelete"
+      @cancel="showBulkDeleteModal = false"
+    />
+
+    <UiConfirmModal
+      v-if="showBulkRestoreModal"
+      title="Restore Selected Roles"
+      :message="`Are you sure you want to restore ${selectedRoles.length} roles?`"
+      confirm-text="Restore"
+      @confirm="handleBulkRestore"
+      @cancel="showBulkRestoreModal = false"
+    />
+
+    <UiConfirmModal
+      v-if="showBulkForceDeleteModal"
+      title="Force Delete Selected Roles"
+      :message="`Are you sure you want to permanently delete ${selectedRoles.length} roles? This action cannot be undone.`"
+      confirm-text="Force Delete"
+      :danger="true" require-input="DELETE"
+      @confirm="handleBulkForceDelete"
+      @cancel="showBulkForceDeleteModal = false"
+    />
+
   </div>
 </template>
 
@@ -221,14 +267,74 @@ async function handleRestore() {
 }
 
 
+
+const selectedRoles = ref<string[]>([])
+
+const selectAll = computed({
+  get: () => roles.value.length > 0 && selectedRoles.value.length === roles.value.length,
+  set: (val) => {
+    if (val) {
+      selectedRoles.value = roles.value.map(r => r.id)
+    } else {
+      selectedRoles.value = []
+    }
+  }
+})
+
+const showBulkDeleteModal = ref(false)
+const showBulkRestoreModal = ref(false)
+const showBulkForceDeleteModal = ref(false)
+
+async function handleBulkDelete() {
+  try {
+    await roleService.bulkDeleteRoles(selectedRoles.value)
+    toast.success('Selected roles deleted successfully')
+    showBulkDeleteModal.value = false
+    loadRoles()
+  } catch (e: any) {
+    toast.error(handleApiError(e).message)
+  }
+}
+
+async function handleBulkRestore() {
+  try {
+    await roleService.bulkRestoreRoles(selectedRoles.value)
+    toast.success('Selected roles restored successfully')
+    showBulkRestoreModal.value = false
+    loadRoles()
+  } catch (e: any) {
+    toast.error(handleApiError(e).message)
+  }
+}
+
+async function handleBulkForceDelete() {
+  try {
+    await roleService.bulkForceDeleteRoles(selectedRoles.value)
+    toast.success('Selected roles permanently deleted')
+    showBulkForceDeleteModal.value = false
+    loadRoles()
+  } catch (e: any) {
+    toast.error(handleApiError(e).message)
+  }
+}
+
+// Watch viewMode to reset selection
+watch(viewMode, () => {
+  selectedRoles.value = []
+})
+
+
 async function loadRoles() {
+  selectedRoles.value = []
+
   loading.value = true
   roles.value = []
   try {
     
+    const params = { sort: sortBy.value, order: sortOrder.value }
     const response = viewMode.value === 'active' 
-      ? await roleService.getRoles()
-      : await roleService.getTrashedRoles()
+      ? await roleService.getRoles(params as any)
+      : await roleService.getTrashedRoles(params)
     roles.value = response.data || response // Handle both cases if response structure differs
 
   } catch (e) {
