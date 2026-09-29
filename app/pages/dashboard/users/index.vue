@@ -56,6 +56,7 @@
           <option value="suspended">Suspended</option>
         </select>
       </div>
+      </div>
 
 
       
