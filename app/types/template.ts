@@ -1,7 +1,7 @@
 export interface Template {
   id: string
   name: string
-  component_name: string
+  nuxt_component: string
   thumbnail_url: string
   is_active: boolean
   created_at: string

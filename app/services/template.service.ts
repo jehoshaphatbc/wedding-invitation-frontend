@@ -11,10 +11,10 @@ export function useTemplateService() {
     getTemplate(id: string) {
       return api.get<ApiResponse<Template>>(`/admin/templates/${id}`)
     },
-    createTemplate(data: { name: string; component_name: string; thumbnail_url: string }) {
+    createTemplate(data: { name: string; nuxt_component: string; thumbnail_url: string }) {
       return api.post<ApiResponse<Template>>('/admin/templates', data)
     },
-    updateTemplate(id: string, data: { name?: string; component_name?: string; thumbnail_url?: string }) {
+    updateTemplate(id: string, data: { name?: string; nuxt_component?: string; thumbnail_url?: string }) {
       return api.patch<ApiResponse<Template>>(`/admin/templates/${id}`, data)
     },
     deleteTemplate(id: string) {

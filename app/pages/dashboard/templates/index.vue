@@ -55,7 +55,7 @@
                   </div>
                 </td>
                 <td class="px-4 py-3 font-medium text-gray-900">{{ tpl.name }}</td>
-                <td class="px-4 py-3 text-gray-600 font-mono text-xs">{{ tpl.component_name }}</td>
+                <td class="px-4 py-3 text-gray-600 font-mono text-xs">{{ tpl.nuxt_component }}</td>
                 <td class="px-4 py-3">
                   <div class="flex gap-2">
                     <button
@@ -121,7 +121,7 @@
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Komponen Nuxt</label>
             <input
-              v-model="form.component_name"
+              v-model="form.nuxt_component"
               type="text"
               required
               placeholder="Contoh: TemplateClassicElegance"
@@ -192,9 +192,9 @@ let searchTimeout: any
 const showModal = ref(false)
 const saving = ref(false)
 const editingId = ref<string | null>(null)
-const form = ref<{ name: string; component_name: string; thumbnail_url: string }>({
+const form = ref<{ name: string; nuxt_component: string; thumbnail_url: string }>({
   name: '',
-  component_name: '',
+  nuxt_component: '',
   thumbnail_url: ''
 })
 
@@ -222,7 +222,7 @@ function openCreateModal() {
   editingId.value = null
   form.value = {
     name: '',
-    component_name: '',
+    nuxt_component: '',
     thumbnail_url: ''
   }
   showModal.value = true
@@ -232,7 +232,7 @@ function openEditModal(tpl: Template) {
   editingId.value = tpl.id
   form.value = {
     name: tpl.name,
-    component_name: tpl.component_name,
+    nuxt_component: tpl.nuxt_component,
     thumbnail_url: tpl.thumbnail_url
   }
   showModal.value = true
