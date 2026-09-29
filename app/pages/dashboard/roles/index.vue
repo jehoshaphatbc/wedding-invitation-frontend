@@ -218,6 +218,19 @@ const showDeleteModal = ref(false)
 const roleToDelete = ref<Role | null>(null)
 
 const viewMode = ref<'active' | 'trash'>('active')
+
+const sortBy = ref('created_at')
+const sortOrder = ref('desc')
+
+function toggleSort(field: string) {
+  if (sortBy.value === field) {
+    sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortBy.value = field
+    sortOrder.value = 'asc'
+  }
+  loadRoles()
+}
 const isForceDelete = ref(false)
 const showRestoreModal = ref(false)
 const roleToRestore = ref<Role | null>(null)
