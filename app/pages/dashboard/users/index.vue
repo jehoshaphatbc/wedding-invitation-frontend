@@ -7,6 +7,7 @@
       </div>
       <div class="flex gap-2">
         <button
+          v-if="canViewTrash"
           @click="toggleViewMode"
           class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
           :class="viewMode === 'trash' ? 'bg-red-50 text-red-600 border-red-200' : 'text-gray-700 bg-white'"
@@ -43,6 +44,7 @@
         </select>
       </div>
 
+
       <div class="overflow-visible">
         <table class="w-full text-sm text-left">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -62,7 +64,7 @@
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               </td>
             </tr>
-            <tr v-else-if="users.length === 0">
+            <tr v-else-if="!users || users.length === 0">
               <td colspan="7" class="py-12 text-center text-gray-500">
                 No users found.
               </td>
@@ -96,6 +98,7 @@
                 
                 <div v-if="viewMode === 'trash'" class="flex justify-center gap-2">
                   <button
+                    v-if="canManageTarget(u)"
                     @click.stop="confirmRestore(u)"
                     class="p-1 rounded text-green-600 hover:bg-green-100"
                     title="Restore User"
@@ -103,6 +106,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
                   </button>
                   <button
+                    v-if="canManageTarget(u)"
                     @click.stop="confirmForceDelete(u)"
                     class="p-1 rounded text-red-600 hover:bg-red-100"
                     title="Force Delete"
@@ -140,7 +144,7 @@
                     Edit
                   </NuxtLink>
                   <button
-                    v-if="hasPermission('user.delete')"
+                    v-if="hasPermission('user.delete') && canManageTarget(u)"
                     class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                     @click.stop="confirmDelete(u); activeDropdown = null"
                   >
@@ -232,7 +236,25 @@ useHead({ title: 'Users', meta: [{ name: 'robots', content: 'noindex' }] })
 
 const { hasPermission } = usePermission()
 const toast = useToast()
+
 const userService = useUserService()
+
+const authStore = useAuthStore()
+const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name === 'superadmin'))
+const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name === 'admin'))
+const canViewTrash = computed(() => isSuperAdmin.value || isAdmin.value)
+
+function canManageTarget(target: User) {
+  if (isSuperAdmin.value) return true
+  if (isAdmin.value && !isSuperAdmin.value) {
+    // Admin can only delete users who have 'customer' role and aren't admin themselves
+    const isCustomer = target.roles?.some(r => r.name === 'customer')
+    const isHigherLevel = target.roles?.some(r => ['admin', 'superadmin'].includes(r.name))
+    return isCustomer && !isHigherLevel
+  }
+  return false
+}
+
 
 const users = ref<User[]>([])
 const meta = ref<ApiPaginationMeta | null>(null)

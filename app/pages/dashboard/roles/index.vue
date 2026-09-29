@@ -7,6 +7,7 @@
       </div>
       <div class="flex gap-2">
         <button
+          v-if="canViewTrash"
           @click="toggleViewMode"
           class="px-4 py-2 text-sm font-medium border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2"
           :class="viewMode === 'trash' ? 'bg-red-50 text-red-600 border-red-200' : 'text-gray-700 bg-white'"
@@ -43,7 +44,7 @@
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               </td>
             </tr>
-            <tr v-else-if="roles.length === 0">
+            <tr v-else-if="!roles || roles.length === 0">
               <td colspan="6" class="py-12 text-center text-gray-500">
                 No roles found.
               </td>
@@ -156,7 +157,14 @@ useHead({ title: 'Roles', meta: [{ name: 'robots', content: 'noindex' }] })
 
 const { hasPermission } = usePermission()
 const toast = useToast()
+
 const roleService = useRoleService()
+
+const authStore = useAuthStore()
+const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name === 'superadmin'))
+const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name === 'admin'))
+const canViewTrash = computed(() => isSuperAdmin.value || isAdmin.value)
+
 
 const roles = ref<Role[]>([])
 const loading = ref(true)
