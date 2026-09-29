@@ -50,7 +50,7 @@
         />
       </div>
 
-      <div class="overflow-x-auto">
+      <div class="overflow-visible">
         <table class="w-full text-sm text-left">
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
