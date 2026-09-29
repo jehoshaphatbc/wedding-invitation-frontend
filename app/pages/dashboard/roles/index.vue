@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click="activeDropdown = null">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Roles</h1>
@@ -82,45 +82,57 @@
               <td class="px-4 py-3">
                 <span class="text-gray-600">{{ role.permissions?.length ?? 0 }}</span>
               </td>
-              <td class="px-4 py-3">
-                <div v-if="viewMode === 'trash'" class="flex gap-2">
-                  <button
-                    @click.stop="confirmRestore(role)"
-                    class="text-green-600 hover:text-green-800 text-xs font-medium"
-                    title="Restore Role"
-                  >
-                    Restore
-                  </button>
-                  <button
-                    @click.stop="confirmForceDelete(role)"
-                    class="text-red-600 hover:text-red-800 text-xs font-medium"
-                    title="Force Delete"
-                  >
-                    Force Delete
-                  </button>
-                </div>
-                <div v-else class="flex gap-2">
-                  <NuxtLink
-                    v-if="isSuperAdmin || hasPermission('role.update')"
-                    :to="`/dashboard/roles/${role.id}/edit`"
-                    class="text-green-600 hover:text-green-800 text-xs font-medium"
-                  >
-                    Edit
-                  </NuxtLink>
-                  <NuxtLink
-                    v-if="isSuperAdmin || hasPermission('permission.assign')"
-                    :to="`/dashboard/roles/${role.id}/permissions`"
-                    class="text-indigo-600 hover:text-indigo-800 text-xs font-medium"
-                  >
-                    Permissions
-                  </NuxtLink>
-                  <button
-                    v-if="(isSuperAdmin || hasPermission('role.delete')) && !role.is_system"
-                    class="text-red-600 hover:text-red-800 text-xs font-medium"
-                    @click="confirmDelete(role)"
-                  >
-                    Delete
-                  </button>
+              <td class="px-4 py-3 text-center relative">
+                <button
+                  @click.stop="activeDropdown = activeDropdown === role.id ? null : role.id"
+                  class="p-1 rounded hover:bg-gray-200 text-gray-500"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+                
+                <div
+                  v-show="activeDropdown === role.id"
+                  class="absolute right-8 top-10 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
+                >
+                  <template v-if="viewMode === 'active'">
+                    <NuxtLink
+                      v-if="isSuperAdmin || hasPermission('role.update')"
+                      :to="`/dashboard/roles/${role.id}/edit`"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Edit
+                    </NuxtLink>
+                    <NuxtLink
+                      v-if="isSuperAdmin || hasPermission('permission.assign')"
+                      :to="`/dashboard/roles/${role.id}/permissions`"
+                      class="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-100"
+                    >
+                      Permissions
+                    </NuxtLink>
+                    <button
+                      v-if="(isSuperAdmin || hasPermission('role.delete')) && !role.is_system"
+                      class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      @click.stop="confirmDelete(role); activeDropdown = null"
+                    >
+                      Delete
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button
+                      class="w-full text-left block px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
+                      @click.stop="confirmRestore(role); activeDropdown = null"
+                    >
+                      Restore
+                    </button>
+                    <button
+                      class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      @click.stop="confirmForceDelete(role); activeDropdown = null"
+                    >
+                      Force Delete
+                    </button>
+                  </template>
                 </div>
               </td>
             </tr>
@@ -218,6 +230,7 @@ const showDeleteModal = ref(false)
 const roleToDelete = ref<Role | null>(null)
 
 const viewMode = ref<'active' | 'trash'>('active')
+const activeDropdown = ref<string | null>(null)
 
 const sortBy = ref('created_at')
 const sortOrder = ref('desc')

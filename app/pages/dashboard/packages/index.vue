@@ -91,54 +91,51 @@
                 </td>
                 <td class="px-4 py-3 text-gray-600">{{ new Date(pkg.created_at).toLocaleDateString('id-ID') }}</td>
                 <td class="px-4 py-3 text-center relative">
-                  <div v-if="viewMode === 'trash'" class="flex justify-center gap-2">
+                <button
+                  @click.stop="activeDropdown = activeDropdown === pkg.id ? null : pkg.id"
+                  class="p-1 rounded hover:bg-gray-200 text-gray-500"
+                >
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+                
+                <div
+                  v-show="activeDropdown === pkg.id"
+                  class="absolute right-8 top-10 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
+                >
+                  <template v-if="viewMode === 'active'">
                     <button
-                      v-if="isSuperAdmin"
-                      @click.stop="confirmRestore(pkg)"
-                      class="p-1 rounded text-green-600 hover:bg-green-100"
-                      title="Restore"
+                      class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      @click.stop="openEditModal(pkg); activeDropdown = null"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                      Edit
                     </button>
                     <button
-                      v-if="isSuperAdmin"
-                      @click.stop="confirmForceDelete(pkg)"
-                      class="p-1 rounded text-red-600 hover:bg-red-100"
-                      title="Force Delete"
+                      class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      @click.stop="confirmDelete(pkg); activeDropdown = null"
                     >
-                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                      Delete
                     </button>
-                  </div>
-                  
+                  </template>
                   <template v-else>
                     <button
-                      @click.stop="activeDropdown = activeDropdown === pkg.id ? null : pkg.id"
-                      class="p-1 rounded hover:bg-gray-200 text-gray-500"
+                      v-if="isSuperAdmin"
+                      class="w-full text-left block px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
+                      @click.stop="confirmRestore(pkg); activeDropdown = null"
                     >
-                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                      </svg>
+                      Restore
                     </button>
-                    
-                    <div
-                      v-show="activeDropdown === pkg.id"
-                      class="absolute right-8 top-10 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
+                    <button
+                      v-if="isSuperAdmin"
+                      class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      @click.stop="confirmForceDelete(pkg); activeDropdown = null"
                     >
-                      <button
-                        class="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        @click.stop="openEditModal(pkg); activeDropdown = null"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        @click.stop="confirmDelete(pkg); activeDropdown = null"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                      Force Delete
+                    </button>
                   </template>
-                </td>
+                </div>
+              </td>
               </tr>
             </template>
           </tbody>

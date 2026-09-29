@@ -134,31 +134,10 @@
               </td>
               <td class="px-4 py-3 text-gray-600">{{ new Date(u.created_at).toLocaleDateString() }}</td>
               <td class="px-4 py-3 text-center relative">
-                
-                <div v-if="viewMode === 'trash'" class="flex justify-center gap-2">
-                  <button
-                    v-if="canManageTarget(u)"
-                    @click.stop="confirmRestore(u)"
-                    class="p-1 rounded text-green-600 hover:bg-green-100"
-                    title="Restore User"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
-                  </button>
-                  <button
-                    v-if="canManageTarget(u)"
-                    @click.stop="confirmForceDelete(u)"
-                    class="p-1 rounded text-red-600 hover:bg-red-100"
-                    title="Force Delete"
-                  >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                  </button>
-                </div>
-                
-                <template v-else>
-                  <button
-                    @click.stop="activeDropdown = activeDropdown === u.id ? null : u.id"
-                    class="p-1 rounded hover:bg-gray-200 text-gray-500"
-                  >
+                <button
+                  @click.stop="activeDropdown = activeDropdown === u.id ? null : u.id"
+                  class="p-1 rounded hover:bg-gray-200 text-gray-500"
+                >
                   <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
                   </svg>
@@ -168,29 +147,46 @@
                   v-show="activeDropdown === u.id"
                   class="absolute right-8 top-10 mt-1 w-32 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
                 >
-                  <NuxtLink
-                    v-if="isSuperAdmin || hasPermission('user.view')"
-                    :to="`/dashboard/users/${u.id}`"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    View
-                  </NuxtLink>
-                  <NuxtLink
-                    v-if="isSuperAdmin || hasPermission('user.update')"
-                    :to="`/dashboard/users/${u.id}/edit`"
-                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                  >
-                    Edit
-                  </NuxtLink>
-                  <button
-                    v-if="canManageTarget(u)"
-                    class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                    @click.stop="confirmDelete(u); activeDropdown = null"
-                  >
-                    Delete
-                  </button>
+                  <template v-if="viewMode === 'active'">
+                    <NuxtLink
+                      v-if="isSuperAdmin || hasPermission('user.view')"
+                      :to="`/dashboard/users/${u.id}`"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      View
+                    </NuxtLink>
+                    <NuxtLink
+                      v-if="isSuperAdmin || hasPermission('user.update')"
+                      :to="`/dashboard/users/${u.id}/edit`"
+                      class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Edit
+                    </NuxtLink>
+                    <button
+                      v-if="canManageTarget(u)"
+                      class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      @click.stop="confirmDelete(u); activeDropdown = null"
+                    >
+                      Delete
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button
+                      v-if="canManageTarget(u)"
+                      class="w-full text-left block px-4 py-2 text-sm text-green-600 hover:bg-gray-100"
+                      @click.stop="confirmRestore(u); activeDropdown = null"
+                    >
+                      Restore
+                    </button>
+                    <button
+                      v-if="canManageTarget(u)"
+                      class="w-full text-left block px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      @click.stop="confirmForceDelete(u); activeDropdown = null"
+                    >
+                      Force Delete
+                    </button>
+                  </template>
                 </div>
-                </template>
               </td>
             </tr>
             </template>
