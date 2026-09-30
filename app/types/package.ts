@@ -4,8 +4,9 @@ export interface PackageFeatures {
   has_rsvp?: boolean
   has_story?: boolean
   has_wishes?: boolean
+  has_video?: boolean
+  has_qr?: boolean
   max_guests?: number
-  [key: string]: any
 }
 
 export interface Package {

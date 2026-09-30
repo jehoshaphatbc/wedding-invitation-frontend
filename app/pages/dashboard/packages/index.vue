@@ -175,13 +175,18 @@
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
-            <input
-              v-model.number="form.price"
-              type="number"
-              required
-              min="0"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium pointer-events-none">Rp</span>
+              <input
+                :value="displayPrice"
+                @input="onPriceInput"
+                type="text"
+                inputmode="numeric"
+                required
+                placeholder="0"
+                class="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
           </div>
 
           <div class="border-t border-gray-200 pt-4 mt-4">
@@ -350,10 +355,13 @@ const selectAll = computed({
 const showModal = ref(false)
 const saving = ref(false)
 const editingId = ref<string | null>(null)
-const form = ref<{ name: string; price: number; features_config: PackageFeatures }>({
-  name: '', price: 0,
+const form = ref<{ name: string; features_config: PackageFeatures }>({
+  name: '',
   features_config: { has_gallery: false, gallery_limit: 10, has_story: false, has_rsvp: false, has_wishes: false, has_video: false, has_qr: false, max_guests: 100 }
 })
+
+// Price mask
+const { displayPrice, rawPrice, onInput: onPriceInput, setPrice } = usePriceMask(0)
 
 const showDeleteModal = ref(false)
 const packageToDelete = ref<Package | null>(null)
@@ -398,27 +406,29 @@ function toggleViewMode() {
 function openCreateModal() {
   editingId.value = null
   form.value = {
-    name: '', price: 0,
+    name: '',
     features_config: { has_gallery: false, gallery_limit: 10, has_story: false, has_rsvp: false, has_wishes: false, has_video: false, has_qr: false, max_guests: 100 }
   }
+  setPrice(0)
   showModal.value = true
 }
 
 function openEditModal(pkg: Package) {
   editingId.value = pkg.id
   form.value = {
-    name: pkg.name, price: pkg.price,
+    name: pkg.name,
     features_config: {
-      has_gallery: pkg.features_config?.has_gallery || false,
-      gallery_limit: pkg.features_config?.gallery_limit || 10,
-      has_story: pkg.features_config?.has_story || false,
-      has_rsvp: pkg.features_config?.has_rsvp || false,
-      has_wishes: pkg.features_config?.has_wishes || false,
-      has_video: pkg.features_config?.has_video || false,
-      has_qr: pkg.features_config?.has_qr || false,
-      max_guests: pkg.features_config?.max_guests || 0,
+      has_gallery: pkg.features_config?.has_gallery ?? false,
+      gallery_limit: pkg.features_config?.gallery_limit ?? 10,
+      has_story: pkg.features_config?.has_story ?? false,
+      has_rsvp: pkg.features_config?.has_rsvp ?? false,
+      has_wishes: pkg.features_config?.has_wishes ?? false,
+      has_video: pkg.features_config?.has_video ?? false,
+      has_qr: pkg.features_config?.has_qr ?? false,
+      max_guests: pkg.features_config?.max_guests ?? 0,
     }
   }
+  setPrice(pkg.price ?? 0)
   showModal.value = true
 }
 
@@ -427,7 +437,7 @@ async function savePackage() {
   try {
     const payload = {
       name: form.value.name,
-      price: Number(form.value.price),
+      price: rawPrice.value,
       features_config: {
         has_gallery: !!form.value.features_config.has_gallery,
         gallery_limit: Number(form.value.features_config.gallery_limit) || 0,
