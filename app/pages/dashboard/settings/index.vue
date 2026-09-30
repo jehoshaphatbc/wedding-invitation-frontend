@@ -119,6 +119,12 @@ definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 useHead({ title: 'Company Settings', meta: [{ name: 'robots', content: 'noindex' }] })
 
 const toast = useToast()
+const { isSuperAdmin } = usePermission()
+
+if (!isSuperAdmin.value) {
+  await navigateTo('/dashboard')
+}
+
 const companyService = useCompanyService()
 const companyStore = useCompanyStore()
 const config = useRuntimeConfig()

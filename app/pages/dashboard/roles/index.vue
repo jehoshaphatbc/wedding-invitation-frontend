@@ -80,7 +80,16 @@
                 <span v-else class="text-gray-400">-</span>
               </td>
               <td class="px-4 py-3">
-                <span class="text-gray-600">{{ role.permissions?.length ?? 0 }}</span>
+                <NuxtLink
+                  :to="`/dashboard/roles/${role.id}/permissions`"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 transition-colors"
+                  title="Klik untuk konfigurasi capabilities role ini"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                  </svg>
+                  <span>{{ role.permissions?.length ?? 0 }} Capabilities</span>
+                </NuxtLink>
               </td>
               <td class="px-4 py-3 text-center relative">
                 <button
@@ -94,20 +103,18 @@
                 
                 <div
                   v-show="activeDropdown === role.id"
-                  class="absolute right-8 top-10 mt-1 w-44 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
+                  class="absolute right-8 top-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
                 >
                   <template v-if="viewMode === 'active'">
                     <NuxtLink
-                      v-if="isSuperAdmin || hasPermission('role.update')"
+                      :to="`/dashboard/roles/${role.id}/permissions`"
+                      class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 text-indigo-600 font-medium">
+                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>Capabilities
+                    </NuxtLink>
+                    <NuxtLink
                       :to="`/dashboard/roles/${role.id}/edit`"
                       class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 text-gray-700">
                       <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>Edit
-                    </NuxtLink>
-                    <NuxtLink
-                      v-if="isSuperAdmin || hasPermission('permission.assign')"
-                      :to="`/dashboard/roles/${role.id}/permissions`"
-                      class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 text-indigo-600">
-                    <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/></svg>Permissions
                     </NuxtLink>
                     <button
                       v-if="(isSuperAdmin || hasPermission('role.delete')) && !role.is_system"
@@ -205,13 +212,15 @@ import { handleApiError } from '~/utils/errors'
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 useHead({ title: 'Roles', meta: [{ name: 'robots', content: 'noindex' }] })
 
-const { hasPermission } = usePermission()
+const { hasPermission, isSuperAdmin } = usePermission()
+
+if (!isSuperAdmin.value) {
+  await navigateTo('/dashboard')
+}
+
 const toast = useToast()
-
 const roleService = useRoleService()
-
 const authStore = useAuthStore()
-const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('super')))
 const isAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('admin') && !r.name.toLowerCase().includes('super')))
 const canViewTrash = computed(() => isSuperAdmin.value)
 

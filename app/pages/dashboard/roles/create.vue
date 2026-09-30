@@ -68,6 +68,12 @@ import { handleApiError } from '~/utils/errors'
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
 useHead({ title: 'Create Role', meta: [{ name: 'robots', content: 'noindex' }] })
 
+const { isSuperAdmin } = usePermission()
+
+if (!isSuperAdmin.value) {
+  await navigateTo('/dashboard')
+}
+
 const toast = useToast()
 const roleService = useRoleService()
 const router = useRouter()
