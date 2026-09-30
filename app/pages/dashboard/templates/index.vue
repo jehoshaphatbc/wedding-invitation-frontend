@@ -129,23 +129,32 @@
         </table>
       </div>
       
-      <!-- Pagination -->
-      <div v-if="meta && meta.last_page > 1" class="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-        <div class="text-sm text-gray-500">
-          Showing <span class="font-medium">{{ (meta.current_page - 1) * meta.per_page + 1 }}</span> to <span class="font-medium">{{ Math.min(meta.current_page * meta.per_page, meta.total) }}</span> of <span class="font-medium">{{ meta.total }}</span> results
-        </div>
+      <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+        <span class="text-sm text-gray-500">
+          Showing {{ (meta.page - 1) * meta.per_page + 1 }} to
+          {{ Math.min(meta.page * meta.per_page, meta.total) }} of {{ meta.total }}
+        </span>
         <div class="flex gap-1">
           <button
-            :disabled="currentPage === 1"
-            @click="goToPage(currentPage - 1)"
-            class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+            :disabled="meta.page <= 1"
+            class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            @click="goToPage(meta.page - 1)"
           >
-            Prev
+            Previous
           </button>
           <button
-            :disabled="currentPage === meta.last_page"
-            @click="goToPage(currentPage + 1)"
-            class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+            v-for="p in visiblePages"
+            :key="p"
+            class="px-3 py-1 text-sm rounded border text-sm font-medium"
+            :class="p === meta.page ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-50'"
+            @click="goToPage(p)"
+          >
+            {{ p }}
+          </button>
+          <button
+            :disabled="meta.page >= meta.last_page"
+            class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            @click="goToPage(meta.page + 1)"
           >
             Next
           </button>
@@ -337,6 +346,17 @@ async function loadTemplates() {
   }
 }
 
+const visiblePages = computed(() => {
+  if (!meta.value) return []
+  const pages: number[] = []
+  const currentPageVal = meta.value.page || meta.value.current_page || 1
+  const lastPageVal = meta.value.last_page || 1
+  const start = Math.max(1, currentPageVal - 2)
+  const end = Math.min(lastPageVal, currentPageVal + 2)
+  for (let i = start; i <= end; i++) pages.push(i)
+  return pages
+})
+
 function toggleViewMode() {
   viewMode.value = viewMode.value === 'active' ? 'trash' : 'active'
   currentPage.value = 1
@@ -379,8 +399,9 @@ async function handleDelete() {
   if (!templateToDelete.value) return
   try {
     await templateService.deleteTemplate(templateToDelete.value.id)
-    toast.success('Template berhasil dihapus')
+    toast.success('Template berhasil dipindahkan ke sampah')
     showDeleteModal.value = false
+    templateToDelete.value = null
     loadTemplates()
   } catch (e) { toast.error(handleApiError(e).message) }
 }
@@ -389,22 +410,44 @@ function confirmRestore(tpl: Template) { templateToRestore.value = tpl; showRest
 async function handleRestore() {
   if (!templateToRestore.value) return
   try {
-    await templateService.bulkRestoreTemplates([templateToRestore.value.id])
+    await templateService.restoreTemplate(templateToRestore.value.id)
     toast.success('Template berhasil dikembalikan')
     showRestoreModal.value = false
+    templateToRestore.value = null
     loadTemplates()
-  } catch (e) { toast.error(handleApiError(e).message) }
+  } catch (e) {
+    try {
+      await templateService.bulkRestoreTemplates([templateToRestore.value.id])
+      toast.success('Template berhasil dikembalikan')
+      showRestoreModal.value = false
+      templateToRestore.value = null
+      loadTemplates()
+    } catch (bulkErr) {
+      toast.error(handleApiError(e).message)
+    }
+  }
 }
 
 function confirmForceDelete(tpl: Template) { templateToForceDelete.value = tpl; showForceDeleteModal.value = true }
 async function handleForceDelete() {
   if (!templateToForceDelete.value) return
   try {
-    await templateService.bulkForceDeleteTemplates([templateToForceDelete.value.id])
+    await templateService.forceDeleteTemplate(templateToForceDelete.value.id)
     toast.success('Template permanen dihapus')
     showForceDeleteModal.value = false
+    templateToForceDelete.value = null
     loadTemplates()
-  } catch (e) { toast.error(handleApiError(e).message) }
+  } catch (e) {
+    try {
+      await templateService.bulkForceDeleteTemplates([templateToForceDelete.value.id])
+      toast.success('Template permanen dihapus')
+      showForceDeleteModal.value = false
+      templateToForceDelete.value = null
+      loadTemplates()
+    } catch (bulkErr) {
+      toast.error(handleApiError(e).message)
+    }
+  }
 }
 
 async function handleBulkDelete() {
@@ -435,7 +478,18 @@ async function handleBulkForceDelete() {
 }
 
 function goToPage(page: number) { currentPage.value = page; loadTemplates() }
-watch(search, () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { currentPage.value = 1; loadTemplates() }, 300) })
+
+watch(search, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1
+    loadTemplates()
+  }, 300)
+})
+
+watch(viewMode, () => {
+  selectedTemplates.value = []
+})
 
 await loadTemplates()
 </script>

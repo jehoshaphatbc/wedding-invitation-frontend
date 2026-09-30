@@ -131,23 +131,32 @@
         </table>
       </div>
       
-      <!-- Pagination -->
-      <div v-if="meta && meta.last_page > 1" class="px-4 py-3 border-t border-gray-200 flex items-center justify-between">
-        <div class="text-sm text-gray-500">
-          Showing <span class="font-medium">{{ (meta.current_page - 1) * meta.per_page + 1 }}</span> to <span class="font-medium">{{ Math.min(meta.current_page * meta.per_page, meta.total) }}</span> of <span class="font-medium">{{ meta.total }}</span> results
-        </div>
+      <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
+        <span class="text-sm text-gray-500">
+          Showing {{ (meta.page - 1) * meta.per_page + 1 }} to
+          {{ Math.min(meta.page * meta.per_page, meta.total) }} of {{ meta.total }}
+        </span>
         <div class="flex gap-1">
           <button
-            :disabled="currentPage === 1"
-            @click="goToPage(currentPage - 1)"
-            class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+            :disabled="meta.page <= 1"
+            class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            @click="goToPage(meta.page - 1)"
           >
-            Prev
+            Previous
           </button>
           <button
-            :disabled="currentPage === meta.last_page"
-            @click="goToPage(currentPage + 1)"
-            class="px-3 py-1 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+            v-for="p in visiblePages"
+            :key="p"
+            class="px-3 py-1 text-sm rounded border text-sm font-medium"
+            :class="p === meta.page ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-50'"
+            @click="goToPage(p)"
+          >
+            {{ p }}
+          </button>
+          <button
+            :disabled="meta.page >= meta.last_page"
+            class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
+            @click="goToPage(meta.page + 1)"
           >
             Next
           </button>
@@ -434,13 +443,25 @@ async function savePackage() {
   }
 }
 
+const visiblePages = computed(() => {
+  if (!meta.value) return []
+  const pages: number[] = []
+  const currentPageVal = meta.value.page || meta.value.current_page || 1
+  const lastPageVal = meta.value.last_page || 1
+  const start = Math.max(1, currentPageVal - 2)
+  const end = Math.min(lastPageVal, currentPageVal + 2)
+  for (let i = start; i <= end; i++) pages.push(i)
+  return pages
+})
+
 function confirmDelete(pkg: Package) { packageToDelete.value = pkg; showDeleteModal.value = true }
 async function handleDelete() {
   if (!packageToDelete.value) return
   try {
     await packageService.deletePackage(packageToDelete.value.id)
-    toast.success('Paket berhasil dihapus')
+    toast.success('Paket berhasil dipindahkan ke sampah')
     showDeleteModal.value = false
+    packageToDelete.value = null
     loadPackages()
   } catch (e) { toast.error(handleApiError(e).message) }
 }
@@ -449,22 +470,44 @@ function confirmRestore(pkg: Package) { packageToRestore.value = pkg; showRestor
 async function handleRestore() {
   if (!packageToRestore.value) return
   try {
-    await packageService.bulkRestorePackages([packageToRestore.value.id])
+    await packageService.restorePackage(packageToRestore.value.id)
     toast.success('Paket berhasil dikembalikan')
     showRestoreModal.value = false
+    packageToRestore.value = null
     loadPackages()
-  } catch (e) { toast.error(handleApiError(e).message) }
+  } catch (e) {
+    try {
+      await packageService.bulkRestorePackages([packageToRestore.value.id])
+      toast.success('Paket berhasil dikembalikan')
+      showRestoreModal.value = false
+      packageToRestore.value = null
+      loadPackages()
+    } catch (bulkErr) {
+      toast.error(handleApiError(e).message)
+    }
+  }
 }
 
 function confirmForceDelete(pkg: Package) { packageToForceDelete.value = pkg; showForceDeleteModal.value = true }
 async function handleForceDelete() {
   if (!packageToForceDelete.value) return
   try {
-    await packageService.bulkForceDeletePackages([packageToForceDelete.value.id])
+    await packageService.forceDeletePackage(packageToForceDelete.value.id)
     toast.success('Paket permanen dihapus')
     showForceDeleteModal.value = false
+    packageToForceDelete.value = null
     loadPackages()
-  } catch (e) { toast.error(handleApiError(e).message) }
+  } catch (e) {
+    try {
+      await packageService.bulkForceDeletePackages([packageToForceDelete.value.id])
+      toast.success('Paket permanen dihapus')
+      showForceDeleteModal.value = false
+      packageToForceDelete.value = null
+      loadPackages()
+    } catch (bulkErr) {
+      toast.error(handleApiError(e).message)
+    }
+  }
 }
 
 async function handleBulkDelete() {
@@ -495,7 +538,18 @@ async function handleBulkForceDelete() {
 }
 
 function goToPage(page: number) { currentPage.value = page; loadPackages() }
-watch(search, () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { currentPage.value = 1; loadPackages() }, 300) })
+
+watch(search, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    currentPage.value = 1
+    loadPackages()
+  }, 300)
+})
+
+watch(viewMode, () => {
+  selectedPackages.value = []
+})
 
 await loadPackages()
 </script>

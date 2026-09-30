@@ -9,6 +9,12 @@ export function usePackageService() {
     getTrashedPackages(params?: { page?: number; per_page?: number; search?: string; sort?: string; order?: string }) {
       return api.get<any>('/admin/packages/trash', params as any)
     },
+    restorePackage(id: string) {
+      return api.post<ApiResponse<null>>(`/admin/packages/${id}/restore`)
+    },
+    forceDeletePackage(id: string) {
+      return api.delete<ApiResponse<null>>(`/admin/packages/${id}/force`)
+    },
     bulkDeletePackages(ids: string[]) {
       return api.post<ApiResponse<{ success_count: number }>>('/admin/packages/bulk-delete', { ids })
     },
@@ -19,7 +25,7 @@ export function usePackageService() {
       return api.post<ApiResponse<{ success_count: number }>>('/admin/packages/bulk-force-delete', { ids })
     },
   
-    getPackages(params?: { page?: number; per_page?: number; search?: string }) {
+    getPackages(params?: { page?: number; per_page?: number; search?: string; sort?: string; order?: string }) {
       return api.get<any>('/admin/packages', params as any)
     },
     getPackage(id: string) {
