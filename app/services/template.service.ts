@@ -39,6 +39,12 @@ export function useTemplateService() {
     },
     deleteTemplate(id: string) {
       return api.delete<ApiResponse<null>>(`/admin/templates/${id}`)
+    },
+    uploadImage(file: File) {
+      const formData = new globalThis.FormData()
+      formData.append('file', file)
+      formData.append('image', file)
+      return api.post<any>('/upload', formData)
     }
   }
 }

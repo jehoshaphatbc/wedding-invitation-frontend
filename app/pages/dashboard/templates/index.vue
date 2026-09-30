@@ -78,7 +78,7 @@
                 <td class="px-4 py-3"><input type="checkbox" :value="tpl.id" v-model="selectedTemplates" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
                 <td class="px-4 py-3">
                   <div class="w-16 h-16 bg-gray-100 rounded border border-gray-200 overflow-hidden flex items-center justify-center">
-                    <img v-if="tpl.thumbnail_url" :src="tpl.thumbnail_url" class="object-cover w-full h-full" alt="Thumbnail" />
+                    <img v-if="tpl.thumbnail_url" :src="resolveImageUrl(tpl.thumbnail_url)" class="object-cover w-full h-full" alt="Thumbnail" />
                     <svg v-else class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                   </div>
                 </td>
@@ -189,13 +189,71 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">URL Thumbnail</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Thumbnail Template</label>
+            
             <input
-              v-model="form.thumbnail_url"
-              type="text"
-              placeholder="https://example.com/image.jpg"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              ref="fileInputRef"
+              type="file"
+              accept="image/png,image/jpeg,image/webp,image/jpg,image/svg+xml"
+              class="hidden"
+              @change="onFileInputChange"
             />
+
+            <!-- Preview Mode -->
+            <div
+              v-if="previewUrl"
+              class="relative rounded-lg border border-gray-200 p-3 bg-gray-50 flex items-center gap-4"
+            >
+              <div class="w-20 h-20 rounded-md overflow-hidden bg-white border border-gray-200 flex-shrink-0 flex items-center justify-center">
+                <img :src="previewUrl" alt="Thumbnail Preview" class="w-full h-full object-cover" />
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium text-gray-900 truncate">
+                  {{ selectedFile ? selectedFile.name : (form.name ? `${form.name} Thumbnail` : 'Thumbnail') }}
+                </p>
+                <p class="text-xs text-gray-500 mt-0.5">
+                  {{ selectedFile ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 'Gambar tersimpan di server' }}
+                </p>
+                <div class="flex gap-2 mt-2">
+                  <button
+                    type="button"
+                    @click="fileInputRef?.click()"
+                    class="text-xs font-medium text-blue-600 hover:text-blue-800"
+                  >
+                    Ganti Gambar
+                  </button>
+                  <span class="text-gray-300">|</span>
+                  <button
+                    type="button"
+                    @click="removeImage"
+                    class="text-xs font-medium text-red-600 hover:text-red-800"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Drag & Drop Dropzone -->
+            <div
+              v-else
+              @dragover.prevent="isDragging = true"
+              @dragleave.prevent="isDragging = false"
+              @drop.prevent="onDrop"
+              @click="fileInputRef?.click()"
+              class="cursor-pointer border-2 border-dashed rounded-lg p-6 text-center transition-colors"
+              :class="isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400 hover:bg-gray-50'"
+            >
+              <div class="mx-auto w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600 mb-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <p class="text-sm font-medium text-gray-700">
+                <span class="text-blue-600 hover:underline">Klik untuk upload</span> atau drag & drop gambar
+              </p>
+              <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP, atau SVG (Maks. 5MB)</p>
+            </div>
           </div>
 
           <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
@@ -363,21 +421,104 @@ function toggleViewMode() {
   loadTemplates()
 }
 
+const selectedFile = ref<File | null>(null)
+const previewUrl = ref<string>('')
+const isDragging = ref(false)
+const fileInputRef = ref<HTMLInputElement | null>(null)
+
+const config = useRuntimeConfig()
+const apiBase = (config.public.apiBase as string || '').replace(/\/api\/v1\/?$/, '')
+
+function resolveImageUrl(path?: string) {
+  if (!path) return ''
+  if (path.startsWith('http') || path.startsWith('blob:') || path.startsWith('data:')) return path
+  return `${apiBase}${path.startsWith('/') ? '' : '/'}${path}`
+}
+
+function handleSelectedFile(file: File) {
+  if (!file.type.startsWith('image/')) {
+    toast.error('File harus berupa gambar (PNG, JPG, WEBP, SVG)')
+    return
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error('Ukuran gambar maksimal 5MB')
+    return
+  }
+  selectedFile.value = file
+  if (previewUrl.value && previewUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+  previewUrl.value = URL.createObjectURL(file)
+}
+
+function onFileInputChange(e: Event) {
+  const target = e.target as HTMLInputElement
+  if (target.files && target.files.length > 0) {
+    handleSelectedFile(target.files[0])
+  }
+}
+
+function onDrop(e: DragEvent) {
+  isDragging.value = false
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+    handleSelectedFile(e.dataTransfer.files[0])
+  }
+}
+
+function removeImage() {
+  selectedFile.value = null
+  if (previewUrl.value && previewUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+  previewUrl.value = ''
+  form.value.thumbnail_url = ''
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
+}
+
+onUnmounted(() => {
+  if (previewUrl.value && previewUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+})
+
 function openCreateModal() {
   editingId.value = null
   form.value = { name: '', nuxt_component: '', thumbnail_url: '' }
+  removeImage()
   showModal.value = true
 }
 
 function openEditModal(tpl: Template) {
   editingId.value = tpl.id
-  form.value = { name: tpl.name, nuxt_component: tpl.nuxt_component, thumbnail_url: tpl.thumbnail_url }
+  form.value = { name: tpl.name, nuxt_component: tpl.nuxt_component, thumbnail_url: tpl.thumbnail_url || '' }
+  selectedFile.value = null
+  previewUrl.value = resolveImageUrl(tpl.thumbnail_url)
+  if (fileInputRef.value) {
+    fileInputRef.value.value = ''
+  }
   showModal.value = true
 }
 
 async function saveTemplate() {
   saving.value = true
   try {
+    // If a new image was selected, upload it first to backend blob upload
+    if (selectedFile.value) {
+      try {
+        const uploadRes = await templateService.uploadImage(selectedFile.value)
+        const uploadedUrl = uploadRes?.data?.url || uploadRes?.data?.file_url || uploadRes?.data?.thumbnail_url || (typeof uploadRes?.data === 'string' ? uploadRes.data : '') || uploadRes?.url || ''
+        if (uploadedUrl) {
+          form.value.thumbnail_url = uploadedUrl
+        }
+      } catch (uploadErr) {
+        toast.error('Gagal mengupload gambar thumbnail: ' + handleApiError(uploadErr).message)
+        saving.value = false
+        return
+      }
+    }
+
     if (editingId.value) {
       await templateService.updateTemplate(editingId.value, form.value)
       toast.success('Template berhasil diperbarui')
