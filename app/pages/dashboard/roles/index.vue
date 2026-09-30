@@ -50,7 +50,7 @@
               <th class="px-4 py-3">Description</th>
               <th class="px-4 py-3">System Role</th>
               <th class="px-4 py-3">Permissions</th>
-              <th class="px-4 py-3">Actions</th>
+              <th class="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>

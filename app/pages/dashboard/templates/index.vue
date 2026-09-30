@@ -59,7 +59,7 @@
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">Nama Template <span v-if="sortBy==='name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('nuxt_component')">Nama Komponen <span v-if="sortBy==='nuxt_component'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">Created At <span v-if="sortBy==='created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
-              <th class="px-4 py-3">Actions</th>
+              <th class="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
