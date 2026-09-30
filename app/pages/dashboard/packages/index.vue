@@ -80,13 +80,10 @@
                 <td class="px-4 py-3 text-gray-600">Rp {{ pkg.price.toLocaleString('id-ID') }}</td>
                 <td class="px-4 py-3 text-gray-500 text-xs">
                   <div class="flex flex-wrap gap-1">
-                    <span v-if="pkg.features_config?.has_gallery" class="px-2 py-0.5 bg-green-100 text-green-800 rounded">Galeri ({{ pkg.features_config.gallery_limit || '0' }})</span>
-                    <span v-if="pkg.features_config?.has_story" class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded">Story</span>
-                    <span v-if="pkg.features_config?.has_rsvp" class="px-2 py-0.5 bg-purple-100 text-purple-800 rounded">RSVP</span>
-                    <span v-if="pkg.features_config?.has_wishes" class="px-2 py-0.5 bg-pink-100 text-pink-800 rounded">Wishes</span>
+                    <span v-if="pkg.features_config?.has_gallery" class="px-2 py-0.5 bg-green-100 text-green-800 rounded">Galeri ({{ pkg.features_config.gallery_limit }})</span>
+                    <span v-if="!pkg.features_config?.has_gallery" class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded">No Galeri</span>
                     <span v-if="pkg.features_config?.has_video" class="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded">Video</span>
                     <span v-if="pkg.features_config?.has_qr" class="px-2 py-0.5 bg-teal-100 text-teal-800 rounded">QR</span>
-                    <span v-if="pkg.features_config?.max_guests" class="px-2 py-0.5 bg-gray-100 text-gray-800 rounded">Maks Tamu: {{ pkg.features_config.max_guests }}</span>
                   </div>
                 </td>
                 <td class="px-4 py-3 text-gray-600">{{ new Date(pkg.created_at).toLocaleDateString('id-ID') }}</td>
@@ -192,11 +189,12 @@
           <div class="border-t border-gray-200 pt-4 mt-4">
             <h4 class="text-sm font-medium text-gray-900 mb-3">Konfigurasi Fitur</h4>
             
-            <div class="space-y-3">
+            <div class="space-y-4">
+              <!-- Gallery -->
               <div>
-                <label class="flex items-center gap-2">
+                <label class="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" v-model="form.features_config.has_gallery" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm text-gray-700">Gunakan Galeri</span>
+                  <span class="text-sm font-medium text-gray-700">Fitur Galeri Foto</span>
                 </label>
                 <div v-if="form.features_config.has_gallery" class="mt-2 pl-6">
                   <label class="block text-xs text-gray-500 mb-1">Limit Foto Galeri</label>
@@ -204,43 +202,22 @@
                     v-model.number="form.features_config.gallery_limit"
                     type="number"
                     min="1"
-                    class="w-full sm:w-1/2 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                    placeholder="Contoh: 50"
+                    class="w-40 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
                   />
                 </div>
               </div>
 
+              <!-- Video & QR -->
               <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" v-model="form.features_config.has_story" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm text-gray-700">Love Story</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" v-model="form.features_config.has_rsvp" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm text-gray-700">RSVP</span>
-                </label>
-                <label class="flex items-center gap-2">
-                  <input type="checkbox" v-model="form.features_config.has_wishes" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm text-gray-700">Ucapan (Wishes)</span>
-                </label>
-                <label class="flex items-center gap-2">
+                <label class="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" v-model="form.features_config.has_video" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm text-gray-700">Video Undangan</span>
+                  <span class="text-sm font-medium text-gray-700">Fitur Video</span>
                 </label>
-                <label class="flex items-center gap-2">
+                <label class="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" v-model="form.features_config.has_qr" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm text-gray-700">QR Code</span>
+                  <span class="text-sm font-medium text-gray-700">Fitur QR Code</span>
                 </label>
-              </div>
-
-              <div class="pt-2">
-                <label class="block text-sm text-gray-700 mb-1">Batas Maksimal Tamu</label>
-                <input
-                  v-model.number="form.features_config.max_guests"
-                  type="number"
-                  min="0"
-                  placeholder="0 untuk unlimited"
-                  class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
-                />
               </div>
             </div>
           </div>
@@ -357,7 +334,7 @@ const saving = ref(false)
 const editingId = ref<string | null>(null)
 const form = ref<{ name: string; features_config: PackageFeatures }>({
   name: '',
-  features_config: { has_gallery: false, gallery_limit: 10, has_story: false, has_rsvp: false, has_wishes: false, has_video: false, has_qr: false, max_guests: 100 }
+  features_config: { has_gallery: false, gallery_limit: 0, has_video: false, has_qr: false }
 })
 
 // Price mask
@@ -407,7 +384,7 @@ function openCreateModal() {
   editingId.value = null
   form.value = {
     name: '',
-    features_config: { has_gallery: false, gallery_limit: 10, has_story: false, has_rsvp: false, has_wishes: false, has_video: false, has_qr: false, max_guests: 100 }
+    features_config: { has_gallery: false, gallery_limit: 0, has_video: false, has_qr: false }
   }
   setPrice(0)
   showModal.value = true
@@ -419,13 +396,9 @@ function openEditModal(pkg: Package) {
     name: pkg.name,
     features_config: {
       has_gallery: pkg.features_config?.has_gallery ?? false,
-      gallery_limit: pkg.features_config?.gallery_limit ?? 10,
-      has_story: pkg.features_config?.has_story ?? false,
-      has_rsvp: pkg.features_config?.has_rsvp ?? false,
-      has_wishes: pkg.features_config?.has_wishes ?? false,
+      gallery_limit: pkg.features_config?.gallery_limit ?? 0,
       has_video: pkg.features_config?.has_video ?? false,
       has_qr: pkg.features_config?.has_qr ?? false,
-      max_guests: pkg.features_config?.max_guests ?? 0,
     }
   }
   setPrice(pkg.price ?? 0)
@@ -440,13 +413,9 @@ async function savePackage() {
       price: rawPrice.value,
       features_config: {
         has_gallery: !!form.value.features_config.has_gallery,
-        gallery_limit: Number(form.value.features_config.gallery_limit) || 0,
-        has_story: !!form.value.features_config.has_story,
-        has_rsvp: !!form.value.features_config.has_rsvp,
-        has_wishes: !!form.value.features_config.has_wishes,
+        gallery_limit: form.value.features_config.has_gallery ? (Number(form.value.features_config.gallery_limit) || 0) : 0,
         has_video: !!form.value.features_config.has_video,
         has_qr: !!form.value.features_config.has_qr,
-        max_guests: Number(form.value.features_config.max_guests) || 0,
       }
     }
     if (editingId.value) {
