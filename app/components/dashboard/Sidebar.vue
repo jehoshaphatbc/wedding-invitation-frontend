@@ -58,6 +58,19 @@
       </NuxtLink>
 
       <NuxtLink
+        v-if="hasPermission('package.view') || isSuperAdmin"
+        to="/dashboard/features"
+        class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group"
+        :class="[$route.path.startsWith('/dashboard/features') ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100', !uiStore.isOpen ? 'justify-center' : '']"
+        :title="!uiStore.isOpen ? 'Master Fitur' : ''"
+      >
+        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/>
+        </svg>
+        <span v-if="uiStore.isOpen" class="ml-3 whitespace-nowrap">Master Fitur</span>
+      </NuxtLink>
+
+      <NuxtLink
         v-if="hasPermission('template.view') || isSuperAdmin"
         to="/dashboard/templates"
         class="flex items-center px-3 py-2 text-sm font-medium rounded-lg group"

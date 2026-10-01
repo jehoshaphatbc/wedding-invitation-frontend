@@ -79,11 +79,30 @@
                 <td class="px-4 py-3 font-medium text-gray-900">{{ pkg.name }}</td>
                 <td class="px-4 py-3 text-gray-600">Rp {{ pkg.price.toLocaleString('id-ID') }}</td>
                 <td class="px-4 py-3 text-gray-500 text-xs">
-                  <div class="flex flex-wrap gap-1">
-                    <span v-if="pkg.features_config?.has_gallery" class="px-2 py-0.5 bg-green-100 text-green-800 rounded">Galeri ({{ pkg.features_config.gallery_limit }})</span>
-                    <span v-if="!pkg.features_config?.has_gallery" class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded">No Galeri</span>
-                    <span v-if="pkg.features_config?.has_video" class="px-2 py-0.5 bg-indigo-100 text-indigo-800 rounded">Video</span>
-                    <span v-if="pkg.features_config?.has_qr" class="px-2 py-0.5 bg-teal-100 text-teal-800 rounded">QR</span>
+                  <div class="flex flex-wrap gap-1 max-w-xs">
+                    <template v-if="pkg.features_config && Object.keys(pkg.features_config).length > 0">
+                      <template v-for="(val, key) in pkg.features_config" :key="key">
+                        <span
+                          v-if="typeof val === 'boolean' && val"
+                          class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-medium"
+                        >
+                          ✓ {{ getFeatureLabel(String(key)) }}
+                        </span>
+                        <span
+                          v-else-if="typeof val === 'number' && val > 0"
+                          class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-medium"
+                        >
+                          {{ getFeatureLabel(String(key)) }}: {{ val }}
+                        </span>
+                        <span
+                          v-else-if="typeof val === 'boolean' && !val"
+                          class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded"
+                        >
+                          ✕ {{ getFeatureLabel(String(key)) }}
+                        </span>
+                      </template>
+                    </template>
+                    <span v-else class="text-gray-400 italic">-</span>
                   </div>
                 </td>
                 <td class="px-4 py-3 text-gray-600">{{ new Date(pkg.created_at).toLocaleDateString('id-ID') }}</td>
@@ -196,37 +215,59 @@
           </div>
 
           <div class="border-t border-gray-200 pt-4 mt-4">
-            <h4 class="text-sm font-medium text-gray-900 mb-3">Konfigurasi Fitur</h4>
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-sm font-medium text-gray-900">Konfigurasi Fitur</h4>
+              <span v-if="loadingFeatures" class="text-xs text-gray-400 flex items-center gap-1">
+                <div class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600" />
+                Memuat fitur...
+              </span>
+            </div>
             
-            <div class="space-y-4">
-              <!-- Gallery -->
-              <div>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" v-model="form.features_config.has_gallery" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm font-medium text-gray-700">Fitur Galeri Foto</span>
-                </label>
-                <div v-if="form.features_config.has_gallery" class="mt-2 pl-6">
-                  <label class="block text-xs text-gray-500 mb-1">Limit Foto Galeri</label>
+            <div v-if="loadingFeatures && (!masterFeatures || masterFeatures.length === 0)" class="py-6 text-center text-sm text-gray-500">
+              Memuat konfigurasi fitur...
+            </div>
+            <div v-else class="space-y-3 max-h-64 overflow-y-auto pr-1">
+              <div
+                v-for="feat in masterFeatures"
+                :key="feat.key"
+                class="p-3 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-between gap-4"
+              >
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-gray-800">{{ feat.name || feat.key }}</div>
+                  <div class="text-xs text-gray-400 font-mono">{{ feat.key }} ({{ feat.input_type }})</div>
+                </div>
+
+                <!-- Boolean Toggle / Checkbox -->
+                <div v-if="feat.input_type === 'boolean'" class="flex items-center">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      v-model="configPayload[feat.key]"
+                      class="sr-only peer"
+                    />
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
+                </div>
+
+                <!-- Number Input -->
+                <div v-else-if="feat.input_type === 'number'" class="w-32">
                   <input
-                    v-model.number="form.features_config.gallery_limit"
+                    v-model.number="configPayload[feat.key]"
                     type="number"
-                    min="1"
-                    placeholder="Contoh: 50"
-                    class="w-40 rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                    min="0"
+                    placeholder="0"
+                    class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none text-right"
                   />
                 </div>
-              </div>
 
-              <!-- Video & QR -->
-              <div class="grid grid-cols-2 gap-3">
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" v-model="form.features_config.has_video" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm font-medium text-gray-700">Fitur Video</span>
-                </label>
-                <label class="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" v-model="form.features_config.has_qr" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                  <span class="text-sm font-medium text-gray-700">Fitur QR Code</span>
-                </label>
+                <!-- Fallback Text Input -->
+                <div v-else class="w-40">
+                  <input
+                    v-model="configPayload[feat.key]"
+                    type="text"
+                    class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -287,7 +328,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Package, PackageFeatures } from '~/types/package'
+import type { Package } from '~/types/package'
+import type { Feature } from '~/types/feature'
 import { handleApiError } from '~/utils/errors'
 
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
@@ -295,6 +337,7 @@ useHead({ title: 'Packages', meta: [{ name: 'robots', content: 'noindex' }] })
 
 const toast = useToast()
 const packageService = usePackageService()
+const featureService = useFeatureService()
 const authStore = useAuthStore()
 
 const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLowerCase().includes('super')))
@@ -338,12 +381,48 @@ const selectAll = computed({
   }
 })
 
+// Dynamic Features State
+const masterFeatures = ref<Feature[]>([])
+const loadingFeatures = ref(false)
+const configPayload = ref<Record<string, any>>({})
+
+const DEFAULT_FALLBACK_FEATURES: Feature[] = [
+  { key: 'has_gallery', name: 'Fitur Galeri Foto', input_type: 'boolean', default_value: 'false' },
+  { key: 'gallery_limit', name: 'Limit Foto Galeri', input_type: 'number', default_value: '0' },
+  { key: 'has_video', name: 'Fitur Video Undangan', input_type: 'boolean', default_value: 'false' },
+  { key: 'has_qr', name: 'Fitur QR Code Check-in', input_type: 'boolean', default_value: 'false' }
+]
+
+async function loadMasterFeatures() {
+  loadingFeatures.value = true
+  try {
+    const list = await featureService.getFeatures()
+    if (list && list.length > 0) {
+      masterFeatures.value = list
+    } else if (masterFeatures.value.length === 0) {
+      masterFeatures.value = DEFAULT_FALLBACK_FEATURES
+    }
+  } catch (e) {
+    console.warn('Failed to load master features, using defaults:', e)
+    if (masterFeatures.value.length === 0) {
+      masterFeatures.value = DEFAULT_FALLBACK_FEATURES
+    }
+  } finally {
+    loadingFeatures.value = false
+  }
+}
+
+function getFeatureLabel(key: string) {
+  const feat = masterFeatures.value.find(f => f.key === key)
+  if (feat?.name) return feat.name
+  return key.replace(/^has_/, '').replace(/_/g, ' ')
+}
+
 const showModal = ref(false)
 const saving = ref(false)
 const editingId = ref<string | null>(null)
-const form = ref<{ name: string; features_config: PackageFeatures }>({
-  name: '',
-  features_config: { has_gallery: false, gallery_limit: 0, has_video: false, has_qr: false }
+const form = ref<{ name: string }>({
+  name: ''
 })
 
 // Price mask
@@ -389,43 +468,93 @@ function toggleViewMode() {
   loadPackages()
 }
 
-function openCreateModal() {
+async function openCreateModal() {
   editingId.value = null
-  form.value = {
-    name: '',
-    features_config: { has_gallery: false, gallery_limit: 0, has_video: false, has_qr: false }
-  }
+  form.value = { name: '' }
   setPrice(0)
   showModal.value = true
-}
 
-function openEditModal(pkg: Package) {
-  editingId.value = pkg.id
-  form.value = {
-    name: pkg.name,
-    features_config: {
-      has_gallery: pkg.features_config?.has_gallery ?? false,
-      gallery_limit: pkg.features_config?.gallery_limit ?? 0,
-      has_video: pkg.features_config?.has_video ?? false,
-      has_qr: pkg.features_config?.has_qr ?? false,
+  await loadMasterFeatures()
+
+  const initial: Record<string, any> = {}
+  for (const feat of masterFeatures.value) {
+    if (feat.input_type === 'boolean') {
+      initial[feat.key] = feat.default_value === 'true' || feat.default_value === '1'
+    } else if (feat.input_type === 'number') {
+      initial[feat.key] = Number(feat.default_value) || 0
+    } else {
+      initial[feat.key] = feat.default_value ?? ''
     }
   }
+  configPayload.value = initial
+}
+
+async function openEditModal(pkg: Package) {
+  editingId.value = pkg.id
+  form.value = { name: pkg.name }
   setPrice(pkg.price ?? 0)
   showModal.value = true
+
+  await loadMasterFeatures()
+
+  const initial: Record<string, any> = {}
+  const existingConfig = pkg.features_config || {}
+  
+  for (const feat of masterFeatures.value) {
+    if (existingConfig[feat.key] !== undefined) {
+      if (feat.input_type === 'boolean') {
+        initial[feat.key] = Boolean(existingConfig[feat.key])
+      } else if (feat.input_type === 'number') {
+        initial[feat.key] = Number(existingConfig[feat.key]) || 0
+      } else {
+        initial[feat.key] = existingConfig[feat.key]
+      }
+    } else {
+      if (feat.input_type === 'boolean') {
+        initial[feat.key] = feat.default_value === 'true' || feat.default_value === '1'
+      } else if (feat.input_type === 'number') {
+        initial[feat.key] = Number(feat.default_value) || 0
+      } else {
+        initial[feat.key] = feat.default_value ?? ''
+      }
+    }
+  }
+
+  // Preserve any remaining keys in existingConfig that are not in masterFeatures
+  for (const [k, v] of Object.entries(existingConfig)) {
+    if (initial[k] === undefined) {
+      initial[k] = v
+    }
+  }
+
+  configPayload.value = initial
 }
 
 async function savePackage() {
   saving.value = true
   try {
+    const finalFeaturesConfig: Record<string, any> = {}
+    for (const [key, val] of Object.entries(configPayload.value)) {
+      const featMeta = masterFeatures.value.find(f => f.key === key)
+      if (featMeta?.input_type === 'boolean') {
+        finalFeaturesConfig[key] = Boolean(val)
+      } else if (featMeta?.input_type === 'number') {
+        finalFeaturesConfig[key] = Number(val) || 0
+      } else if (typeof val === 'boolean') {
+        finalFeaturesConfig[key] = val
+      } else if (typeof val === 'number') {
+        finalFeaturesConfig[key] = val
+      } else if (!isNaN(Number(val)) && val !== '' && val !== null) {
+        finalFeaturesConfig[key] = Number(val)
+      } else {
+        finalFeaturesConfig[key] = val
+      }
+    }
+
     const payload = {
       name: form.value.name,
       price: rawPrice.value,
-      features_config: {
-        has_gallery: !!form.value.features_config.has_gallery,
-        gallery_limit: form.value.features_config.has_gallery ? (Number(form.value.features_config.gallery_limit) || 0) : 0,
-        has_video: !!form.value.features_config.has_video,
-        has_qr: !!form.value.features_config.has_qr,
-      }
+      features_config: finalFeaturesConfig
     }
     if (editingId.value) {
       await packageService.updatePackage(editingId.value, payload)
@@ -551,5 +680,8 @@ watch(viewMode, () => {
   selectedPackages.value = []
 })
 
-await loadPackages()
+await Promise.all([
+  loadPackages(),
+  loadMasterFeatures()
+])
 </script>
