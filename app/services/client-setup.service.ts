@@ -46,10 +46,16 @@ export function useClientSetupService() {
         `/invitation/verify?token=${encodeURIComponent(token)}`
       ]
 
+      const headers = {
+        'Authorization': `Bearer ${token}`,
+        'X-Client-Token': token,
+        'X-Form-Token': token
+      }
+
       let lastError: any = null
       for (const ep of endpoints) {
         try {
-          const res = await api.get<any>(ep)
+          const res = await api.get<any>(ep, undefined, { headers })
           const data = res?.data || res
 
           let localDraft: any = null
@@ -121,7 +127,8 @@ export function useClientSetupService() {
     async saveInvitation(token: string, payload: any): Promise<any> {
       const headers = {
         'Authorization': `Bearer ${token}`,
-        'X-Client-Token': token
+        'X-Client-Token': token,
+        'X-Form-Token': token
       }
 
       // Always save draft to localStorage first as safety

@@ -996,6 +996,8 @@ const availableTemplates = [
 
 // Reactive Form State
 const form = ref({
+  title: '',
+  slug: '',
   groom: {
     full_name: '',
     nickname: '',
@@ -1166,6 +1168,8 @@ async function verifyClientAccess() {
 
     if (res.invitation) {
       const inv = res.invitation
+      if (inv.title) form.value.title = inv.title
+      if (inv.slug) form.value.slug = inv.slug
       if (inv.groom) form.value.groom = { ...form.value.groom, ...inv.groom }
       if (inv.bride) form.value.bride = { ...form.value.bride, ...inv.bride }
       if (inv.event) {
@@ -1244,7 +1248,14 @@ async function handleSaveInvitation() {
 
     const validGifts = form.value.gifts.filter(g => g.bank_name.trim() !== '' || g.account_number.trim() !== '')
 
+    const groomNick = form.value.groom.nickname || form.value.groom.full_name || 'Pria'
+    const brideNick = form.value.bride.nickname || form.value.bride.full_name || 'Wanita'
+    const title = form.value.title || `Pernikahan ${groomNick} & ${brideNick}`
+    const slug = form.value.slug || `${groomNick}-${brideNick}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
+
     const payload = {
+      title,
+      slug,
       groom: { ...form.value.groom },
       bride: { ...form.value.bride },
       event: { ...form.value.event },
