@@ -490,11 +490,11 @@ function openPaymentUrl(order: Order) {
 async function copyMagicLink(order: Order) {
   let link = ''
   if (order.form_token) {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/form/${order.form_token}` : ''
+    link = typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${order.form_token}` : ''
   } else if (order.magic_link) {
     link = order.magic_link
   } else {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/${order.id}?auth=magic` : ''
+    link = typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${order.id}` : ''
   }
 
   try {

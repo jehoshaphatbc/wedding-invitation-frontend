@@ -40,7 +40,7 @@ export function useApi() {
       headers['Content-Type'] = 'application/json'
     }
 
-    if (authStore.accessToken) {
+    if (authStore.accessToken && !headers['Authorization']) {
       headers['Authorization'] = `Bearer ${authStore.accessToken}`
     }
 

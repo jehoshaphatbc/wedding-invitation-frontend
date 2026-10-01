@@ -705,11 +705,11 @@ function openOrderPayment(order: Order) {
 async function copyOrderFormLink(order: Order) {
   let link = ''
   if (order.form_token) {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/form/${order.form_token}` : ''
+    link = typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${order.form_token}` : ''
   } else if (order.magic_link) {
     link = order.magic_link
   } else {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/${order.id}?auth=magic` : ''
+    link = typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${order.id}` : ''
   }
 
   try {
@@ -750,11 +750,11 @@ async function copyClientAccessLink(client: Client) {
   const paidOrder = client.orders?.find(o => o.status === 'paid' && o.form_token)
   let link = ''
   if (paidOrder?.form_token) {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/form/${paidOrder.form_token}` : ''
+    link = typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${paidOrder.form_token}` : ''
   } else if (client.magic_link) {
     link = client.magic_link
   } else {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/${client.id}?auth=magic` : ''
+    link = typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${client.id}` : ''
   }
 
   try {
