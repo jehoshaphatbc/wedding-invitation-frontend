@@ -50,6 +50,8 @@ export function useClientSetupService() {
       for (const ep of endpoints) {
         try {
           const res = await api.get<any>(ep)
+          const data = res?.data || res
+
           let localDraft: any = null
           if (typeof window !== 'undefined' && window.localStorage) {
             try {
@@ -108,7 +110,8 @@ export function useClientSetupService() {
             has_maps: true,
             has_rsvp: true,
             has_qr: true
-          }
+          },
+          invitation: localDraft
         }
       }
 

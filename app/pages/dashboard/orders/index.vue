@@ -212,31 +212,39 @@
                     class="absolute right-8 top-10 mt-1 w-52 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
                   >
                     <template v-if="viewMode === 'active'">
-                      <!-- Action if Unpaid: Open payment URL -->
+                      <!-- Link Akses Klien: Buka Link & Salin Link -->
                       <button
-                        v-if="isUnpaid(order.status) && order.payment_url"
-                        class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left border-b border-gray-100"
-                        @click.stop="openPaymentUrl(order); activeDropdown = null"
+                        class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left"
+                        @click.stop="openClientAccessLink(order); activeDropdown = null"
                       >
                         <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                         </svg>
-                        Buka Link Pembayaran
+                        Buka Link Akses Klien
+                      </button>
+                      <button
+                        class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left"
+                        :class="!hasQrFeature(order) && (!isUnpaid(order.status) || !order.payment_url) ? 'border-b border-gray-100' : ''"
+                        @click.stop="copyMagicLink(order); activeDropdown = null"
+                      >
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                        Salin Link Akses Klien
                       </button>
 
-                      <!-- Special actions for Paid status -->
-                      <template v-if="isPaid(order.status)">
+                      <!-- Link Scanner (Hari H) jika QR aktif -->
+                      <template v-if="hasQrFeature(order)">
                         <button
-                          class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left"
-                          @click.stop="copyMagicLink(order); activeDropdown = null"
+                          class="flex items-center px-3 py-2 text-sm hover:bg-purple-50 text-purple-700 w-full text-left"
+                          @click.stop="openScannerLink(order); activeDropdown = null"
                         >
-                          <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                          <svg class="w-4 h-4 mr-2 flex-shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                           </svg>
-                          Salin Link Akses Klien
+                          Buka Link Scanner (Hari H)
                         </button>
                         <button
-                          v-if="hasQrFeature(order)"
                           class="flex items-center px-3 py-2 text-sm hover:bg-purple-50 text-purple-700 w-full text-left border-b border-gray-100"
                           @click.stop="copyScannerLink(order); activeDropdown = null"
                         >
@@ -244,6 +252,28 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                           </svg>
                           Salin Link Scanner (Hari H)
+                        </button>
+                      </template>
+
+                      <!-- Action if Unpaid: Buka & Salin Link Pembayaran -->
+                      <template v-if="isUnpaid(order.status) && order.payment_url">
+                        <button
+                          class="flex items-center px-3 py-2 text-sm hover:bg-yellow-50 text-yellow-800 w-full text-left"
+                          @click.stop="openPaymentUrl(order); activeDropdown = null"
+                        >
+                          <svg class="w-4 h-4 mr-2 flex-shrink-0 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                          Buka Link Pembayaran
+                        </button>
+                        <button
+                          class="flex items-center px-3 py-2 text-sm hover:bg-yellow-50 text-yellow-800 w-full text-left border-b border-gray-100"
+                          @click.stop="copyPaymentUrl(order); activeDropdown = null"
+                        >
+                          <svg class="w-4 h-4 mr-2 flex-shrink-0 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                          </svg>
+                          Salin Link Pembayaran
                         </button>
                       </template>
 
@@ -486,16 +516,44 @@ function openPaymentUrl(order: Order) {
   }
 }
 
+async function copyPaymentUrl(order: Order) {
+  if (!order.payment_url) {
+    toast.error('Link pembayaran tidak tersedia.')
+    return
+  }
+  try {
+    if (navigator?.clipboard) {
+      await navigator.clipboard.writeText(order.payment_url)
+      toast.success('Link pembayaran berhasil disalin!')
+    } else {
+      toast.success(`Link pembayaran: ${order.payment_url}`)
+    }
+  } catch {
+    toast.error('Gagal menyalin link pembayaran ke clipboard.')
+  }
+}
+
+function getClientAccessLink(order: Order): string {
+  if (order.form_token) {
+    return typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${order.form_token}` : ''
+  } else if (order.magic_link) {
+    return order.magic_link
+  }
+  return typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${order.id}` : ''
+}
+
+function openClientAccessLink(order: Order) {
+  const link = getClientAccessLink(order)
+  if (link && typeof window !== 'undefined') {
+    window.open(link, '_blank')
+  } else {
+    toast.error('Link akses klien belum tersedia.')
+  }
+}
+
 // Special Actions: Copy Link Akses Klien & Copy Link Scanner (Hari H)
 async function copyMagicLink(order: Order) {
-  let link = ''
-  if (order.form_token) {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${order.form_token}` : ''
-  } else if (order.magic_link) {
-    link = order.magic_link
-  } else {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/client/setup?token=${order.id}` : ''
-  }
+  const link = getClientAccessLink(order)
 
   try {
     if (navigator?.clipboard) {
@@ -509,15 +567,26 @@ async function copyMagicLink(order: Order) {
   }
 }
 
-async function copyScannerLink(order: Order) {
-  let link = ''
+function getScannerLink(order: Order): string {
   if (order.scanner_token) {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/checkin/scanner/${order.scanner_token}` : ''
+    return typeof window !== 'undefined' ? `${window.location.origin}/checkin/scanner/${order.scanner_token}` : ''
   } else if (order.scanner_link) {
-    link = order.scanner_link
-  } else {
-    link = typeof window !== 'undefined' ? `${window.location.origin}/checkin/${order.id}/scanner` : ''
+    return order.scanner_link
   }
+  return typeof window !== 'undefined' ? `${window.location.origin}/checkin/${order.id}/scanner` : ''
+}
+
+function openScannerLink(order: Order) {
+  const link = getScannerLink(order)
+  if (link && typeof window !== 'undefined') {
+    window.open(link, '_blank')
+  } else {
+    toast.error('Link scanner belum tersedia.')
+  }
+}
+
+async function copyScannerLink(order: Order) {
+  const link = getScannerLink(order)
 
   try {
     if (navigator?.clipboard) {

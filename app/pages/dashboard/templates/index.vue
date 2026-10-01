@@ -207,6 +207,16 @@
                   >
                     <template v-if="viewMode === 'active'">
                       <button
+                        v-if="tpl.thumbnail_url"
+                        class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 w-full text-left text-blue-700"
+                        @click.stop="copyThumbnailUrl(tpl); activeDropdown = null"
+                      >
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                        Salin URL Gambar
+                      </button>
+                      <button
                         class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-gray-700"
                         @click.stop="openEditModal(tpl); activeDropdown = null"
                       >
@@ -610,6 +620,21 @@ function resolveImageUrl(path?: string) {
   if (!path) return ''
   if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:') || path.startsWith('data:')) return path
   return `${apiBase}${path.startsWith('/') ? '' : '/'}${path}`
+}
+
+async function copyThumbnailUrl(tpl: Template) {
+  const url = resolveImageUrl(tpl.thumbnail_url)
+  if (!url) return
+  try {
+    if (navigator?.clipboard) {
+      await navigator.clipboard.writeText(url)
+      toast.success('URL gambar template berhasil disalin!')
+    } else {
+      toast.success(`URL: ${url}`)
+    }
+  } catch {
+    toast.error('Gagal menyalin URL gambar template.')
+  }
 }
 
 async function loadTemplates() {
