@@ -3,7 +3,7 @@ import { handleApiError } from "~/utils/errors"
 definePageMeta({ layout: 'auth' })
 
 useHead({
-  title: 'Login',
+  title: 'Login Admin Harsava',
   meta: [
     { name: 'robots', content: 'noindex, nofollow' },
   ],
@@ -61,7 +61,7 @@ async function handleSubmit() {
 <template>
   <div class="bg-white rounded-lg shadow-md p-8">
     <h1 class="text-2xl font-bold text-center text-gray-900 mb-6">
-      Login
+      Login Admin Harsava
     </h1>
 
     <form @submit.prevent="handleSubmit" class="space-y-4">
@@ -117,12 +117,5 @@ async function handleSubmit() {
         <span>{{ isLoading ? 'Signing in...' : 'Sign in' }}</span>
       </button>
     </form>
-
-    <p class="mt-6 text-center text-sm text-gray-600">
-      Don't have an account?
-      <NuxtLink to="/register" class="font-semibold text-indigo-600 hover:text-indigo-500">
-        Register
-      </NuxtLink>
-    </p>
   </div>
 </template>

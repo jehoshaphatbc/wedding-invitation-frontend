@@ -153,9 +153,18 @@
 
                   <div
                     v-show="activeDropdown === client.id"
-                    class="absolute right-8 top-10 mt-1 w-36 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
+                    class="absolute right-8 top-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
                   >
                     <template v-if="viewMode === 'active'">
+                      <button
+                        class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left"
+                        @click.stop="copyClientAccessLink(client); activeDropdown = null"
+                      >
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                        Salin Link Akses Klien
+                      </button>
                       <button
                         class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-gray-700"
                         @click.stop="openEditModal(client); activeDropdown = null"
@@ -444,6 +453,20 @@ function formatWaUrl(wa?: string | null): string {
     digits = '62' + digits.slice(1)
   }
   return `https://wa.me/${digits}`
+}
+
+async function copyClientAccessLink(client: Client) {
+  const link = (client as any).magic_link || (typeof window !== 'undefined' ? `${window.location.origin}/invitation/${client.id}?auth=magic` : '')
+  try {
+    if (navigator?.clipboard) {
+      await navigator.clipboard.writeText(link)
+      toast.success('Link Akses Klien berhasil disalin!')
+    } else {
+      toast.success(`Link Akses Klien: ${link}`)
+    }
+  } catch (err) {
+    toast.error('Gagal menyalin Link Akses Klien ke clipboard.')
+  }
 }
 
 async function loadClients() {

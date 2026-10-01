@@ -3,7 +3,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Orders</h1>
-        <p class="text-sm text-gray-500 mt-1">Manage orders, payment statuses, magic links, and scanner check-ins.</p>
+        <p class="text-sm text-gray-500 mt-1">Kelola data pesanan, status pembayaran, Link Akses Klien, dan Link Scanner (Hari H).</p>
       </div>
       <div class="flex gap-2">
         <button
@@ -184,7 +184,7 @@
                           <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                           </svg>
-                          Copy Magic Link
+                          Salin Link Akses Klien
                         </button>
                         <button
                           class="flex items-center px-3 py-2 text-sm hover:bg-purple-50 text-purple-700 w-full text-left border-b border-gray-100"
@@ -193,7 +193,7 @@
                           <svg class="w-4 h-4 mr-2 flex-shrink-0 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
                           </svg>
-                          Copy Scanner Link
+                          Salin Link Scanner (Hari H)
                         </button>
                       </template>
 
@@ -419,18 +419,18 @@ function getPackageName(order: Order): string {
   return order.package?.name || order.package_name || '-'
 }
 
-// Special Actions: Copy Magic Link & Copy Scanner Link
+// Special Actions: Copy Link Akses Klien & Copy Link Scanner (Hari H)
 async function copyMagicLink(order: Order) {
   const link = order.magic_link || (typeof window !== 'undefined' ? `${window.location.origin}/invitation/${order.id}?auth=magic` : '')
   try {
     if (navigator?.clipboard) {
       await navigator.clipboard.writeText(link)
-      toast.success('Magic Link copied to clipboard!')
+      toast.success('Link Akses Klien berhasil disalin!')
     } else {
-      toast.success(`Magic Link: ${link}`)
+      toast.success(`Link Akses Klien: ${link}`)
     }
   } catch (err) {
-    toast.error('Failed to copy Magic Link to clipboard.')
+    toast.error('Gagal menyalin Link Akses Klien ke clipboard.')
   }
 }
 
@@ -439,12 +439,12 @@ async function copyScannerLink(order: Order) {
   try {
     if (navigator?.clipboard) {
       await navigator.clipboard.writeText(link)
-      toast.success('Scanner Link copied to clipboard!')
+      toast.success('Link Scanner (Hari H) berhasil disalin!')
     } else {
-      toast.success(`Scanner Link: ${link}`)
+      toast.success(`Link Scanner (Hari H): ${link}`)
     }
   } catch (err) {
-    toast.error('Failed to copy Scanner Link to clipboard.')
+    toast.error('Gagal menyalin Link Scanner (Hari H) ke clipboard.')
   }
 }
 
