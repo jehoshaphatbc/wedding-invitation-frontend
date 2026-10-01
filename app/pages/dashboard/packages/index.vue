@@ -256,20 +256,19 @@
                     <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
                       <span>{{ hasGalleryFeature.name || 'Galeri Foto' }}</span>
                       <span
-                        v-if="configPayload['has_gallery']"
+                        v-if="toBoolean(configPayload['has_gallery'])"
                         class="px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 rounded-full"
                       >
                         Aktif
                       </span>
                     </div>
-                    <div class="text-xs text-gray-400 font-mono mt-0.5">has_gallery (boolean)</div>
                   </div>
 
                   <!-- Toggle Switch Galeri -->
                   <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
                     <input
                       type="checkbox"
-                      :checked="!!configPayload['has_gallery']"
+                      :checked="toBoolean(configPayload['has_gallery'])"
                       @change="onToggleGallery"
                       class="sr-only peer"
                     />
@@ -287,7 +286,7 @@
                   leave-to-class="opacity-0 max-h-0 -translate-y-1"
                 >
                   <div
-                    v-if="configPayload['has_gallery']"
+                    v-if="toBoolean(configPayload['has_gallery'])"
                     class="border-t border-blue-100 bg-white/80 p-3.5"
                   >
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -323,7 +322,6 @@
               >
                 <div class="flex-1 min-w-0">
                   <div class="text-sm font-medium text-gray-900">{{ feat.name || feat.key }}</div>
-                  <div class="text-xs text-gray-400 font-mono mt-0.5">{{ feat.key }} ({{ feat.input_type }})</div>
                 </div>
 
                 <!-- Boolean Toggle Switch -->
@@ -331,7 +329,8 @@
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
-                      v-model="configPayload[feat.key]"
+                      :checked="toBoolean(configPayload[feat.key])"
+                      @change="configPayload[feat.key] = ($event.target as HTMLInputElement).checked"
                       class="sr-only peer"
                     />
                     <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -494,6 +493,11 @@ const standaloneFeatures = computed(() => {
   return masterFeatures.value.filter(f => f.key !== 'has_gallery' && f.key !== 'gallery_limit')
 })
 
+function toBoolean(val: any): boolean {
+  if (val === true || val === 1 || val === 'true' || val === '1') return true
+  return false
+}
+
 function onToggleGallery(event: Event) {
   const target = event.target as HTMLInputElement
   const isChecked = target.checked
@@ -506,52 +510,6 @@ function onToggleGallery(event: Event) {
     configPayload.value['gallery_limit'] = 0
   }
 }
-
-async function loadMasterFeatures() {
-  loadingFeatures.value = true
-  try {
-    const list = await featureService.getFeatures()
-    if (list && list.length > 0) {
-      masterFeatures.value = list
-    } else if (masterFeatures.value.length === 0) {
-      masterFeatures.value = DEFAULT_FALLBACK_FEATURES
-    }
-  } catch (e) {
-    console.warn('Failed to load master features, using defaults:', e)
-    if (masterFeatures.value.length === 0) {
-      masterFeatures.value = DEFAULT_FALLBACK_FEATURES
-    }
-  } finally {
-    loadingFeatures.value = false
-  }
-}
-
-function getFeatureLabel(key: string) {
-  const feat = masterFeatures.value.find(f => f.key === key)
-  if (feat?.name) return feat.name
-  return key.replace(/^has_/, '').replace(/_/g, ' ')
-}
-
-const showModal = ref(false)
-const saving = ref(false)
-const editingId = ref<string | null>(null)
-const form = ref<{ name: string }>({
-  name: ''
-})
-
-// Price mask
-const { displayPrice, rawPrice, onInput: onPriceInput, setPrice } = usePriceMask(0)
-
-const showDeleteModal = ref(false)
-const packageToDelete = ref<Package | null>(null)
-const showRestoreModal = ref(false)
-const packageToRestore = ref<Package | null>(null)
-const showForceDeleteModal = ref(false)
-const packageToForceDelete = ref<Package | null>(null)
-
-const showBulkDeleteModal = ref(false)
-const showBulkRestoreModal = ref(false)
-const showBulkForceDeleteModal = ref(false)
 
 async function loadPackages() {
   selectedPackages.value = []
@@ -567,7 +525,17 @@ async function loadPackages() {
     const response = viewMode.value === 'active' 
       ? await packageService.getPackages(params)
       : await packageService.getTrashedPackages(params)
-    packages.value = response?.data || []
+    const rawList = response?.data || []
+    packages.value = rawList.map((p: any) => {
+      let cfg = p.features_config
+      if (typeof cfg === 'string') {
+        try { cfg = JSON.parse(cfg) } catch { cfg = {} }
+      }
+      return {
+        ...p,
+        features_config: cfg || {}
+      }
+    })
     meta.value = response?.meta || null
   } catch (e) {
     toast.error(handleApiError(e).message)
@@ -586,7 +554,6 @@ async function openCreateModal() {
   editingId.value = null
   form.value = { name: '' }
   setPrice(0)
-  showModal.value = true
 
   await loadMasterFeatures()
 
@@ -595,7 +562,7 @@ async function openCreateModal() {
     if (feat.key === 'gallery_limit') {
       initial['gallery_limit'] = 0
     } else if (feat.input_type === 'boolean') {
-      initial[feat.key] = feat.default_value === 'true' || feat.default_value === '1'
+      initial[feat.key] = toBoolean(feat.default_value)
     } else if (feat.input_type === 'number') {
       initial[feat.key] = Number(feat.default_value) || 0
     } else {
@@ -612,23 +579,31 @@ async function openCreateModal() {
   }
 
   configPayload.value = initial
+  showModal.value = true
 }
 
 async function openEditModal(pkg: Package) {
   editingId.value = pkg.id
   form.value = { name: pkg.name }
   setPrice(pkg.price ?? 0)
-  showModal.value = true
 
   await loadMasterFeatures()
 
+  let existingConfig = pkg.features_config || {}
+  if (typeof existingConfig === 'string') {
+    try {
+      existingConfig = JSON.parse(existingConfig)
+    } catch {
+      existingConfig = {}
+    }
+  }
+
   const initial: Record<string, any> = {}
-  const existingConfig = pkg.features_config || {}
   
   for (const feat of masterFeatures.value) {
     if (existingConfig[feat.key] !== undefined) {
       if (feat.input_type === 'boolean') {
-        initial[feat.key] = Boolean(existingConfig[feat.key])
+        initial[feat.key] = toBoolean(existingConfig[feat.key])
       } else if (feat.input_type === 'number') {
         initial[feat.key] = Number(existingConfig[feat.key]) || 0
       } else {
@@ -636,7 +611,7 @@ async function openEditModal(pkg: Package) {
       }
     } else {
       if (feat.input_type === 'boolean') {
-        initial[feat.key] = feat.default_value === 'true' || feat.default_value === '1'
+        initial[feat.key] = toBoolean(feat.default_value)
       } else if (feat.input_type === 'number') {
         initial[feat.key] = Number(feat.default_value) || 0
       } else {
@@ -661,6 +636,7 @@ async function openEditModal(pkg: Package) {
   }
 
   configPayload.value = initial
+  showModal.value = true
 }
 
 async function savePackage() {
@@ -669,33 +645,37 @@ async function savePackage() {
     const finalFeaturesConfig: Record<string, any> = {}
     
     // Explicitly enforce has_gallery and gallery_limit dependency
-    const hasGallery = Boolean(configPayload.value['has_gallery'])
+    const hasGallery = toBoolean(configPayload.value['has_gallery'])
     const galleryLimit = hasGallery ? (Number(configPayload.value['gallery_limit']) || 10) : 0
 
-    for (const [key, val] of Object.entries(configPayload.value)) {
-      if (key === 'has_gallery') {
+    // Capture every master feature
+    for (const feat of masterFeatures.value) {
+      if (feat.key === 'has_gallery') {
         finalFeaturesConfig['has_gallery'] = hasGallery
-      } else if (key === 'gallery_limit') {
+      } else if (feat.key === 'gallery_limit') {
         finalFeaturesConfig['gallery_limit'] = galleryLimit
+      } else if (feat.input_type === 'boolean') {
+        finalFeaturesConfig[feat.key] = toBoolean(configPayload.value[feat.key])
+      } else if (feat.input_type === 'number') {
+        finalFeaturesConfig[feat.key] = Number(configPayload.value[feat.key]) || 0
       } else {
-        const featMeta = masterFeatures.value.find(f => f.key === key)
-        if (featMeta?.input_type === 'boolean') {
-          finalFeaturesConfig[key] = Boolean(val)
-        } else if (featMeta?.input_type === 'number') {
-          finalFeaturesConfig[key] = Number(val) || 0
-        } else if (typeof val === 'boolean') {
+        finalFeaturesConfig[feat.key] = configPayload.value[feat.key] ?? ''
+      }
+    }
+
+    // Also preserve any keys in configPayload that might not be in masterFeatures
+    for (const [key, val] of Object.entries(configPayload.value)) {
+      if (finalFeaturesConfig[key] === undefined) {
+        if (typeof val === 'boolean') {
           finalFeaturesConfig[key] = val
         } else if (typeof val === 'number') {
           finalFeaturesConfig[key] = val
-        } else if (!isNaN(Number(val)) && val !== '' && val !== null) {
-          finalFeaturesConfig[key] = Number(val)
         } else {
           finalFeaturesConfig[key] = val
         }
       }
     }
 
-    // Always ensure both keys are present in payload
     finalFeaturesConfig['has_gallery'] = hasGallery
     finalFeaturesConfig['gallery_limit'] = galleryLimit
 
@@ -712,7 +692,7 @@ async function savePackage() {
       toast.success('Paket berhasil ditambahkan')
     }
     showModal.value = false
-    loadPackages()
+    await loadPackages()
   } catch (e) {
     toast.error(handleApiError(e).message)
   } finally {
