@@ -80,46 +80,17 @@
                 <td class="px-4 py-3 text-gray-600">Rp {{ (pkg.price ?? 0).toLocaleString('id-ID') }}</td>
                 <td class="px-4 py-3 text-gray-500 text-xs">
                   <div class="flex flex-wrap gap-1 max-w-xs">
-                    <template v-if="pkg.features_config && Object.keys(pkg.features_config).length > 0">
-                      <!-- Unified Galeri Badge -->
+                    <template v-if="getActiveFeatures(pkg.features_config).length > 0">
                       <span
-                        v-if="pkg.features_config?.has_gallery"
-                        class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-medium"
+                        v-for="item in getActiveFeatures(pkg.features_config)"
+                        :key="item.key"
+                        class="px-2 py-0.5 rounded font-medium text-xs flex items-center gap-1"
+                        :class="item.type === 'number' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'"
                       >
-                        ✓ Galeri ({{ pkg.features_config?.gallery_limit ?? 0 }} foto)
+                        ✓ {{ item.label }}
                       </span>
-                      <span
-                        v-else-if="pkg.features_config?.has_gallery === false"
-                        class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded"
-                      >
-                        ✕ Galeri
-                      </span>
-
-                      <!-- Other features -->
-                      <template v-for="(val, key) in pkg.features_config" :key="key">
-                        <template v-if="key !== 'has_gallery' && key !== 'gallery_limit'">
-                          <span
-                            v-if="typeof val === 'boolean' && val"
-                            class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-medium"
-                          >
-                            ✓ {{ getFeatureLabel(String(key)) }}
-                          </span>
-                          <span
-                            v-else-if="typeof val === 'number' && val > 0"
-                            class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-medium"
-                          >
-                            {{ getFeatureLabel(String(key)) }}: {{ val }}
-                          </span>
-                          <span
-                            v-else-if="typeof val === 'boolean' && !val"
-                            class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded"
-                          >
-                            ✕ {{ getFeatureLabel(String(key)) }}
-                          </span>
-                        </template>
-                      </template>
                     </template>
-                    <span v-else class="text-gray-400 italic">-</span>
+                    <span v-else class="text-gray-400 italic text-xs">-</span>
                   </div>
                 </td>
                 <td class="px-4 py-3 text-gray-600">{{ pkg.created_at ? new Date(pkg.created_at).toLocaleDateString('id-ID') : '-' }}</td>
@@ -503,6 +474,48 @@ function getFeatureLabel(key: string) {
   const feat = masterFeatures.value.find(f => f.key === key)
   if (feat?.name) return feat.name
   return key.replace(/^has_/, '').replace(/_/g, ' ')
+}
+
+function getActiveFeatures(config?: Record<string, any>) {
+  if (!config) return []
+  const list: { key: string; label: string; type: 'gallery' | 'boolean' | 'number' | 'text' }[] = []
+  
+  if (toBoolean(config.has_gallery)) {
+    list.push({
+      key: 'has_gallery',
+      label: `Galeri (${config.gallery_limit ?? 0} foto)`,
+      type: 'gallery'
+    })
+  }
+
+  for (const [key, val] of Object.entries(config)) {
+    if (key === 'has_gallery' || key === 'gallery_limit') continue
+    if (typeof val === 'boolean') {
+      if (val) {
+        list.push({
+          key,
+          label: getFeatureLabel(key),
+          type: 'boolean'
+        })
+      }
+    } else if (typeof val === 'number') {
+      if (val > 0) {
+        list.push({
+          key,
+          label: `${getFeatureLabel(key)}: ${val}`,
+          type: 'number'
+        })
+      }
+    } else if (val && String(val).trim() !== '' && val !== 'false' && val !== '0') {
+      list.push({
+        key,
+        label: `${getFeatureLabel(key)}: ${val}`,
+        type: 'text'
+      })
+    }
+  }
+
+  return list
 }
 
 const showModal = ref(false)
