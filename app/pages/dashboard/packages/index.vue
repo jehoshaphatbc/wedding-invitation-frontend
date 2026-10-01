@@ -699,13 +699,6 @@ async function openEditModal(pkg: Package) {
     }
   }
 
-  // Preserve any remaining keys in existingConfig that are not in masterFeatures
-  for (const [k, v] of Object.entries(existingConfig)) {
-    if (initial[k] === undefined) {
-      initial[k] = v
-    }
-  }
-
   // Galeri foto integration logic
   if (initial['has_gallery']) {
     initial['gallery_limit'] = Number(initial['gallery_limit']) > 0 ? Number(initial['gallery_limit']) : 10
@@ -727,7 +720,7 @@ async function savePackage() {
     const hasGallery = toBoolean(configPayload.value['has_gallery'])
     const galleryLimit = hasGallery ? (Number(configPayload.value['gallery_limit']) || 10) : 0
 
-    // Capture every master feature
+    // Capture every master feature currently active in master data
     for (const feat of masterFeatures.value) {
       if (feat.key === 'has_gallery') {
         finalFeaturesConfig['has_gallery'] = hasGallery
@@ -742,21 +735,10 @@ async function savePackage() {
       }
     }
 
-    // Also preserve any keys in configPayload that might not be in masterFeatures
-    for (const [key, val] of Object.entries(configPayload.value)) {
-      if (finalFeaturesConfig[key] === undefined) {
-        if (typeof val === 'boolean') {
-          finalFeaturesConfig[key] = val
-        } else if (typeof val === 'number') {
-          finalFeaturesConfig[key] = val
-        } else {
-          finalFeaturesConfig[key] = val
-        }
-      }
+    if (masterFeatures.value.some(f => f.key === 'has_gallery')) {
+      finalFeaturesConfig['has_gallery'] = hasGallery
+      finalFeaturesConfig['gallery_limit'] = galleryLimit
     }
-
-    finalFeaturesConfig['has_gallery'] = hasGallery
-    finalFeaturesConfig['gallery_limit'] = galleryLimit
 
     const payload = {
       name: form.value.name,
