@@ -81,25 +81,42 @@
                 <td class="px-4 py-3 text-gray-500 text-xs">
                   <div class="flex flex-wrap gap-1 max-w-xs">
                     <template v-if="pkg.features_config && Object.keys(pkg.features_config).length > 0">
+                      <!-- Unified Galeri Badge -->
+                      <span
+                        v-if="pkg.features_config.has_gallery"
+                        class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-medium"
+                      >
+                        ✓ Galeri ({{ pkg.features_config.gallery_limit ?? 0 }} foto)
+                      </span>
+                      <span
+                        v-else-if="pkg.features_config.has_gallery === false"
+                        class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded"
+                      >
+                        ✕ Galeri
+                      </span>
+
+                      <!-- Other features -->
                       <template v-for="(val, key) in pkg.features_config" :key="key">
-                        <span
-                          v-if="typeof val === 'boolean' && val"
-                          class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-medium"
-                        >
-                          ✓ {{ getFeatureLabel(String(key)) }}
-                        </span>
-                        <span
-                          v-else-if="typeof val === 'number' && val > 0"
-                          class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-medium"
-                        >
-                          {{ getFeatureLabel(String(key)) }}: {{ val }}
-                        </span>
-                        <span
-                          v-else-if="typeof val === 'boolean' && !val"
-                          class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded"
-                        >
-                          ✕ {{ getFeatureLabel(String(key)) }}
-                        </span>
+                        <template v-if="key !== 'has_gallery' && key !== 'gallery_limit'">
+                          <span
+                            v-if="typeof val === 'boolean' && val"
+                            class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-medium"
+                          >
+                            ✓ {{ getFeatureLabel(String(key)) }}
+                          </span>
+                          <span
+                            v-else-if="typeof val === 'number' && val > 0"
+                            class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-medium"
+                          >
+                            {{ getFeatureLabel(String(key)) }}: {{ val }}
+                          </span>
+                          <span
+                            v-else-if="typeof val === 'boolean' && !val"
+                            class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded"
+                          >
+                            ✕ {{ getFeatureLabel(String(key)) }}
+                          </span>
+                        </template>
                       </template>
                     </template>
                     <span v-else class="text-gray-400 italic">-</span>
@@ -226,19 +243,91 @@
             <div v-if="loadingFeatures && (!masterFeatures || masterFeatures.length === 0)" class="py-6 text-center text-sm text-gray-500">
               Memuat konfigurasi fitur...
             </div>
-            <div v-else class="space-y-3 max-h-64 overflow-y-auto pr-1">
+            <div v-else class="space-y-3 max-h-72 overflow-y-auto pr-1">
+              <!-- 1. Card "Galeri Foto" Terpadu (Dependent Feature) -->
               <div
-                v-for="feat in masterFeatures"
-                :key="feat.key"
-                class="p-3 bg-gray-50 rounded-lg border border-gray-100 flex items-center justify-between gap-4"
+                v-if="hasGalleryFeature"
+                class="rounded-lg border transition-all duration-200"
+                :class="configPayload['has_gallery'] ? 'bg-blue-50/40 border-blue-200 shadow-sm' : 'bg-gray-50 border-gray-200'"
               >
-                <div class="flex-1 min-w-0">
-                  <div class="text-sm font-medium text-gray-800">{{ feat.name || feat.key }}</div>
-                  <div class="text-xs text-gray-400 font-mono">{{ feat.key }} ({{ feat.input_type }})</div>
+                <!-- Header Card Galeri Foto -->
+                <div class="p-3.5 flex items-center justify-between gap-4">
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                      <span>{{ hasGalleryFeature.name || 'Galeri Foto' }}</span>
+                      <span
+                        v-if="configPayload['has_gallery']"
+                        class="px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 rounded-full"
+                      >
+                        Aktif
+                      </span>
+                    </div>
+                    <div class="text-xs text-gray-400 font-mono mt-0.5">has_gallery (boolean)</div>
+                  </div>
+
+                  <!-- Toggle Switch Galeri -->
+                  <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                    <input
+                      type="checkbox"
+                      :checked="!!configPayload['has_gallery']"
+                      @change="onToggleGallery"
+                      class="sr-only peer"
+                    />
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                  </label>
                 </div>
 
-                <!-- Boolean Toggle / Checkbox -->
-                <div v-if="feat.input_type === 'boolean'" class="flex items-center">
+                <!-- Conditional Sub-input: Batas Jumlah Foto -->
+                <transition
+                  enter-active-class="transition-all duration-200 ease-out"
+                  enter-from-class="opacity-0 max-h-0 -translate-y-1"
+                  enter-to-class="opacity-100 max-h-40 translate-y-0"
+                  leave-active-class="transition-all duration-150 ease-in"
+                  leave-from-class="opacity-100 max-h-40 translate-y-0"
+                  leave-to-class="opacity-0 max-h-0 -translate-y-1"
+                >
+                  <div
+                    v-if="configPayload['has_gallery']"
+                    class="border-t border-blue-100 bg-white/80 p-3.5"
+                  >
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <label class="block text-xs font-semibold text-gray-800">
+                          Batas Maksimal Foto <span class="text-red-500">*</span>
+                        </label>
+                        <p class="text-[11px] text-gray-500 mt-0.5">
+                          Tentukan berapa banyak foto yang dapat diunggah pengantin
+                        </p>
+                      </div>
+                      <div class="w-full sm:w-36 flex items-center gap-1.5 flex-shrink-0">
+                        <input
+                          v-model.number="configPayload['gallery_limit']"
+                          type="number"
+                          min="1"
+                          placeholder="10"
+                          required
+                          class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-right font-medium bg-white"
+                        />
+                        <span class="text-xs text-gray-500 whitespace-nowrap">Foto</span>
+                      </div>
+                    </div>
+                  </div>
+                </transition>
+              </div>
+
+              <!-- 2. Loop Standalone Master Features (Exclude has_gallery & gallery_limit) -->
+              <div
+                v-for="feat in standaloneFeatures"
+                :key="feat.key"
+                class="p-3.5 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-between gap-4"
+              >
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm font-medium text-gray-900">{{ feat.name || feat.key }}</div>
+                  <div class="text-xs text-gray-400 font-mono mt-0.5">{{ feat.key }} ({{ feat.input_type }})</div>
+                </div>
+
+                <!-- Boolean Toggle Switch -->
+                <div v-if="feat.input_type === 'boolean'" class="flex items-center flex-shrink-0">
                   <label class="relative inline-flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -250,22 +339,22 @@
                 </div>
 
                 <!-- Number Input -->
-                <div v-else-if="feat.input_type === 'number'" class="w-32">
+                <div v-else-if="feat.input_type === 'number'" class="w-32 flex-shrink-0">
                   <input
                     v-model.number="configPayload[feat.key]"
                     type="number"
                     min="0"
                     placeholder="0"
-                    class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none text-right"
+                    class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-right bg-white"
                   />
                 </div>
 
                 <!-- Fallback Text Input -->
-                <div v-else class="w-40">
+                <div v-else class="w-40 flex-shrink-0">
                   <input
                     v-model="configPayload[feat.key]"
                     type="text"
-                    class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none"
+                    class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   />
                 </div>
               </div>
@@ -393,6 +482,31 @@ const DEFAULT_FALLBACK_FEATURES: Feature[] = [
   { key: 'has_qr', name: 'Fitur QR Code Check-in', input_type: 'boolean', default_value: 'false' }
 ]
 
+const hasGalleryFeature = computed(() => {
+  return masterFeatures.value.find(f => f.key === 'has_gallery')
+})
+
+const galleryLimitFeature = computed(() => {
+  return masterFeatures.value.find(f => f.key === 'gallery_limit')
+})
+
+const standaloneFeatures = computed(() => {
+  return masterFeatures.value.filter(f => f.key !== 'has_gallery' && f.key !== 'gallery_limit')
+})
+
+function onToggleGallery(event: Event) {
+  const target = event.target as HTMLInputElement
+  const isChecked = target.checked
+  configPayload.value['has_gallery'] = isChecked
+  if (isChecked) {
+    if (!configPayload.value['gallery_limit'] || Number(configPayload.value['gallery_limit']) <= 0) {
+      configPayload.value['gallery_limit'] = 10
+    }
+  } else {
+    configPayload.value['gallery_limit'] = 0
+  }
+}
+
 async function loadMasterFeatures() {
   loadingFeatures.value = true
   try {
@@ -478,7 +592,9 @@ async function openCreateModal() {
 
   const initial: Record<string, any> = {}
   for (const feat of masterFeatures.value) {
-    if (feat.input_type === 'boolean') {
+    if (feat.key === 'gallery_limit') {
+      initial['gallery_limit'] = 0
+    } else if (feat.input_type === 'boolean') {
       initial[feat.key] = feat.default_value === 'true' || feat.default_value === '1'
     } else if (feat.input_type === 'number') {
       initial[feat.key] = Number(feat.default_value) || 0
@@ -486,6 +602,15 @@ async function openCreateModal() {
       initial[feat.key] = feat.default_value ?? ''
     }
   }
+
+  // Galeri foto integration logic
+  if (initial['has_gallery']) {
+    initial['gallery_limit'] = Number(initial['gallery_limit']) > 0 ? Number(initial['gallery_limit']) : 10
+  } else {
+    initial['has_gallery'] = false
+    initial['gallery_limit'] = 0
+  }
+
   configPayload.value = initial
 }
 
@@ -527,6 +652,14 @@ async function openEditModal(pkg: Package) {
     }
   }
 
+  // Galeri foto integration logic
+  if (initial['has_gallery']) {
+    initial['gallery_limit'] = Number(initial['gallery_limit']) > 0 ? Number(initial['gallery_limit']) : 10
+  } else {
+    initial['has_gallery'] = false
+    initial['gallery_limit'] = 0
+  }
+
   configPayload.value = initial
 }
 
@@ -534,22 +667,37 @@ async function savePackage() {
   saving.value = true
   try {
     const finalFeaturesConfig: Record<string, any> = {}
+    
+    // Explicitly enforce has_gallery and gallery_limit dependency
+    const hasGallery = Boolean(configPayload.value['has_gallery'])
+    const galleryLimit = hasGallery ? (Number(configPayload.value['gallery_limit']) || 10) : 0
+
     for (const [key, val] of Object.entries(configPayload.value)) {
-      const featMeta = masterFeatures.value.find(f => f.key === key)
-      if (featMeta?.input_type === 'boolean') {
-        finalFeaturesConfig[key] = Boolean(val)
-      } else if (featMeta?.input_type === 'number') {
-        finalFeaturesConfig[key] = Number(val) || 0
-      } else if (typeof val === 'boolean') {
-        finalFeaturesConfig[key] = val
-      } else if (typeof val === 'number') {
-        finalFeaturesConfig[key] = val
-      } else if (!isNaN(Number(val)) && val !== '' && val !== null) {
-        finalFeaturesConfig[key] = Number(val)
+      if (key === 'has_gallery') {
+        finalFeaturesConfig['has_gallery'] = hasGallery
+      } else if (key === 'gallery_limit') {
+        finalFeaturesConfig['gallery_limit'] = galleryLimit
       } else {
-        finalFeaturesConfig[key] = val
+        const featMeta = masterFeatures.value.find(f => f.key === key)
+        if (featMeta?.input_type === 'boolean') {
+          finalFeaturesConfig[key] = Boolean(val)
+        } else if (featMeta?.input_type === 'number') {
+          finalFeaturesConfig[key] = Number(val) || 0
+        } else if (typeof val === 'boolean') {
+          finalFeaturesConfig[key] = val
+        } else if (typeof val === 'number') {
+          finalFeaturesConfig[key] = val
+        } else if (!isNaN(Number(val)) && val !== '' && val !== null) {
+          finalFeaturesConfig[key] = Number(val)
+        } else {
+          finalFeaturesConfig[key] = val
+        }
       }
     }
+
+    // Always ensure both keys are present in payload
+    finalFeaturesConfig['has_gallery'] = hasGallery
+    finalFeaturesConfig['gallery_limit'] = galleryLimit
 
     const payload = {
       name: form.value.name,
