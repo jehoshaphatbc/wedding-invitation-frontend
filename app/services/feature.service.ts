@@ -39,9 +39,14 @@ export function useFeatureService() {
 
   return {
     async getFeatures(): Promise<Feature[]> {
-      const response = await tryEndpoints<any>('get')
-      const rawList = Array.isArray(response) ? response : (response?.data || [])
-      return rawList.map(normalizeFeature)
+      try {
+        const response = await tryEndpoints<any>('get')
+        const rawList = Array.isArray(response) ? response : (response?.data || [])
+        return rawList.map(normalizeFeature)
+      } catch (err) {
+        console.warn('Failed to fetch features:', err)
+        return []
+      }
     },
 
     async getFeature(id: string): Promise<Feature> {

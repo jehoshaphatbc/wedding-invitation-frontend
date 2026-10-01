@@ -1,5 +1,6 @@
 <template>
   <div>
+    <NuxtLoadingIndicator color="repeating-linear-gradient(to right, #2563eb 0%, #3b82f6 50%, #60a5fa 100%)" :height="3" />
     <NuxtRouteAnnouncer />
     <NuxtLayout>
       <NuxtPage />

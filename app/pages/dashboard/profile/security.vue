@@ -25,44 +25,39 @@
       <form @submit.prevent="handleChangePassword" class="space-y-4 max-w-lg">
         <div>
           <label for="current_password" class="block text-sm font-medium text-gray-700 mb-1">Current Password</label>
-          <input
+          <UiPasswordInput
             id="current_password"
             v-model="passwordForm.current_password"
-            type="password"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            :class="{ 'border-red-500': errors.current_password }"
+            :has-error="!!errors.current_password"
           />
           <p v-if="errors.current_password" class="mt-1 text-sm text-red-600">{{ errors.current_password[0] }}</p>
         </div>
 
         <div>
           <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-          <input
+          <UiPasswordInput
             id="new_password"
             v-model="passwordForm.new_password"
-            type="password"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            :class="{ 'border-red-500': errors.new_password }"
+            :has-error="!!errors.new_password"
           />
           <p v-if="errors.new_password" class="mt-1 text-sm text-red-600">{{ errors.new_password[0] }}</p>
         </div>
 
         <div>
           <label for="new_password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">Confirm New Password</label>
-          <input
+          <UiPasswordInput
             id="new_password_confirmation"
             v-model="passwordForm.new_password_confirmation"
-            type="password"
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
 
         <button
           type="submit"
           :disabled="changingPassword"
-          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
-          {{ changingPassword ? 'Changing...' : 'Change Password' }}
+          <div v-if="changingPassword" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+          <span>{{ changingPassword ? 'Changing...' : 'Change Password' }}</span>
         </button>
       </form>
     </div>

@@ -172,14 +172,12 @@ async function handleSubmit() {
           <label for="password" class="block text-sm font-medium text-gray-700 mb-1">
             Password
           </label>
-          <input
+          <UiPasswordInput
             id="password"
             v-model="form.password"
-            type="password"
             autocomplete="new-password"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            :class="{ 'border-red-500': fieldErrors.password }"
             placeholder="Min. 8 characters"
+            :has-error="!!fieldErrors.password"
           />
           <p v-if="fieldErrors.password" class="mt-1 text-sm text-red-600">
             {{ fieldErrors.password }}
@@ -190,14 +188,12 @@ async function handleSubmit() {
           <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-1">
             Confirm Password
           </label>
-          <input
+          <UiPasswordInput
             id="password_confirmation"
             v-model="form.password_confirmation"
-            type="password"
             autocomplete="new-password"
-            class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm placeholder:text-gray-400 focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
-            :class="{ 'border-red-500': fieldErrors.password_confirmation }"
             placeholder="Repeat your password"
+            :has-error="!!fieldErrors.password_confirmation"
           />
           <p v-if="fieldErrors.password_confirmation" class="mt-1 text-sm text-red-600">
             {{ fieldErrors.password_confirmation }}
@@ -207,10 +203,10 @@ async function handleSubmit() {
         <button
           type="submit"
           :disabled="isLoading"
-          class="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          class="w-full flex items-center justify-center gap-2 rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
-          <span v-if="isLoading">Creating account...</span>
-          <span v-else>Register</span>
+          <div v-if="isLoading" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+          <span>{{ isLoading ? 'Creating account...' : 'Register' }}</span>
         </button>
       </form>
 

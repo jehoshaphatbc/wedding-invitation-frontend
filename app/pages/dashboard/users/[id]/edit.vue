@@ -75,15 +75,12 @@
         <form @submit.prevent="promptPasswordChange" class="space-y-4 max-w-lg">
           <div>
             <label for="new_password" class="block text-sm font-medium text-gray-700 mb-1">New Password</label>
-            <input
+            <UiPasswordInput
               id="new_password"
               v-model="passwordForm.new_password"
-              type="password"
               required
-              minlength="8"
               placeholder="At least 8 characters"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-red-500 focus:outline-none focus:ring-1 focus:ring-red-500"
-              :class="{ 'border-red-500': passwordErrors.new_password }"
+              :has-error="!!passwordErrors.new_password"
             />
             <p v-if="passwordErrors.new_password" class="mt-1 text-sm text-red-600">{{ passwordErrors.new_password[0] }}</p>
           </div>
@@ -91,9 +88,10 @@
           <button
             type="submit"
             :disabled="changingPassword"
-            class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {{ changingPassword ? 'Changing...' : 'Force Change Password' }}
+            <div v-if="changingPassword" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+            <span>{{ changingPassword ? 'Changing...' : 'Force Change Password' }}</span>
           </button>
         </form>
       </div>

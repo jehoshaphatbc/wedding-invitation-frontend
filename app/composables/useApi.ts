@@ -1,3 +1,5 @@
+let activeRequests = 0
+
 export function useApi() {
   const config = useRuntimeConfig()
   const authStore = useAuthStore()
@@ -13,6 +15,17 @@ export function useApi() {
       headers?: Record<string, string>
     } = {},
   ): Promise<T> {
+    let indicator: any = null
+    if (import.meta.client) {
+      try {
+        indicator = useLoadingIndicator()
+        if (activeRequests === 0) {
+          indicator.start()
+        }
+        activeRequests++
+      } catch {}
+    }
+
     const cleanPath = path.startsWith('/') ? path : `/${path}`
     const url = `${baseURL}${cleanPath}`
 
@@ -65,6 +78,15 @@ export function useApi() {
         }
       }
       throw error
+    } finally {
+      if (import.meta.client && indicator) {
+        try {
+          activeRequests = Math.max(0, activeRequests - 1)
+          if (activeRequests === 0) {
+            indicator.finish()
+          }
+        } catch {}
+      }
     }
   }
 

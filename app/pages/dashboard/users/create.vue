@@ -44,13 +44,11 @@
 
         <div>
           <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-          <input
+          <UiPasswordInput
             id="password"
             v-model="form.password"
-            type="password"
             required
-            class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            :class="{ 'border-red-500': errors.password }"
+            :has-error="!!errors.password"
           />
           <p v-if="errors.password" class="mt-1 text-sm text-red-600">{{ errors.password[0] }}</p>
         </div>
@@ -92,9 +90,10 @@
           <button
             type="submit"
             :disabled="submitting"
-            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
           >
-            {{ submitting ? 'Creating...' : 'Create User' }}
+            <div v-if="submitting" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+            <span>{{ submitting ? 'Creating...' : 'Create User' }}</span>
           </button>
           <NuxtLink
             to="/dashboard/users"

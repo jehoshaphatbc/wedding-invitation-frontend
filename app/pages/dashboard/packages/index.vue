@@ -77,19 +77,19 @@
               <tr v-for="pkg in packages" :key="pkg.id" class="border-b hover:bg-gray-50">
                 <td class="px-4 py-3"><input type="checkbox" :value="pkg.id" v-model="selectedPackages" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"></td>
                 <td class="px-4 py-3 font-medium text-gray-900">{{ pkg.name }}</td>
-                <td class="px-4 py-3 text-gray-600">Rp {{ pkg.price.toLocaleString('id-ID') }}</td>
+                <td class="px-4 py-3 text-gray-600">Rp {{ (pkg.price ?? 0).toLocaleString('id-ID') }}</td>
                 <td class="px-4 py-3 text-gray-500 text-xs">
                   <div class="flex flex-wrap gap-1 max-w-xs">
                     <template v-if="pkg.features_config && Object.keys(pkg.features_config).length > 0">
                       <!-- Unified Galeri Badge -->
                       <span
-                        v-if="pkg.features_config.has_gallery"
+                        v-if="pkg.features_config?.has_gallery"
                         class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-medium"
                       >
-                        ✓ Galeri ({{ pkg.features_config.gallery_limit ?? 0 }} foto)
+                        ✓ Galeri ({{ pkg.features_config?.gallery_limit ?? 0 }} foto)
                       </span>
                       <span
-                        v-else-if="pkg.features_config.has_gallery === false"
+                        v-else-if="pkg.features_config?.has_gallery === false"
                         class="px-2 py-0.5 bg-gray-100 text-gray-400 rounded"
                       >
                         ✕ Galeri
@@ -122,7 +122,7 @@
                     <span v-else class="text-gray-400 italic">-</span>
                   </div>
                 </td>
-                <td class="px-4 py-3 text-gray-600">{{ new Date(pkg.created_at).toLocaleDateString('id-ID') }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ pkg.created_at ? new Date(pkg.created_at).toLocaleDateString('id-ID') : '-' }}</td>
                 <td class="px-4 py-3 text-center relative">
                 <button
                   @click.stop="activeDropdown = activeDropdown === pkg.id ? null : pkg.id"
@@ -481,6 +481,70 @@ const DEFAULT_FALLBACK_FEATURES: Feature[] = [
   { key: 'has_qr', name: 'Fitur QR Code Check-in', input_type: 'boolean', default_value: 'false' }
 ]
 
+async function loadMasterFeatures() {
+  loadingFeatures.value = true
+  try {
+    const list = await featureService.getFeatures()
+    if (list && list.length > 0) {
+      masterFeatures.value = list
+    } else if (masterFeatures.value.length === 0) {
+      masterFeatures.value = DEFAULT_FALLBACK_FEATURES
+    }
+  } catch (e) {
+    if (masterFeatures.value.length === 0) {
+      masterFeatures.value = DEFAULT_FALLBACK_FEATURES
+    }
+  } finally {
+    loadingFeatures.value = false
+  }
+}
+
+function getFeatureLabel(key: string) {
+  const feat = masterFeatures.value.find(f => f.key === key)
+  if (feat?.name) return feat.name
+  return key.replace(/^has_/, '').replace(/_/g, ' ')
+}
+
+const showModal = ref(false)
+const saving = ref(false)
+const editingId = ref<string | null>(null)
+const form = ref<{ name: string }>({
+  name: ''
+})
+
+// Price mask
+const rawPrice = ref(0)
+const displayPrice = ref('0')
+
+function formatNumber(num: number): string {
+  return new Intl.NumberFormat('id-ID').format(num)
+}
+
+function onPriceInput(e: Event) {
+  const input = e.target as HTMLInputElement
+  const digitsOnly = input.value.replace(/\D/g, '')
+  const num = parseInt(digitsOnly, 10) || 0
+  rawPrice.value = num
+  displayPrice.value = formatNumber(num)
+  input.value = displayPrice.value
+}
+
+function setPrice(num: number) {
+  rawPrice.value = num
+  displayPrice.value = formatNumber(num)
+}
+
+// Confirmation modals state
+const packageToDelete = ref<Package | null>(null)
+const packageToRestore = ref<Package | null>(null)
+const packageToForceDelete = ref<Package | null>(null)
+const showDeleteModal = ref(false)
+const showRestoreModal = ref(false)
+const showForceDeleteModal = ref(false)
+const showBulkDeleteModal = ref(false)
+const showBulkRestoreModal = ref(false)
+const showBulkForceDeleteModal = ref(false)
+
 const hasGalleryFeature = computed(() => {
   return masterFeatures.value.find(f => f.key === 'has_gallery')
 })
@@ -538,7 +602,9 @@ async function loadPackages() {
     })
     meta.value = response?.meta || null
   } catch (e) {
-    toast.error(handleApiError(e).message)
+    if (import.meta.client) {
+      toast.error(handleApiError(e).message)
+    }
   } finally {
     loading.value = false
   }
@@ -808,8 +874,23 @@ watch(viewMode, () => {
   selectedPackages.value = []
 })
 
-await Promise.all([
-  loadPackages(),
-  loadMasterFeatures()
-])
+if (import.meta.server) {
+  try {
+    await Promise.all([
+      loadPackages(),
+      loadMasterFeatures()
+    ])
+  } catch (err) {
+    console.error('SSR fetch error in packages/index.vue:', err)
+  }
+}
+
+onMounted(() => {
+  if (packages.value.length === 0) {
+    loadPackages()
+  }
+  if (masterFeatures.value.length === 0) {
+    loadMasterFeatures()
+  }
+})
 </script>
