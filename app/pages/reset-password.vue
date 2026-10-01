@@ -32,15 +32,15 @@ function validate(): boolean {
   errors.password_confirmation = ''
 
   if (!form.password) {
-    errors.password = 'Password wajib diisi.'
+    errors.password = 'Password is required.'
   } else if (form.password.length < 8) {
-    errors.password = 'Password minimal 8 karakter.'
+    errors.password = 'Password must be at least 8 characters.'
   }
 
   if (!form.password_confirmation) {
-    errors.password_confirmation = 'Konfirmasi password wajib diisi.'
+    errors.password_confirmation = 'Password confirmation is required.'
   } else if (form.password !== form.password_confirmation) {
-    errors.password_confirmation = 'Konfirmasi password tidak cocok.'
+    errors.password_confirmation = 'Password confirmation does not match.'
   }
 
   return !errors.password && !errors.password_confirmation

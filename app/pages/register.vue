@@ -43,23 +43,23 @@ function validate(): boolean {
   clearErrors()
 
   if (!form.name) {
-    fieldErrors.name = 'Nama wajib diisi.'
+    fieldErrors.name = 'Name is required.'
   }
 
   if (!form.email) {
-    fieldErrors.email = 'Email wajib diisi.'
+    fieldErrors.email = 'Email is required.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    fieldErrors.email = 'Format email tidak valid.'
+    fieldErrors.email = 'Invalid email format.'
   }
 
   if (!form.password) {
-    fieldErrors.password = 'Password wajib diisi.'
+    fieldErrors.password = 'Password is required.'
   } else if (form.password.length < 8) {
-    fieldErrors.password = 'Password minimal 8 karakter.'
+    fieldErrors.password = 'Password must be at least 8 characters.'
   }
 
   if (form.password !== form.password_confirmation) {
-    fieldErrors.password_confirmation = 'Konfirmasi password tidak cocok.'
+    fieldErrors.password_confirmation = 'Password confirmation does not match.'
   }
 
   return !Object.values(fieldErrors).some(Boolean)

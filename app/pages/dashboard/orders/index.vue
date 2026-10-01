@@ -3,7 +3,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Orders</h1>
-        <p class="text-sm text-gray-500 mt-1">Kelola data pesanan, status pembayaran, magic link, dan scanner check-in.</p>
+        <p class="text-sm text-gray-500 mt-1">Manage orders, payment statuses, magic links, and scanner check-ins.</p>
       </div>
       <div class="flex gap-2">
         <button
@@ -23,14 +23,14 @@
     <div class="bg-white rounded-lg shadow">
       <!-- Bulk Actions Bar -->
       <div v-if="selectedOrders.length > 0" class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex items-center justify-between">
-        <span class="text-sm text-blue-800 font-medium">{{ selectedOrders.length }} pesanan dipilih</span>
+        <span class="text-sm text-blue-800 font-medium">{{ selectedOrders.length }} order(s) selected</span>
         <div class="flex gap-2">
           <template v-if="viewMode === 'active'">
             <button
               @click="showBulkDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Hapus Terpilih
+              Delete Selected
             </button>
           </template>
           <template v-else>
@@ -39,14 +39,14 @@
               @click="showBulkRestoreModal = true"
               class="px-3 py-1.5 text-sm font-medium text-green-600 bg-white border border-green-200 rounded hover:bg-green-50"
             >
-              Restore Terpilih
+              Restore Selected
             </button>
             <button
               v-if="isSuperAdmin"
               @click="showBulkForceDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Force Delete Terpilih
+              Force Delete Selected
             </button>
           </template>
         </div>
@@ -61,7 +61,7 @@
           <input
             v-model="search"
             type="text"
-            placeholder="Cari Invoice, Nama Klien, atau Email..."
+            placeholder="Search invoice, client name, or email..."
             class="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -72,7 +72,7 @@
             v-model="statusFilter"
             class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
           >
-            <option value="">Semua Status</option>
+            <option value="">All Statuses</option>
             <option value="paid">Paid</option>
             <option value="unpaid">Unpaid</option>
             <option value="expired">Expired</option>
@@ -91,16 +91,16 @@
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('invoice_number')">
                 Invoice <span v-if="sortBy === 'invoice_number'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
-              <th class="px-4 py-3">Klien</th>
-              <th class="px-4 py-3">Paket</th>
+              <th class="px-4 py-3">Client</th>
+              <th class="px-4 py-3">Package</th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('total_amount')">
                 Total <span v-if="sortBy === 'total_amount'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
               <th class="px-4 py-3 text-center">Status</th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">
-                Tanggal <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                Date <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
-              <th class="px-4 py-3 text-center">Aksi</th>
+              <th class="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -111,7 +111,7 @@
             </tr>
             <tr v-else-if="!orders || orders.length === 0">
               <td colspan="8" class="py-12 text-center text-gray-500">
-                Tidak ada data pesanan ditemukan.
+                No orders found.
               </td>
             </tr>
             <template v-else>
@@ -158,7 +158,7 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
-                  {{ order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' }}
+                  {{ order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' }}
                 </td>
                 <td class="px-4 py-3 text-center relative">
                   <button
@@ -175,7 +175,7 @@
                     class="absolute right-8 top-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
                   >
                     <template v-if="viewMode === 'active'">
-                      <!-- Aksi Khusus untuk Status Paid -->
+                      <!-- Special actions for Paid status -->
                       <template v-if="isPaid(order.status)">
                         <button
                           class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left"
@@ -197,7 +197,7 @@
                         </button>
                       </template>
 
-                      <!-- Hapus Pesanan -->
+                      <!-- Delete Order -->
                       <button
                         class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-red-600"
                         @click.stop="confirmDelete(order); activeDropdown = null"
@@ -205,7 +205,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Hapus Pesanan
+                        Delete Order
                       </button>
                     </template>
                     <template v-else>
@@ -241,8 +241,8 @@
       <!-- Pagination -->
       <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
         <span class="text-sm text-gray-500">
-          Menampilkan {{ (meta.page - 1) * meta.per_page + 1 }} sampai
-          {{ Math.min(meta.page * meta.per_page, meta.total) }} dari {{ meta.total }} pesanan
+          Showing {{ (meta.page - 1) * meta.per_page + 1 }} to
+          {{ Math.min(meta.page * meta.per_page, meta.total) }} of {{ meta.total }} orders
         </span>
         <div class="flex gap-1">
           <button
@@ -250,7 +250,7 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page - 1)"
           >
-            Sebelumnya
+            Previous
           </button>
           <button
             v-for="p in visiblePages"
@@ -266,7 +266,7 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page + 1)"
           >
-            Selanjutnya
+            Next
           </button>
         </div>
       </div>
@@ -275,9 +275,9 @@
     <!-- Confirmation Modals -->
     <UiConfirmModal
       v-if="showDeleteModal && orderToDelete"
-      title="Hapus Pesanan"
-      :message="`Apakah Anda yakin ingin memindahkan pesanan '${orderToDelete.invoice_number || orderToDelete.id}' ke sampah?`"
-      confirm-text="Hapus"
+      title="Delete Order"
+      :message="`Are you sure you want to move order '${orderToDelete.invoice_number || orderToDelete.id}' to trash?`"
+      confirm-text="Delete"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
@@ -285,8 +285,8 @@
 
     <UiConfirmModal
       v-if="showRestoreModal && orderToRestore"
-      title="Restore Pesanan"
-      :message="`Apakah Anda yakin ingin mengembalikan pesanan '${orderToRestore.invoice_number || orderToRestore.id}' dari sampah?`"
+      title="Restore Order"
+      :message="`Are you sure you want to restore order '${orderToRestore.invoice_number || orderToRestore.id}' from trash?`"
       confirm-text="Restore"
       @confirm="handleRestore"
       @cancel="showRestoreModal = false"
@@ -294,8 +294,8 @@
 
     <UiConfirmModal
       v-if="showForceDeleteModal && orderToForceDelete"
-      title="Force Delete Pesanan"
-      :message="`Apakah Anda yakin ingin menghapus PERMANEN pesanan '${orderToForceDelete.invoice_number || orderToForceDelete.id}'? Aksi ini tidak dapat dibatalkan.`"
+      title="Force Delete Order"
+      :message="`Are you sure you want to PERMANENTLY delete order '${orderToForceDelete.invoice_number || orderToForceDelete.id}'? This action cannot be undone.`"
       confirm-text="Force Delete"
       :danger="true"
       require-input="DELETE"
@@ -305,9 +305,9 @@
 
     <UiConfirmModal
       v-if="showBulkDeleteModal"
-      title="Bulk Delete Pesanan"
-      :message="`Apakah Anda yakin ingin memindahkan ${selectedOrders.length} pesanan terpilih ke sampah?`"
-      confirm-text="Hapus Semua"
+      title="Bulk Delete Orders"
+      :message="`Are you sure you want to move ${selectedOrders.length} selected orders to trash?`"
+      confirm-text="Delete All"
       :danger="true"
       @confirm="handleBulkDelete"
       @cancel="showBulkDeleteModal = false"
@@ -315,18 +315,18 @@
 
     <UiConfirmModal
       v-if="showBulkRestoreModal"
-      title="Bulk Restore Pesanan"
-      :message="`Apakah Anda yakin ingin mengembalikan ${selectedOrders.length} pesanan terpilih dari sampah?`"
-      confirm-text="Restore Semua"
+      title="Bulk Restore Orders"
+      :message="`Are you sure you want to restore ${selectedOrders.length} selected orders from trash?`"
+      confirm-text="Restore All"
       @confirm="handleBulkRestore"
       @cancel="showBulkRestoreModal = false"
     />
 
     <UiConfirmModal
       v-if="showBulkForceDeleteModal"
-      title="Bulk Force Delete Pesanan"
-      :message="`Apakah Anda yakin ingin menghapus PERMANEN ${selectedOrders.length} pesanan terpilih?`"
-      confirm-text="Force Delete Semua"
+      title="Bulk Force Delete Orders"
+      :message="`Are you sure you want to PERMANENTLY delete ${selectedOrders.length} selected orders?`"
+      confirm-text="Force Delete All"
       :danger="true"
       require-input="DELETE"
       @confirm="handleBulkForceDelete"
@@ -425,12 +425,12 @@ async function copyMagicLink(order: Order) {
   try {
     if (navigator?.clipboard) {
       await navigator.clipboard.writeText(link)
-      toast.success('Magic Link berhasil disalin!')
+      toast.success('Magic Link copied to clipboard!')
     } else {
       toast.success(`Magic Link: ${link}`)
     }
   } catch (err) {
-    toast.error('Gagal menyalin Magic Link ke clipboard.')
+    toast.error('Failed to copy Magic Link to clipboard.')
   }
 }
 
@@ -439,12 +439,12 @@ async function copyScannerLink(order: Order) {
   try {
     if (navigator?.clipboard) {
       await navigator.clipboard.writeText(link)
-      toast.success('Scanner Link berhasil disalin!')
+      toast.success('Scanner Link copied to clipboard!')
     } else {
       toast.success(`Scanner Link: ${link}`)
     }
   } catch (err) {
-    toast.error('Gagal menyalin Scanner Link ke clipboard.')
+    toast.error('Failed to copy Scanner Link to clipboard.')
   }
 }
 
@@ -490,7 +490,7 @@ async function handleDelete() {
   if (!orderToDelete.value) return
   try {
     await orderService.deleteOrder(orderToDelete.value.id)
-    toast.success('Pesanan berhasil dipindahkan ke sampah')
+    toast.success('Order moved to trash successfully')
     showDeleteModal.value = false
     orderToDelete.value = null
     loadOrders()
@@ -508,14 +508,14 @@ async function handleRestore() {
   if (!orderToRestore.value) return
   try {
     await orderService.restoreOrder(orderToRestore.value.id)
-    toast.success('Pesanan berhasil dikembalikan')
+    toast.success('Order restored successfully')
     showRestoreModal.value = false
     orderToRestore.value = null
     loadOrders()
   } catch (e) {
     try {
       await orderService.bulkRestoreOrders([orderToRestore.value.id])
-      toast.success('Pesanan berhasil dikembalikan')
+      toast.success('Order restored successfully')
       showRestoreModal.value = false
       orderToRestore.value = null
       loadOrders()
@@ -534,14 +534,14 @@ async function handleForceDelete() {
   if (!orderToForceDelete.value) return
   try {
     await orderService.forceDeleteOrder(orderToForceDelete.value.id)
-    toast.success('Pesanan berhasil dihapus permanen')
+    toast.success('Order permanently deleted')
     showForceDeleteModal.value = false
     orderToForceDelete.value = null
     loadOrders()
   } catch (e) {
     try {
       await orderService.bulkForceDeleteOrders([orderToForceDelete.value.id])
-      toast.success('Pesanan berhasil dihapus permanen')
+      toast.success('Order permanently deleted')
       showForceDeleteModal.value = false
       orderToForceDelete.value = null
       loadOrders()
@@ -554,7 +554,7 @@ async function handleForceDelete() {
 async function handleBulkDelete() {
   try {
     await orderService.bulkDeleteOrders(selectedOrders.value)
-    toast.success('Pesanan terpilih berhasil dihapus')
+    toast.success('Selected orders moved to trash successfully')
     showBulkDeleteModal.value = false
     loadOrders()
   } catch (e: any) {
@@ -565,7 +565,7 @@ async function handleBulkDelete() {
 async function handleBulkRestore() {
   try {
     await orderService.bulkRestoreOrders(selectedOrders.value)
-    toast.success('Pesanan terpilih berhasil dikembalikan')
+    toast.success('Selected orders restored successfully')
     showBulkRestoreModal.value = false
     loadOrders()
   } catch (e: any) {
@@ -576,7 +576,7 @@ async function handleBulkRestore() {
 async function handleBulkForceDelete() {
   try {
     await orderService.bulkForceDeleteOrders(selectedOrders.value)
-    toast.success('Pesanan terpilih berhasil dihapus permanen')
+    toast.success('Selected orders permanently deleted')
     showBulkForceDeleteModal.value = false
     loadOrders()
   } catch (e: any) {

@@ -182,7 +182,7 @@ async function handleChangeEmail() {
 
   try {
     await authService.changeEmail({ new_email: emailForm.new_email })
-    toast.success('Email berhasil diubah. Sesi Anda akan berakhir untuk keamanan.')
+    toast.success('Email updated successfully. Your session will now end for security.')
     setTimeout(async () => {
       await logout()
     }, 2000)

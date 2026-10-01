@@ -4,7 +4,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Feature Packages</h1>
-        <p class="text-sm text-gray-500 mt-1">Kelola master fitur untuk konfigurasi paket undangan.</p>
+        <p class="text-sm text-gray-500 mt-1">Manage master features for invitation package configurations.</p>
       </div>
       <button
         @click="openCreateModal"
@@ -13,7 +13,7 @@
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
         </svg>
-        Tambah Fitur
+        Add Feature
       </button>
     </div>
 
@@ -25,7 +25,7 @@
           <input
             v-model="search"
             type="text"
-            placeholder="Cari key atau nama fitur..."
+            placeholder="Search key or feature name..."
             class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -34,9 +34,9 @@
             v-model="typeFilter"
             class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
           >
-            <option value="">Semua Tipe Input</option>
+            <option value="">All Input Types</option>
             <option value="boolean">Boolean (Toggle/Checkbox)</option>
-            <option value="number">Number (Angka/Limit)</option>
+            <option value="number">Number (Count/Limit)</option>
           </select>
         </div>
       </div>
@@ -50,7 +50,7 @@
               <th class="px-4 py-3">Feature Name</th>
               <th class="px-4 py-3">Input Type</th>
               <th class="px-4 py-3">Default Value</th>
-              <th class="px-4 py-3 text-center">Aksi</th>
+              <th class="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -65,8 +65,8 @@
                   <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
-                  <p class="font-medium">Belum ada data fitur.</p>
-                  <p class="text-xs text-gray-400 mt-1">Klik tombol "Tambah Fitur" untuk membuat master fitur baru.</p>
+                  <p class="font-medium">No feature packages found.</p>
+                  <p class="text-xs text-gray-400 mt-1">Click "Add Feature" button to create a new master feature.</p>
                 </div>
               </td>
             </tr>
@@ -145,7 +145,7 @@
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ editingItem ? 'Edit Feature Package' : 'Tambah Feature Package' }}
+          {{ editingItem ? 'Edit Feature Package' : 'Add Feature Package' }}
         </h3>
         
         <form @submit.prevent="saveFeature" class="space-y-4">
@@ -156,10 +156,10 @@
               type="text"
               required
               :disabled="!!editingItem"
-              placeholder="Contoh: has_gallery, gallery_limit"
+              placeholder="Example: has_gallery, gallery_limit"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed"
             />
-            <p class="text-xs text-gray-400 mt-1">Gunakan format snake_case tanpa spasi.</p>
+            <p class="text-xs text-gray-400 mt-1">Use snake_case format without spaces.</p>
           </div>
 
           <div>
@@ -168,7 +168,7 @@
               v-model="form.name"
               type="text"
               required
-              placeholder="Contoh: Fitur Galeri Foto"
+              placeholder="Example: Photo Gallery Feature"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -181,7 +181,7 @@
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
             >
               <option value="boolean">Boolean (Toggle / Checkbox)</option>
-              <option value="number">Number (Input Angka / Limit)</option>
+              <option value="number">Number (Count / Limit)</option>
             </select>
           </div>
 
@@ -191,7 +191,7 @@
               v-model="form.default_value"
               type="text"
               required
-              :placeholder="form.input_type === 'boolean' ? 'false atau true' : '0 atau angka lainnya'"
+              :placeholder="form.input_type === 'boolean' ? 'false or true' : '0 or other numeric value'"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -202,7 +202,7 @@
               @click="showModal = false"
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
@@ -210,7 +210,7 @@
               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
               <div v-if="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              Simpan
+              Save
             </button>
           </div>
         </form>
@@ -220,9 +220,9 @@
     <!-- Confirm Delete Modal -->
     <UiConfirmModal
       v-if="showDeleteModal && featureToDelete"
-      title="Hapus Feature Package"
-      :message="`Apakah Anda yakin ingin menghapus fitur '${featureToDelete.name}' (${featureToDelete.key})?`"
-      confirm-text="Hapus"
+      title="Delete Feature Package"
+      :message="`Are you sure you want to delete feature '${featureToDelete.name}' (${featureToDelete.key})?`"
+      confirm-text="Delete"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
@@ -324,10 +324,10 @@ async function saveFeature() {
     if (editingItem.value) {
       const targetId = editingItem.value.id || editingItem.value.key
       await featureService.updateFeature(targetId, form.value)
-      toast.success('Master fitur berhasil diperbarui')
+      toast.success('Feature package updated successfully')
     } else {
       await featureService.createFeature(form.value)
-      toast.success('Master fitur berhasil ditambahkan')
+      toast.success('Feature package created successfully')
     }
     showModal.value = false
     loadFeatures()
@@ -348,7 +348,7 @@ async function handleDelete() {
   try {
     const targetId = featureToDelete.value.id || featureToDelete.value.key
     await featureService.deleteFeature(targetId)
-    toast.success('Master fitur berhasil dihapus')
+    toast.success('Feature package deleted successfully')
     showDeleteModal.value = false
     featureToDelete.value = null
     loadFeatures()

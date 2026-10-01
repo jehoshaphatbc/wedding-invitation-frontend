@@ -30,13 +30,13 @@ function validate(): boolean {
   errors.password = ''
 
   if (!form.email) {
-    errors.email = 'Email wajib diisi.'
+    errors.email = 'Email is required.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-    errors.email = 'Format email tidak valid.'
+    errors.email = 'Invalid email format.'
   }
 
   if (!form.password) {
-    errors.password = 'Password wajib diisi.'
+    errors.password = 'Password is required.'
   }
 
   return !errors.email && !errors.password
@@ -51,7 +51,7 @@ async function handleSubmit() {
     router.push('/dashboard')
   } catch (e) {
     const err = handleApiError(e)
-    toast.error(err.message || 'Email atau password salah.')
+    toast.error(err.message || 'Invalid email or password.')
   } finally {
     isLoading.value = false
   }

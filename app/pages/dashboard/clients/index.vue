@@ -3,7 +3,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Clients</h1>
-        <p class="text-sm text-gray-500 mt-1">Kelola data klien, kontak WhatsApp, dan informasi keanggotaan.</p>
+        <p class="text-sm text-gray-500 mt-1">Manage client profiles, WhatsApp contacts, and membership details.</p>
       </div>
       <div class="flex gap-2">
         <button
@@ -25,7 +25,7 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
           </svg>
-          Tambah Klien
+          Add Client
         </button>
       </div>
     </div>
@@ -33,14 +33,14 @@
     <div class="bg-white rounded-lg shadow">
       <!-- Bulk Actions Bar -->
       <div v-if="selectedClients.length > 0" class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex items-center justify-between">
-        <span class="text-sm text-blue-800 font-medium">{{ selectedClients.length }} klien dipilih</span>
+        <span class="text-sm text-blue-800 font-medium">{{ selectedClients.length }} clients selected</span>
         <div class="flex gap-2">
           <template v-if="viewMode === 'active'">
             <button
               @click="showBulkDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Hapus Terpilih
+              Delete Selected
             </button>
           </template>
           <template v-else>
@@ -49,14 +49,14 @@
               @click="showBulkRestoreModal = true"
               class="px-3 py-1.5 text-sm font-medium text-green-600 bg-white border border-green-200 rounded hover:bg-green-50"
             >
-              Restore Terpilih
+              Restore Selected
             </button>
             <button
               v-if="isSuperAdmin"
               @click="showBulkForceDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Force Delete Terpilih
+              Force Delete Selected
             </button>
           </template>
         </div>
@@ -71,7 +71,7 @@
           <input
             v-model="search"
             type="text"
-            placeholder="Cari berdasarkan Nama atau Email..."
+            placeholder="Search by name or email..."
             class="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -86,16 +86,16 @@
                 <input type="checkbox" v-model="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
               </th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">
-                Nama <span v-if="sortBy === 'name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                Name <span v-if="sortBy === 'name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('email')">
                 Email <span v-if="sortBy === 'email'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
               <th class="px-4 py-3">WhatsApp</th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">
-                Tanggal Bergabung <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                Joined Date <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
-              <th class="px-4 py-3 text-center">Aksi</th>
+              <th class="px-4 py-3 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -106,7 +106,7 @@
             </tr>
             <tr v-else-if="!clients || clients.length === 0">
               <td colspan="6" class="py-12 text-center text-gray-500">
-                Tidak ada data klien ditemukan.
+                No clients found.
               </td>
             </tr>
             <template v-else>
@@ -139,7 +139,7 @@
                   <span v-else class="text-gray-400 italic">-</span>
                 </td>
                 <td class="px-4 py-3 text-gray-600">
-                  {{ client.created_at ? new Date(client.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' }}
+                  {{ client.created_at ? new Date(client.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' }}
                 </td>
                 <td class="px-4 py-3 text-center relative">
                   <button
@@ -172,7 +172,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Hapus
+                        Delete
                       </button>
                     </template>
                     <template v-else>
@@ -208,8 +208,8 @@
       <!-- Pagination -->
       <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
         <span class="text-sm text-gray-500">
-          Menampilkan {{ (meta.page - 1) * meta.per_page + 1 }} sampai
-          {{ Math.min(meta.page * meta.per_page, meta.total) }} dari {{ meta.total }} klien
+          Showing {{ (meta.page - 1) * meta.per_page + 1 }} to
+          {{ Math.min(meta.page * meta.per_page, meta.total) }} of {{ meta.total }} clients
         </span>
         <div class="flex gap-1">
           <button
@@ -217,7 +217,7 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page - 1)"
           >
-            Sebelumnya
+            Previous
           </button>
           <button
             v-for="p in visiblePages"
@@ -233,7 +233,7 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page + 1)"
           >
-            Selanjutnya
+            Next
           </button>
         </div>
       </div>
@@ -243,17 +243,17 @@
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ editingId ? 'Edit Data Klien' : 'Tambah Klien Baru' }}
+          {{ editingId ? 'Edit Client' : 'Add New Client' }}
         </h3>
 
         <form @submit.prevent="saveClient" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
             <input
               v-model="form.name"
               type="text"
               required
-              placeholder="Contoh: Jessica & Robert"
+              placeholder="e.g. Jessica & Robert"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -270,7 +270,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nomor WhatsApp *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number *</label>
             <input
               v-model="form.whatsapp"
               type="tel"
@@ -278,7 +278,7 @@
               placeholder="081234567890"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <p class="text-xs text-gray-400 mt-1">Gunakan format angka lokal (08...) atau internasional (628...).</p>
+            <p class="text-xs text-gray-400 mt-1">Use local (08...) or international format (628...).</p>
           </div>
 
           <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
@@ -287,7 +287,7 @@
               @click="showModal = false"
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
@@ -295,7 +295,7 @@
               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
               <div v-if="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              Simpan
+              Save
             </button>
           </div>
         </form>
@@ -305,9 +305,9 @@
     <!-- Confirmation Modals -->
     <UiConfirmModal
       v-if="showDeleteModal && clientToDelete"
-      title="Hapus Klien"
-      :message="`Apakah Anda yakin ingin memindahkan klien '${clientToDelete.name}' ke sampah?`"
-      confirm-text="Hapus"
+      title="Delete Client"
+      :message="`Are you sure you want to move client '${clientToDelete.name}' to trash?`"
+      confirm-text="Delete"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
@@ -315,8 +315,8 @@
 
     <UiConfirmModal
       v-if="showRestoreModal && clientToRestore"
-      title="Restore Klien"
-      :message="`Apakah Anda yakin ingin mengembalikan klien '${clientToRestore.name}' dari sampah?`"
+      title="Restore Client"
+      :message="`Are you sure you want to restore client '${clientToRestore.name}' from trash?`"
       confirm-text="Restore"
       @confirm="handleRestore"
       @cancel="showRestoreModal = false"
@@ -324,8 +324,8 @@
 
     <UiConfirmModal
       v-if="showForceDeleteModal && clientToForceDelete"
-      title="Force Delete Klien"
-      :message="`Apakah Anda yakin ingin menghapus PERMANEN klien '${clientToForceDelete.name}'? Aksi ini tidak dapat dibatalkan.`"
+      title="Force Delete Client"
+      :message="`Are you sure you want to PERMANENTLY delete client '${clientToForceDelete.name}'? This action cannot be undone.`"
       confirm-text="Force Delete"
       :danger="true"
       require-input="DELETE"
@@ -335,9 +335,9 @@
 
     <UiConfirmModal
       v-if="showBulkDeleteModal"
-      title="Bulk Delete Klien"
-      :message="`Apakah Anda yakin ingin memindahkan ${selectedClients.length} klien terpilih ke sampah?`"
-      confirm-text="Hapus Semua"
+      title="Bulk Delete Clients"
+      :message="`Are you sure you want to move ${selectedClients.length} selected clients to trash?`"
+      confirm-text="Delete All"
       :danger="true"
       @confirm="handleBulkDelete"
       @cancel="showBulkDeleteModal = false"
@@ -345,18 +345,18 @@
 
     <UiConfirmModal
       v-if="showBulkRestoreModal"
-      title="Bulk Restore Klien"
-      :message="`Apakah Anda yakin ingin mengembalikan ${selectedClients.length} klien terpilih dari sampah?`"
-      confirm-text="Restore Semua"
+      title="Bulk Restore Clients"
+      :message="`Are you sure you want to restore ${selectedClients.length} selected clients from trash?`"
+      confirm-text="Restore All"
       @confirm="handleBulkRestore"
       @cancel="showBulkRestoreModal = false"
     />
 
     <UiConfirmModal
       v-if="showBulkForceDeleteModal"
-      title="Bulk Force Delete Klien"
-      :message="`Apakah Anda yakin ingin menghapus PERMANEN ${selectedClients.length} klien terpilih?`"
-      confirm-text="Force Delete Semua"
+      title="Bulk Force Delete Clients"
+      :message="`Are you sure you want to PERMANENTLY delete ${selectedClients.length} selected clients?`"
+      confirm-text="Force Delete All"
       :danger="true"
       require-input="DELETE"
       @confirm="handleBulkForceDelete"
@@ -503,10 +503,10 @@ async function saveClient() {
   try {
     if (editingId.value) {
       await clientService.updateClient(editingId.value, form.value)
-      toast.success('Data klien berhasil diperbarui')
+      toast.success('Client updated successfully')
     } else {
       await clientService.createClient(form.value)
-      toast.success('Klien berhasil ditambahkan')
+      toast.success('Client added successfully')
     }
     showModal.value = false
     await loadClients()
@@ -526,7 +526,7 @@ async function handleDelete() {
   if (!clientToDelete.value) return
   try {
     await clientService.deleteClient(clientToDelete.value.id)
-    toast.success('Klien berhasil dipindahkan ke sampah')
+    toast.success('Client moved to trash')
     showDeleteModal.value = false
     clientToDelete.value = null
     loadClients()
@@ -544,14 +544,14 @@ async function handleRestore() {
   if (!clientToRestore.value) return
   try {
     await clientService.restoreClient(clientToRestore.value.id)
-    toast.success('Klien berhasil dikembalikan')
+    toast.success('Client restored successfully')
     showRestoreModal.value = false
     clientToRestore.value = null
     loadClients()
   } catch (e) {
     try {
       await clientService.bulkRestoreClients([clientToRestore.value.id])
-      toast.success('Klien berhasil dikembalikan')
+      toast.success('Client restored successfully')
       showRestoreModal.value = false
       clientToRestore.value = null
       loadClients()
@@ -570,14 +570,14 @@ async function handleForceDelete() {
   if (!clientToForceDelete.value) return
   try {
     await clientService.forceDeleteClient(clientToForceDelete.value.id)
-    toast.success('Klien berhasil dihapus permanen')
+    toast.success('Client permanently deleted')
     showForceDeleteModal.value = false
     clientToForceDelete.value = null
     loadClients()
   } catch (e) {
     try {
       await clientService.bulkForceDeleteClients([clientToForceDelete.value.id])
-      toast.success('Klien berhasil dihapus permanen')
+      toast.success('Client permanently deleted')
       showForceDeleteModal.value = false
       clientToForceDelete.value = null
       loadClients()
@@ -590,7 +590,7 @@ async function handleForceDelete() {
 async function handleBulkDelete() {
   try {
     await clientService.bulkDeleteClients(selectedClients.value)
-    toast.success('Klien terpilih berhasil dihapus')
+    toast.success('Selected clients moved to trash')
     showBulkDeleteModal.value = false
     loadClients()
   } catch (e: any) {
@@ -601,7 +601,7 @@ async function handleBulkDelete() {
 async function handleBulkRestore() {
   try {
     await clientService.bulkRestoreClients(selectedClients.value)
-    toast.success('Klien terpilih berhasil dikembalikan')
+    toast.success('Selected clients restored successfully')
     showBulkRestoreModal.value = false
     loadClients()
   } catch (e: any) {
@@ -612,7 +612,7 @@ async function handleBulkRestore() {
 async function handleBulkForceDelete() {
   try {
     await clientService.bulkForceDeleteClients(selectedClients.value)
-    toast.success('Klien terpilih berhasil dihapus permanen')
+    toast.success('Selected clients permanently deleted')
     showBulkForceDeleteModal.value = false
     loadClients()
   } catch (e: any) {

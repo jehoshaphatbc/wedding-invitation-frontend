@@ -20,7 +20,7 @@
           @click="openCreateModal"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
         >
-          Tambah Baru
+          Add New
         </button>
       </div>
     </div>
@@ -55,9 +55,9 @@
           <thead class="text-xs text-gray-700 uppercase bg-gray-50">
             <tr>
               <th class="px-4 py-3 w-4"><input type="checkbox" v-model="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"></th>
-              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">Nama Paket <span v-if="sortBy==='name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
-              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('price')">Harga <span v-if="sortBy==='price'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
-              <th class="px-4 py-3">Fitur</th>
+              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">Package Name <span v-if="sortBy==='name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
+              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('price')">Price <span v-if="sortBy==='price'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
+              <th class="px-4 py-3">Features</th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">Created At <span v-if="sortBy==='created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
               <th class="px-4 py-3 text-center">Actions</th>
             </tr>
@@ -93,7 +93,7 @@
                     <span v-else class="text-gray-400 italic text-xs">-</span>
                   </div>
                 </td>
-                <td class="px-4 py-3 text-gray-600">{{ pkg.created_at ? new Date(pkg.created_at).toLocaleDateString('id-ID') : '-' }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ pkg.created_at ? new Date(pkg.created_at).toLocaleDateString('en-US') : '-' }}</td>
                 <td class="px-4 py-3 text-center relative">
                 <button
                   @click.stop="activeDropdown = activeDropdown === pkg.id ? null : pkg.id"
@@ -178,7 +178,7 @@
         
         <form @submit.prevent="savePackage" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Paket</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Package Name</label>
             <input
               v-model="form.name"
               type="text"
@@ -187,7 +187,7 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Harga (Rp)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Price (Rp)</label>
             <div class="relative">
               <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium pointer-events-none">Rp</span>
               <input
@@ -204,15 +204,15 @@
 
           <div class="border-t border-gray-200 pt-4 mt-4">
             <div class="flex items-center justify-between mb-3">
-              <h4 class="text-sm font-medium text-gray-900">Konfigurasi Fitur</h4>
+              <h4 class="text-sm font-medium text-gray-900">Feature Configuration</h4>
               <span v-if="loadingFeatures" class="text-xs text-gray-400 flex items-center gap-1">
                 <div class="inline-block animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600" />
-                Memuat fitur...
+                Loading features...
               </span>
             </div>
             
             <div v-if="loadingFeatures && (!masterFeatures || masterFeatures.length === 0)" class="py-6 text-center text-sm text-gray-500">
-              Memuat konfigurasi fitur...
+              Loading feature configuration...
             </div>
             <div v-else class="space-y-3 max-h-72 overflow-y-auto pr-1">
               <!-- 1. Card "Galeri Foto" Terpadu (Dependent Feature) -->
@@ -225,12 +225,12 @@
                 <div class="p-3.5 flex items-center justify-between gap-4">
                   <div class="flex-1 min-w-0">
                     <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                      <span>{{ hasGalleryFeature.name || 'Galeri Foto' }}</span>
+                      <span>{{ hasGalleryFeature.name || 'Photo Gallery' }}</span>
                       <span
                         v-if="toBoolean(configPayload['has_gallery'])"
                         class="px-2 py-0.5 text-[10px] font-semibold bg-blue-100 text-blue-700 rounded-full"
                       >
-                        Aktif
+                        Active
                       </span>
                     </div>
                   </div>
@@ -263,10 +263,10 @@
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
                         <label class="block text-xs font-semibold text-gray-800">
-                          Batas Maksimal Foto <span class="text-red-500">*</span>
+                          Maximum Photos Limit <span class="text-red-500">*</span>
                         </label>
                         <p class="text-[11px] text-gray-500 mt-0.5">
-                          Tentukan berapa banyak foto yang dapat diunggah pengantin
+                          Set how many photos the couple can upload
                         </p>
                       </div>
                       <div class="w-full sm:w-36 flex items-center gap-1.5 flex-shrink-0">
@@ -278,7 +278,7 @@
                           required
                           class="w-full rounded-md border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 text-right font-medium bg-white"
                         />
-                        <span class="text-xs text-gray-500 whitespace-nowrap">Foto</span>
+                        <span class="text-xs text-gray-500 whitespace-nowrap">Photos</span>
                       </div>
                     </div>
                   </div>
@@ -337,7 +337,7 @@
               @click="showModal = false"
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
@@ -345,7 +345,7 @@
               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
               <div v-if="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              Simpan
+              Save
             </button>
           </div>
         </form>
@@ -355,25 +355,25 @@
     <!-- Modals -->
     <UiConfirmModal
       v-if="showDeleteModal && packageToDelete"
-      title="Hapus Paket"
-      :message="`Apakah Anda yakin ingin memindahkan paket '${packageToDelete.name}' ke sampah?`"
-      confirm-text="Hapus"
+      title="Delete Package"
+      :message="`Are you sure you want to move package '${packageToDelete.name}' to trash?`"
+      confirm-text="Delete"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
     />
     <UiConfirmModal
       v-if="showRestoreModal && packageToRestore"
-      title="Restore Paket"
-      :message="`Apakah Anda yakin ingin mengembalikan paket '${packageToRestore.name}' dari sampah?`"
+      title="Restore Package"
+      :message="`Are you sure you want to restore package '${packageToRestore.name}' from trash?`"
       confirm-text="Restore"
       @confirm="handleRestore"
       @cancel="showRestoreModal = false"
     />
     <UiConfirmModal
       v-if="showForceDeleteModal && packageToForceDelete"
-      title="Force Delete Paket"
-      :message="`Apakah Anda yakin ingin menghapus PERMANEN paket '${packageToForceDelete.name}'? Aksi ini tidak dapat dibatalkan.`"
+      title="Force Delete Package"
+      :message="`Are you sure you want to PERMANENTLY delete package '${packageToForceDelete.name}'? This action cannot be undone.`"
       confirm-text="Force Delete"
       :danger="true" require-input="DELETE"
       @confirm="handleForceDelete"
@@ -446,10 +446,10 @@ const loadingFeatures = ref(false)
 const configPayload = ref<Record<string, any>>({})
 
 const DEFAULT_FALLBACK_FEATURES: Feature[] = [
-  { key: 'has_gallery', name: 'Fitur Galeri Foto', input_type: 'boolean', default_value: 'false' },
-  { key: 'gallery_limit', name: 'Limit Foto Galeri', input_type: 'number', default_value: '0' },
-  { key: 'has_video', name: 'Fitur Video Undangan', input_type: 'boolean', default_value: 'false' },
-  { key: 'has_qr', name: 'Fitur QR Code Check-in', input_type: 'boolean', default_value: 'false' }
+  { key: 'has_gallery', name: 'Photo Gallery', input_type: 'boolean', default_value: 'false' },
+  { key: 'gallery_limit', name: 'Gallery Photo Limit', input_type: 'number', default_value: '0' },
+  { key: 'has_video', name: 'Invitation Video', input_type: 'boolean', default_value: 'false' },
+  { key: 'has_qr', name: 'QR Code Check-in', input_type: 'boolean', default_value: 'false' }
 ]
 
 async function loadMasterFeatures() {
@@ -483,7 +483,7 @@ function getActiveFeatures(config?: Record<string, any>) {
   if (toBoolean(config.has_gallery)) {
     list.push({
       key: 'has_gallery',
-      label: `Galeri (${config.gallery_limit ?? 0} foto)`,
+      label: `Gallery (${config.gallery_limit ?? 0} photos)`,
       type: 'gallery'
     })
   }
@@ -747,10 +747,10 @@ async function savePackage() {
     }
     if (editingId.value) {
       await packageService.updatePackage(editingId.value, payload)
-      toast.success('Paket berhasil diperbarui')
+      toast.success('Package updated successfully')
     } else {
       await packageService.createPackage(payload)
-      toast.success('Paket berhasil ditambahkan')
+      toast.success('Package created successfully')
     }
     showModal.value = false
     await loadPackages()
@@ -777,7 +777,7 @@ async function handleDelete() {
   if (!packageToDelete.value) return
   try {
     await packageService.deletePackage(packageToDelete.value.id)
-    toast.success('Paket berhasil dipindahkan ke sampah')
+    toast.success('Package moved to trash successfully')
     showDeleteModal.value = false
     packageToDelete.value = null
     loadPackages()
@@ -789,14 +789,14 @@ async function handleRestore() {
   if (!packageToRestore.value) return
   try {
     await packageService.restorePackage(packageToRestore.value.id)
-    toast.success('Paket berhasil dikembalikan')
+    toast.success('Package restored successfully')
     showRestoreModal.value = false
     packageToRestore.value = null
     loadPackages()
   } catch (e) {
     try {
       await packageService.bulkRestorePackages([packageToRestore.value.id])
-      toast.success('Paket berhasil dikembalikan')
+      toast.success('Package restored successfully')
       showRestoreModal.value = false
       packageToRestore.value = null
       loadPackages()
@@ -811,14 +811,14 @@ async function handleForceDelete() {
   if (!packageToForceDelete.value) return
   try {
     await packageService.forceDeletePackage(packageToForceDelete.value.id)
-    toast.success('Paket permanen dihapus')
+    toast.success('Package permanently deleted')
     showForceDeleteModal.value = false
     packageToForceDelete.value = null
     loadPackages()
   } catch (e) {
     try {
       await packageService.bulkForceDeletePackages([packageToForceDelete.value.id])
-      toast.success('Paket permanen dihapus')
+      toast.success('Package permanently deleted')
       showForceDeleteModal.value = false
       packageToForceDelete.value = null
       loadPackages()

@@ -41,10 +41,10 @@ async function handleResend() {
   isResending.value = true
   try {
     await authService.resendVerification({ email: resendEmail.value })
-    toast.success('Email verifikasi berhasil dikirim ulang. Silakan cek inbox Anda.')
+    toast.success('Verification email resent successfully. Please check your inbox.')
     resendEmail.value = ''
   } catch (error: any) {
-    const msg = error?.data?.message || 'Gagal mengirim ulang verifikasi.'
+    const msg = error?.data?.message || 'Failed to resend verification email.'
     toast.error(msg)
   } finally {
     isResending.value = false
@@ -76,13 +76,13 @@ onMounted(() => {
         </svg>
       </div>
       <p class="text-sm text-green-800 font-medium mb-6">
-        Email berhasil diverifikasi!
+        Email verified successfully!
       </p>
       <NuxtLink
         to="/dashboard"
         class="inline-block w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
       >
-        Masuk ke Dashboard
+        Go to Dashboard
       </NuxtLink>
     </div>
 
@@ -97,13 +97,13 @@ onMounted(() => {
       </p>
 
       <div class="mt-6 pt-6 border-t border-gray-200 text-left">
-        <p class="text-sm text-gray-700 font-medium mb-2 text-center">Kirim ulang verifikasi</p>
+        <p class="text-sm text-gray-700 font-medium mb-2 text-center">Resend verification</p>
         <form @submit.prevent="handleResend" class="space-y-3">
           <input
             v-model="resendEmail"
             type="email"
             required
-            placeholder="Masukkan alamat email Anda"
+            placeholder="Enter your email address"
             class="w-full rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
           />
           <button
@@ -111,7 +111,7 @@ onMounted(() => {
             :disabled="isResending"
             class="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none disabled:opacity-50"
           >
-            {{ isResending ? 'Mengirim...' : 'Kirim Ulang Email' }}
+            {{ isResending ? 'Sending...' : 'Resend Email' }}
           </button>
         </form>
       </div>

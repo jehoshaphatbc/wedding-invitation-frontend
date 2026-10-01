@@ -3,14 +3,14 @@
     <div class="max-w-4xl mx-auto">
       <!-- Brand Header -->
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Checkout Pesanan</h1>
-        <p class="text-sm text-gray-600 mt-2">Lengkapi data Anda untuk memesan paket undangan digital impian.</p>
+        <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">Order Checkout</h1>
+        <p class="text-sm text-gray-600 mt-2">Complete your details to order your digital wedding invitation package.</p>
       </div>
 
       <!-- Loading State -->
       <div v-if="loadingPackage" class="bg-white rounded-2xl shadow-sm p-12 text-center">
         <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4" />
-        <p class="text-gray-500 text-sm">Memuat rincian paket...</p>
+        <p class="text-gray-500 text-sm">Loading package details...</p>
       </div>
 
       <!-- Error / Package Not Found State -->
@@ -20,15 +20,15 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
         </div>
-        <h2 class="text-lg font-bold text-gray-900 mb-2">Paket Tidak Ditemukan</h2>
+        <h2 class="text-lg font-bold text-gray-900 mb-2">Package Not Found</h2>
         <p class="text-sm text-gray-500 max-w-md mx-auto mb-6">
-          Paket yang Anda pilih tidak valid atau telah dinonaktifkan oleh administrator.
+          The selected package is invalid or has been disabled by the administrator.
         </p>
         <NuxtLink
           to="/"
           class="inline-flex items-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
         >
-          Kembali ke Beranda
+          Back to Home
         </NuxtLink>
       </div>
 
@@ -38,42 +38,42 @@
         <div class="md:col-span-7 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
           <h2 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
             <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">1</span>
-            Informasi Pemesan
+            Customer Information
           </h2>
 
           <form @submit.prevent="handleSubmitCheckout" class="space-y-5">
             <div>
               <label for="name" class="block text-sm font-medium text-gray-700 mb-1">
-                Nama Lengkap / Pasangan <span class="text-red-500">*</span>
+                Full Name / Couple Name <span class="text-red-500">*</span>
               </label>
               <input
                 id="name"
                 v-model="form.name"
                 type="text"
                 required
-                placeholder="Contoh: Sarah & Danu"
+                placeholder="Example: Sarah & Danu"
                 class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
               />
             </div>
 
             <div>
               <label for="email" class="block text-sm font-medium text-gray-700 mb-1">
-                Alamat Email <span class="text-red-500">*</span>
+                Email Address <span class="text-red-500">*</span>
               </label>
               <input
                 id="email"
                 v-model="form.email"
                 type="email"
                 required
-                placeholder="emailanda@example.com"
+                placeholder="yourname@example.com"
                 class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
               />
-              <p class="text-xs text-gray-500 mt-1">Invoice dan akses akun akan dikirimkan ke email ini.</p>
+              <p class="text-xs text-gray-500 mt-1">Invoice and account access will be sent to this email.</p>
             </div>
 
             <div>
               <label for="whatsapp" class="block text-sm font-medium text-gray-700 mb-1">
-                Nomor WhatsApp <span class="text-red-500">*</span>
+                WhatsApp Number <span class="text-red-500">*</span>
               </label>
               <div class="relative">
                 <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">🇮🇩 +62</span>
@@ -86,7 +86,7 @@
                   class="w-full rounded-xl border border-gray-300 pl-20 pr-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 transition-colors"
                 />
               </div>
-              <p class="text-xs text-gray-500 mt-1">Notifikasi status order dan link undangan akan dikirimkan melalui WhatsApp.</p>
+              <p class="text-xs text-gray-500 mt-1">Order status notifications and invitation links will be sent via WhatsApp.</p>
             </div>
 
             <div class="pt-4 border-t border-gray-100">
@@ -96,7 +96,7 @@
                 class="w-full py-3 px-4 rounded-xl text-white font-semibold text-sm bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-all"
               >
                 <div v-if="submitting" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                <span>{{ submitting ? 'Memproses Pembayaran...' : 'Lanjutkan ke Pembayaran' }}</span>
+                <span>{{ submitting ? 'Processing Payment...' : 'Proceed to Payment' }}</span>
                 <svg v-if="!submitting" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
                 </svg>
@@ -105,7 +105,7 @@
                 <svg class="w-3.5 h-3.5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
                 </svg>
-                Pembayaran Aman & Terenkripsi Otomatis
+                Secure & Encrypted Payment
               </p>
             </div>
           </form>
@@ -115,11 +115,11 @@
         <div class="md:col-span-5 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-8">
           <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
             <span class="w-7 h-7 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center text-xs font-bold">2</span>
-            Ringkasan Paket
+            Package Summary
           </h2>
 
           <div class="p-4 rounded-xl bg-blue-50/60 border border-blue-100 mb-6">
-            <span class="text-xs uppercase font-bold text-blue-600 tracking-wider">Paket Terpilih</span>
+            <span class="text-xs uppercase font-bold text-blue-600 tracking-wider">Selected Package</span>
             <div class="text-xl font-bold text-gray-900 mt-1">{{ packageData.name }}</div>
             <div class="text-2xl font-extrabold text-blue-600 mt-2">
               Rp {{ (packageData.price ?? 0).toLocaleString('id-ID') }}
@@ -128,7 +128,7 @@
 
           <!-- Fitur Termasuk -->
           <div class="mb-6">
-            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Fitur yang Termasuk</h3>
+            <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Included Features</h3>
             <ul class="space-y-2 text-sm text-gray-600">
               <template v-if="activeFeaturesList.length > 0">
                 <li v-for="feat in activeFeaturesList" :key="feat" class="flex items-center gap-2">
@@ -138,7 +138,7 @@
                   <span>{{ feat }}</span>
                 </li>
               </template>
-              <li v-else class="text-gray-400 italic text-xs">Semua fitur standar undangan digital aktif.</li>
+              <li v-else class="text-gray-400 italic text-xs">All standard digital invitation features included.</li>
             </ul>
           </div>
 
@@ -149,11 +149,11 @@
               <span>Rp {{ (packageData.price ?? 0).toLocaleString('id-ID') }}</span>
             </div>
             <div class="flex justify-between text-gray-600">
-              <span>Biaya Layanan</span>
-              <span class="text-emerald-600 font-medium">Gratis</span>
+              <span>Service Fee</span>
+              <span class="text-emerald-600 font-medium">Free</span>
             </div>
             <div class="flex justify-between text-base font-bold text-gray-900 pt-2 border-t border-gray-100">
-              <span>Total Pembayaran</span>
+              <span>Total Payment</span>
               <span class="text-blue-600">Rp {{ (packageData.price ?? 0).toLocaleString('id-ID') }}</span>
             </div>
           </div>
@@ -175,7 +175,7 @@ const toast = useToast()
 const packageId = String(route.params.package_id || '')
 
 useHead({
-  title: 'Checkout Pesanan',
+  title: 'Order Checkout',
   meta: [{ name: 'robots', content: 'noindex' }]
 })
 
@@ -196,7 +196,7 @@ const activeFeaturesList = computed(() => {
   const list: string[] = []
 
   if (cfg.has_gallery) {
-    list.push(`Galeri Foto (${cfg.gallery_limit ?? 0} foto)`)
+    list.push(`Photo Gallery (${cfg.gallery_limit ?? 0} photos)`)
   }
 
   for (const [k, v] of Object.entries(cfg)) {
@@ -241,7 +241,7 @@ async function loadPackage() {
 
 async function handleSubmitCheckout() {
   if (!form.value.name || !form.value.email || !form.value.whatsapp) {
-    toast.error('Harap lengkapi semua field yang wajib diisi.')
+    toast.error('Please fill in all required fields.')
     return
   }
 
@@ -263,15 +263,15 @@ async function handleSubmitCheckout() {
 
     const res = await checkoutService.submitCheckout(payload)
     if (res?.payment_url) {
-      toast.success('Pesanan dibuat. Mengalihkan ke halaman pembayaran...')
+      toast.success('Order created. Redirecting to payment...')
       if (typeof window !== 'undefined') {
         window.location.href = res.payment_url
       }
     } else {
-      toast.error('Payment URL tidak diterima dari server.')
+      toast.error('Payment URL not received from server.')
     }
   } catch (e: any) {
-    toast.error(handleApiError(e).message || 'Gagal memproses checkout.')
+    toast.error(handleApiError(e).message || 'Failed to process checkout.')
   } finally {
     submitting.value = false
   }

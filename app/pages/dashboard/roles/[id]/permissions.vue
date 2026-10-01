@@ -7,10 +7,10 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
           </svg>
-          Kembali ke Daftar Roles
+          Back to Roles List
         </NuxtLink>
         <span>/</span>
-        <span class="text-gray-700 font-medium">Konfigurasi Capabilitas</span>
+        <span class="text-gray-700 font-medium">Configure Capabilities</span>
       </div>
 
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -33,7 +33,7 @@
             </span>
           </div>
           <p class="text-sm text-gray-500 mt-1">
-            {{ role?.description || 'Tentukan capabilitas dan izin akses apa saja yang dapat dilakukan oleh role ini.' }}
+            {{ role?.description || 'Define which capabilities and access permissions can be performed by this role.' }}
           </p>
         </div>
 
@@ -43,7 +43,7 @@
             to="/dashboard/roles"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
           >
-            Batal
+            Cancel
           </NuxtLink>
           <button
             type="button"
@@ -55,7 +55,7 @@
             <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
             </svg>
-            Simpan Capabilitas
+            Save Capabilities
           </button>
         </div>
       </div>
@@ -71,9 +71,9 @@
       <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex items-center gap-3">
           <span class="text-sm font-medium text-gray-700">
-            Terpilih:
+            Selected:
             <span class="text-blue-600 font-bold">{{ selectedPermissionIds.length }}</span>
-            dari {{ allPermissions.length }} Capabilitas
+            of {{ allPermissions.length }} Capabilities
           </span>
           <span class="text-gray-300">|</span>
           <button
@@ -81,7 +81,7 @@
             @click="selectAllPermissions"
             class="text-xs font-semibold text-blue-600 hover:text-blue-800"
           >
-            Pilih Semua
+            Select All
           </button>
           <span class="text-gray-300">|</span>
           <button
@@ -89,7 +89,7 @@
             @click="deselectAllPermissions"
             class="text-xs font-semibold text-gray-600 hover:text-gray-800"
           >
-            Hapus Semua Pilihan
+            Deselect All
           </button>
         </div>
 
@@ -97,7 +97,7 @@
           <input
             v-model="searchQuery"
             type="text"
-            placeholder="Cari capabilitas..."
+            placeholder="Search capabilities..."
             class="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -115,9 +115,9 @@
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-blue-600 inline-block"></span>
               <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">
-                Modul {{ group }}
+                Module {{ group }}
               </h3>
-              <span class="text-xs text-gray-500 font-normal">({{ perms.length }} capabilitas)</span>
+              <span class="text-xs text-gray-500 font-normal">({{ perms.length }} capabilities)</span>
             </div>
             
             <button
@@ -125,7 +125,7 @@
               @click="toggleGroup(perms)"
               class="text-xs font-medium text-blue-600 hover:underline"
             >
-              {{ isGroupFullySelected(perms) ? 'Batal Pilih Grup' : 'Pilih Semua di Grup' }}
+              {{ isGroupFullySelected(perms) ? 'Deselect Group' : 'Select All in Group' }}
             </button>
           </div>
 
@@ -155,7 +155,7 @@
         </div>
 
         <div v-if="Object.keys(filteredGroupedPermissions).length === 0" class="bg-white rounded-lg p-8 text-center text-gray-500">
-          Tidak ada capabilitas yang cocok dengan pencarian "{{ searchQuery }}".
+          No capabilities match the search "{{ searchQuery }}".
         </div>
 
         <!-- Bottom Action Bar -->
@@ -164,7 +164,7 @@
             to="/dashboard/roles"
             class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
           >
-            Batal
+            Cancel
           </NuxtLink>
           <button
             type="submit"
@@ -172,7 +172,7 @@
             class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 shadow"
           >
             <div v-if="submitting" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-            Simpan Capabilitas Role
+            Save Role Capabilities
           </button>
         </div>
       </form>
@@ -281,7 +281,7 @@ async function handleSubmit() {
   submitting.value = true
   try {
     await roleService.assignPermissions(role.value.id, selectedPermissionIds.value)
-    toast.success('Capabilitas role berhasil diperbarui!')
+    toast.success('Role capabilities updated successfully!')
     navigateTo('/dashboard/roles')
   } catch (e) {
     const err = handleApiError(e)

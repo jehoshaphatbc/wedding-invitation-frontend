@@ -20,7 +20,7 @@
           @click="openCreateModal"
           class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
         >
-          Tambah Baru
+          Add New
         </button>
       </div>
     </div>
@@ -56,8 +56,8 @@
             <tr>
               <th class="px-4 py-3 w-4"><input type="checkbox" v-model="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"></th>
               <th class="px-4 py-3">Thumbnail</th>
-              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">Nama Template <span v-if="sortBy==='name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
-              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('nuxt_component')">Nama Komponen <span v-if="sortBy==='nuxt_component'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
+              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">Template Name <span v-if="sortBy==='name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
+              <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('nuxt_component')">Component Name <span v-if="sortBy==='nuxt_component'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">Created At <span v-if="sortBy==='created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span></th>
               <th class="px-4 py-3 text-center">Actions</th>
             </tr>
@@ -84,7 +84,7 @@
                 </td>
                 <td class="px-4 py-3 font-medium text-gray-900">{{ tpl.name }}</td>
                 <td class="px-4 py-3 text-gray-600 font-mono text-xs">{{ tpl.nuxt_component }}</td>
-                <td class="px-4 py-3 text-gray-600">{{ new Date(tpl.created_at).toLocaleDateString('id-ID') }}</td>
+                <td class="px-4 py-3 text-gray-600">{{ new Date(tpl.created_at).toLocaleDateString('en-US') }}</td>
                 <td class="px-4 py-3 text-center relative">
                 <button
                   @click.stop="activeDropdown = activeDropdown === tpl.id ? null : tpl.id"
@@ -169,27 +169,27 @@
         
         <form @submit.prevent="saveTemplate" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Template</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Template Name</label>
             <input
               v-model="form.name"
               type="text"
               required
-              placeholder="Contoh: Classic Elegance"
+              placeholder="Example: Classic Elegance"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Komponen Nuxt</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nuxt Component Name</label>
             <input
               v-model="form.nuxt_component"
               type="text"
               required
-              placeholder="Contoh: TemplateClassicElegance"
+              placeholder="Example: TemplateClassicElegance"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">Thumbnail Template</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Template Thumbnail</label>
             
             <input
               ref="fileInputRef"
@@ -212,7 +212,7 @@
                   {{ selectedFile ? selectedFile.name : (form.name ? `${form.name} Thumbnail` : 'Thumbnail') }}
                 </p>
                 <p class="text-xs text-gray-500 mt-0.5">
-                  {{ selectedFile ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 'Gambar tersimpan di server' }}
+                  {{ selectedFile ? `${(selectedFile.size / 1024).toFixed(1)} KB` : 'Image saved on server' }}
                 </p>
                 <div class="flex gap-2 mt-2">
                   <button
@@ -220,7 +220,7 @@
                     @click="fileInputRef?.click()"
                     class="text-xs font-medium text-blue-600 hover:text-blue-800"
                   >
-                    Ganti Gambar
+                    Change Image
                   </button>
                   <span class="text-gray-300">|</span>
                   <button
@@ -228,7 +228,7 @@
                     @click="removeImage"
                     class="text-xs font-medium text-red-600 hover:text-red-800"
                   >
-                    Hapus
+                    Remove
                   </button>
                 </div>
               </div>
@@ -250,9 +250,9 @@
                 </svg>
               </div>
               <p class="text-sm font-medium text-gray-700">
-                <span class="text-blue-600 hover:underline">Klik untuk upload</span> atau drag & drop gambar
+                <span class="text-blue-600 hover:underline">Click to upload</span> or drag & drop image
               </p>
-              <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP, atau SVG (Maks. 5MB)</p>
+              <p class="text-xs text-gray-500 mt-1">PNG, JPG, WEBP, or SVG (Max. 5MB)</p>
             </div>
           </div>
 
@@ -262,7 +262,7 @@
               @click="showModal = false"
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
@@ -270,7 +270,7 @@
               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
               <div v-if="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              Simpan
+              Save
             </button>
           </div>
         </form>
@@ -280,9 +280,9 @@
     <!-- Modals -->
     <UiConfirmModal
       v-if="showDeleteModal && templateToDelete"
-      title="Hapus Template"
-      :message="`Apakah Anda yakin ingin memindahkan template '${templateToDelete.name}' ke sampah?`"
-      confirm-text="Hapus"
+      title="Delete Template"
+      :message="`Are you sure you want to move template '${templateToDelete.name}' to trash?`"
+      confirm-text="Delete"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
@@ -290,7 +290,7 @@
     <UiConfirmModal
       v-if="showRestoreModal && templateToRestore"
       title="Restore Template"
-      :message="`Apakah Anda yakin ingin mengembalikan template '${templateToRestore.name}' dari sampah?`"
+      :message="`Are you sure you want to restore template '${templateToRestore.name}' from trash?`"
       confirm-text="Restore"
       @confirm="handleRestore"
       @cancel="showRestoreModal = false"
@@ -298,7 +298,7 @@
     <UiConfirmModal
       v-if="showForceDeleteModal && templateToForceDelete"
       title="Force Delete Template"
-      :message="`Apakah Anda yakin ingin menghapus PERMANEN template '${templateToForceDelete.name}'? Aksi ini tidak dapat dibatalkan.`"
+      :message="`Are you sure you want to PERMANENTLY delete template '${templateToForceDelete.name}'? This action cannot be undone.`"
       confirm-text="Force Delete"
       :danger="true" require-input="DELETE"
       @confirm="handleForceDelete"
@@ -437,11 +437,11 @@ function resolveImageUrl(path?: string) {
 
 function handleSelectedFile(file: File) {
   if (!file.type.startsWith('image/')) {
-    toast.error('File harus berupa gambar (PNG, JPG, WEBP, SVG)')
+    toast.error('File must be an image (PNG, JPG, WEBP, SVG)')
     return
   }
   if (file.size > 5 * 1024 * 1024) {
-    toast.error('Ukuran gambar maksimal 5MB')
+    toast.error('Image size cannot exceed 5MB')
     return
   }
   selectedFile.value = file
@@ -513,7 +513,7 @@ async function saveTemplate() {
           form.value.thumbnail_url = uploadedUrl
         }
       } catch (uploadErr) {
-        toast.error('Gagal mengupload gambar thumbnail: ' + handleApiError(uploadErr).message)
+        toast.error('Failed to upload thumbnail image: ' + handleApiError(uploadErr).message)
         saving.value = false
         return
       }
@@ -521,10 +521,10 @@ async function saveTemplate() {
 
     if (editingId.value) {
       await templateService.updateTemplate(editingId.value, form.value)
-      toast.success('Template berhasil diperbarui')
+      toast.success('Template updated successfully')
     } else {
       await templateService.createTemplate(form.value)
-      toast.success('Template berhasil ditambahkan')
+      toast.success('Template created successfully')
     }
     showModal.value = false
     loadTemplates()
@@ -540,7 +540,7 @@ async function handleDelete() {
   if (!templateToDelete.value) return
   try {
     await templateService.deleteTemplate(templateToDelete.value.id)
-    toast.success('Template berhasil dipindahkan ke sampah')
+    toast.success('Template moved to trash successfully')
     showDeleteModal.value = false
     templateToDelete.value = null
     loadTemplates()
@@ -552,14 +552,14 @@ async function handleRestore() {
   if (!templateToRestore.value) return
   try {
     await templateService.restoreTemplate(templateToRestore.value.id)
-    toast.success('Template berhasil dikembalikan')
+    toast.success('Template restored successfully')
     showRestoreModal.value = false
     templateToRestore.value = null
     loadTemplates()
   } catch (e) {
     try {
       await templateService.bulkRestoreTemplates([templateToRestore.value.id])
-      toast.success('Template berhasil dikembalikan')
+      toast.success('Template restored successfully')
       showRestoreModal.value = false
       templateToRestore.value = null
       loadTemplates()
@@ -574,14 +574,14 @@ async function handleForceDelete() {
   if (!templateToForceDelete.value) return
   try {
     await templateService.forceDeleteTemplate(templateToForceDelete.value.id)
-    toast.success('Template permanen dihapus')
+    toast.success('Template permanently deleted')
     showForceDeleteModal.value = false
     templateToForceDelete.value = null
     loadTemplates()
   } catch (e) {
     try {
       await templateService.bulkForceDeleteTemplates([templateToForceDelete.value.id])
-      toast.success('Template permanen dihapus')
+      toast.success('Template permanently deleted')
       showForceDeleteModal.value = false
       templateToForceDelete.value = null
       loadTemplates()

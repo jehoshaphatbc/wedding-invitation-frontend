@@ -11,7 +11,7 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
           <p class="text-sm text-yellow-700">
-            Email Anda belum diverifikasi. Silakan cek kotak masuk Anda.
+            Your email is not verified. Please check your inbox.
           </p>
         </div>
         <button 
@@ -19,7 +19,7 @@
           :disabled="isResending"
           class="ml-4 px-3 py-1.5 text-sm font-medium text-yellow-800 bg-yellow-100 hover:bg-yellow-200 rounded-md transition-colors disabled:opacity-50"
         >
-          {{ isResending ? 'Mengirim...' : 'Kirim Ulang Email' }}
+          {{ isResending ? 'Sending...' : 'Resend Email' }}
         </button>
       </div>
 
@@ -44,9 +44,9 @@ async function handleResendVerification() {
   isResending.value = true
   try {
     await authService.resendVerification({ email: authStore.user.email })
-    toast.success('Email verifikasi berhasil dikirim ulang. Silakan cek inbox Anda.')
+    toast.success('Verification email resent successfully. Please check your inbox.')
   } catch (error: any) {
-    const msg = error?.data?.message || 'Gagal mengirim ulang verifikasi.'
+    const msg = error?.data?.message || 'Failed to resend verification email.'
     toast.error(msg)
   } finally {
     isResending.value = false

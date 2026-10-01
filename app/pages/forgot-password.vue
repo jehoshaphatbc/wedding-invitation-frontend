@@ -20,9 +20,9 @@ function validate(): boolean {
   emailError.value = ''
 
   if (!email.value) {
-    emailError.value = 'Email wajib diisi.'
+    emailError.value = 'Email is required.'
   } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
-    emailError.value = 'Format email tidak valid.'
+    emailError.value = 'Invalid email format.'
   }
 
   return !emailError.value
