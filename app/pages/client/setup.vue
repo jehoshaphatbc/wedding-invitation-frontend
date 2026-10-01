@@ -222,9 +222,15 @@
 
             <!-- Akad Nikah / Pemberkatan -->
             <div class="border-t border-gray-100 pt-6">
-              <h4 class="text-sm font-bold text-emerald-700 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <span>💍</span> Akad Nikah / Pemberkatan
-              </h4>
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <span>💍</span> Akad Nikah / Pemberkatan
+                </h4>
+                <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+                  {{ akadTimeSummary }}
+                </span>
+              </div>
+              
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-gray-700 mb-1">Tanggal Akad <span class="text-red-500">*</span></label>
@@ -236,23 +242,75 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Waktu Akad <span class="text-red-500">*</span></label>
-                  <input
-                    v-model="form.event.akad_time"
-                    type="text"
-                    required
-                    placeholder="Contoh: 08:00 - 10:00 WIB"
-                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">Waktu Prosesi Akad <span class="text-red-500">*</span></label>
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1">
+                      <input
+                        v-model="form.event.akad_time_start"
+                        type="time"
+                        required
+                        class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <span class="text-xs text-gray-500 font-semibold">s/d</span>
+                    <div class="flex-1">
+                      <input
+                        v-model="form.event.akad_time_end"
+                        type="time"
+                        :disabled="form.event.akad_is_until_end"
+                        class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+                      />
+                    </div>
+                    <select
+                      v-model="form.event.akad_timezone"
+                      class="rounded-xl border border-gray-300 px-2.5 py-2 text-xs font-semibold bg-white text-gray-700 focus:border-blue-500 focus:outline-none"
+                    >
+                      <option value="WIB">WIB</option>
+                      <option value="WITA">WITA</option>
+                      <option value="WIT">WIT</option>
+                    </select>
+                  </div>
+                  <div class="mt-2 flex items-center justify-between">
+                    <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-gray-600">
+                      <input
+                        type="checkbox"
+                        v-model="form.event.akad_is_until_end"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span>Sampai Selesai</span>
+                    </label>
+                    <div class="flex gap-1">
+                      <button
+                        type="button"
+                        @click="setAkadPreset('08:00', '10:00', false)"
+                        class="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      >
+                        08:00 - 10:00
+                      </button>
+                      <button
+                        type="button"
+                        @click="setAkadPreset('09:00', '11:00', false)"
+                        class="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      >
+                        09:00 - 11:00
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Resepsi Pernikahan -->
             <div class="border-t border-gray-100 pt-6">
-              <h4 class="text-sm font-bold text-indigo-700 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <span>🎉</span> Resepsi Pernikahan
-              </h4>
+              <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
+                  <span>🎉</span> Resepsi Pernikahan
+                </h4>
+                <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
+                  {{ receptionTimeSummary }}
+                </span>
+              </div>
+
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-gray-700 mb-1">Tanggal Resepsi <span class="text-red-500">*</span></label>
@@ -265,31 +323,108 @@
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-gray-700 mb-1">Waktu Resepsi <span class="text-red-500">*</span></label>
-                  <input
-                    v-model="form.event.reception_time"
-                    type="text"
-                    required
-                    placeholder="Contoh: 11:00 - 14:00 WIB"
-                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  />
+                  <div class="flex items-center gap-2">
+                    <div class="flex-1">
+                      <input
+                        v-model="form.event.reception_time_start"
+                        type="time"
+                        required
+                        class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <span class="text-xs text-gray-500 font-semibold">s/d</span>
+                    <div class="flex-1">
+                      <input
+                        v-model="form.event.reception_time_end"
+                        type="time"
+                        :disabled="form.event.reception_is_until_end"
+                        class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+                      />
+                    </div>
+                    <select
+                      v-model="form.event.reception_timezone"
+                      class="rounded-xl border border-gray-300 px-2.5 py-2 text-xs font-semibold bg-white text-gray-700 focus:border-blue-500 focus:outline-none"
+                    >
+                      <option value="WIB">WIB</option>
+                      <option value="WITA">WITA</option>
+                      <option value="WIT">WIT</option>
+                    </select>
+                  </div>
+                  <div class="mt-2 flex items-center justify-between">
+                    <label class="inline-flex items-center gap-2 cursor-pointer text-xs text-gray-600">
+                      <input
+                        type="checkbox"
+                        v-model="form.event.reception_is_until_end"
+                        class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span>Sampai Selesai</span>
+                    </label>
+                    <div class="flex gap-1">
+                      <button
+                        type="button"
+                        @click="setReceptionPreset('11:00', '13:00', false)"
+                        class="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      >
+                        11:00 - 13:00
+                      </button>
+                      <button
+                        type="button"
+                        @click="setReceptionPreset('18:30', '21:00', false)"
+                        class="text-[10px] px-2 py-0.5 rounded bg-gray-100 text-gray-600 hover:bg-gray-200"
+                      >
+                        18:30 - 21:00
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Lokasi & Peta -->
             <div class="border-t border-gray-100 pt-6">
-              <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <span>📍</span> Lokasi & Navigasi Maps
-              </h4>
-              <div class="space-y-4">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Tempat / Gedung <span class="text-red-500">*</span></label>
+                  <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>📍</span> Lokasi Acara & Navigasi Maps
+                  </h4>
+                  <p class="text-xs text-gray-500 mt-0.5">Tentukan lokasi akad dan resepsi (apakah sama atau berbeda tempat).</p>
+                </div>
+
+                <!-- Toggle Sama / Beda Lokasi -->
+                <div class="flex items-center gap-2 p-1.5 bg-gray-100 rounded-xl">
+                  <button
+                    type="button"
+                    @click="form.event.is_same_location = true"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all"
+                    :class="form.event.is_same_location ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
+                  >
+                    1 Lokasi (Sama)
+                  </button>
+                  <button
+                    type="button"
+                    @click="form.event.is_same_location = false"
+                    class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all"
+                    :class="!form.event.is_same_location ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
+                  >
+                    2 Lokasi (Beda)
+                  </button>
+                </div>
+              </div>
+
+              <!-- JIKA 1 LOKASI (SAMA) -->
+              <div v-if="form.event.is_same_location" class="space-y-4 bg-gray-50/70 p-4 sm:p-5 rounded-2xl border border-gray-200">
+                <div class="flex items-center gap-2 text-xs font-bold text-blue-800 mb-1">
+                  <span>🏛️</span>
+                  <span>Lokasi Akad & Resepsi (Bersama)</span>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Tempat / Gedung / Masjid <span class="text-red-500">*</span></label>
                   <input
                     v-model="form.event.venue_name"
                     type="text"
                     required
                     placeholder="Contoh: Grand Ballroom Hotel Mulia Senayan"
-                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   />
                 </div>
                 <div>
@@ -299,7 +434,7 @@
                     rows="2"
                     required
                     placeholder="Jl. Asia Afrika No. 8, Gelora, Tanah Abang, Jakarta Pusat"
-                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   />
                 </div>
                 <div>
@@ -308,11 +443,88 @@
                     v-model="form.event.maps_url"
                     type="url"
                     placeholder="https://maps.app.goo.gl/..."
-                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   />
                   <p class="text-[11px] text-gray-500 mt-1">
                     Buka Google Maps, cari lokasi acara, klik Bagikan (Share) lalu salin tautan singkatnya.
                   </p>
+                </div>
+              </div>
+
+              <!-- JIKA BEDA LOKASI (2 LOKASI) -->
+              <div v-else class="space-y-6">
+                <!-- Lokasi Akad -->
+                <div class="space-y-4 bg-emerald-50/50 p-4 sm:p-5 rounded-2xl border border-emerald-200">
+                  <div class="flex items-center gap-2 text-xs font-bold text-emerald-800 mb-1">
+                    <span>💍</span>
+                    <span>1. Lokasi Akad Nikah / Pemberkatan</span>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Tempat / Masjid / Gereja <span class="text-red-500">*</span></label>
+                    <input
+                      v-model="form.event.akad_venue_name"
+                      type="text"
+                      required
+                      placeholder="Contoh: Masjid Agung Al-Azhar Kebayoran Baru"
+                      class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Alamat Lengkap Akad <span class="text-red-500">*</span></label>
+                    <textarea
+                      v-model="form.event.akad_address"
+                      rows="2"
+                      required
+                      placeholder="Jl. Sisingamangaraja No. 1, Selong, Kebayoran Baru, Jakarta Selatan"
+                      class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Link Google Maps Lokasi Akad</label>
+                    <input
+                      v-model="form.event.akad_maps_url"
+                      type="url"
+                      placeholder="https://maps.app.goo.gl/..."
+                      class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+                </div>
+
+                <!-- Lokasi Resepsi -->
+                <div class="space-y-4 bg-indigo-50/50 p-4 sm:p-5 rounded-2xl border border-indigo-200">
+                  <div class="flex items-center gap-2 text-xs font-bold text-indigo-800 mb-1">
+                    <span>🎉</span>
+                    <span>2. Lokasi Resepsi Pernikahan</span>
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Gedung / Hotel / Ballroom <span class="text-red-500">*</span></label>
+                    <input
+                      v-model="form.event.reception_venue_name"
+                      type="text"
+                      required
+                      placeholder="Contoh: Grand Ballroom Hotel Mulia Senayan"
+                      class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Alamat Lengkap Resepsi <span class="text-red-500">*</span></label>
+                    <textarea
+                      v-model="form.event.reception_address"
+                      rows="2"
+                      required
+                      placeholder="Jl. Asia Afrika No. 8, Gelora, Tanah Abang, Jakarta Pusat"
+                      class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">Link Google Maps Lokasi Resepsi</label>
+                    <input
+                      v-model="form.event.reception_maps_url"
+                      type="url"
+                      placeholder="https://maps.app.goo.gl/..."
+                      class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -528,37 +740,107 @@
                 </span>
               </div>
               <p class="text-xs text-gray-500 mb-4">
-                Informasi rekening bank atau dompet digital untuk para tamu yang ingin mengirimkan hadiah kasih.
+                Informasi rekening bank atau dompet digital untuk para tamu yang ingin mengirimkan hadiah kasih. Anda dapat menambahkan lebih dari 1 rekening/e-wallet.
               </p>
 
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-gray-50/70 p-4 rounded-xl border border-gray-200">
-                <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Bank / e-Wallet</label>
-                  <input
-                    v-model="form.gift.bank_name"
-                    type="text"
-                    placeholder="BCA / Mandiri / BRI / QRIS"
-                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                  />
+              <!-- List Rekening -->
+              <div class="space-y-4">
+                <div
+                  v-for="(item, index) in form.gifts"
+                  :key="item.id || index"
+                  class="bg-gray-50/80 p-4 sm:p-5 rounded-2xl border border-gray-200 relative transition-all"
+                >
+                  <div class="flex items-center justify-between mb-3">
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-white text-gray-700 border border-gray-200 shadow-2xs">
+                      💳 Rekening / E-Wallet #{{ index + 1 }}
+                    </span>
+                    <button
+                      v-if="form.gifts.length > 1"
+                      type="button"
+                      @click="removeGiftAccount(index)"
+                      class="text-xs text-red-600 hover:text-red-800 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors flex items-center gap-1"
+                    >
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                      Hapus
+                    </button>
+                  </div>
+
+                  <!-- Quick Bank Select -->
+                  <div class="mb-3">
+                    <span class="text-[11px] font-semibold text-gray-500 block mb-1.5">Pilihan Cepat:</span>
+                    <div class="flex flex-wrap gap-1.5">
+                      <button
+                        v-for="b in ['BCA', 'Mandiri', 'BRI', 'BNI', 'BSI', 'CIMB Niaga', 'GoPay', 'OVO', 'DANA', 'ShopeePay', 'QRIS']"
+                        :key="b"
+                        type="button"
+                        @click="item.bank_name = b"
+                        class="text-[10px] font-medium px-2 py-1 rounded-lg border transition-all"
+                        :class="item.bank_name === b ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100'"
+                      >
+                        {{ b }}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Bank / e-Wallet <span class="text-red-500">*</span></label>
+                      <input
+                        v-model="item.bank_name"
+                        type="text"
+                        required
+                        placeholder="Contoh: BCA / Mandiri / GoPay"
+                        class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-1">Nomor Rekening / No. HP <span class="text-red-500">*</span></label>
+                      <input
+                        v-model="item.account_number"
+                        type="text"
+                        required
+                        placeholder="1234567890"
+                        class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white font-mono"
+                      />
+                    </div>
+                    <div>
+                      <label class="block text-xs font-semibold text-gray-700 mb-1">Atas Nama Pemilik <span class="text-red-500">*</span></label>
+                      <input
+                        v-model="item.account_holder"
+                        type="text"
+                        required
+                        placeholder="Contoh: Dimas Pratama"
+                        class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div class="mt-2.5">
+                    <label class="block text-[11px] font-medium text-gray-500 mb-1">Catatan Tambahan (Opsional)</label>
+                    <input
+                      v-model="item.notes"
+                      type="text"
+                      placeholder="Contoh: Rekening Mempelai Pria / Khusus Dompet Digital"
+                      class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 bg-white focus:outline-none focus:border-blue-400"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nomor Rekening / No. HP</label>
-                  <input
-                    v-model="form.gift.account_number"
-                    type="text"
-                    placeholder="1234567890"
-                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                  />
-                </div>
-                <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Atas Nama Pemilik</label>
-                  <input
-                    v-model="form.gift.account_holder"
-                    type="text"
-                    placeholder="Dimas Pratama"
-                    class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-                  />
-                </div>
+              </div>
+
+              <!-- Button Tambah Rekening -->
+              <div class="mt-4">
+                <button
+                  type="button"
+                  @click="addGiftAccount"
+                  class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                  </svg>
+                  <span>Tambah Rekening / Dompet Digital Baru</span>
+                </button>
               </div>
             </div>
 
@@ -727,13 +1009,33 @@ const form = ref({
     instagram: ''
   },
   event: {
+    // Akad Nikah
     akad_date: '',
     akad_time: '',
+    akad_time_start: '08:00',
+    akad_time_end: '10:00',
+    akad_is_until_end: false,
+    akad_timezone: 'WIB',
+
+    // Resepsi
     reception_date: '',
     reception_time: '',
+    reception_time_start: '11:00',
+    reception_time_end: '13:00',
+    reception_is_until_end: false,
+    reception_timezone: 'WIB',
+
+    // Lokasi (Sama vs Beda)
+    is_same_location: true,
     venue_name: '',
     address: '',
-    maps_url: ''
+    maps_url: '',
+    akad_venue_name: '',
+    akad_address: '',
+    akad_maps_url: '',
+    reception_venue_name: '',
+    reception_address: '',
+    reception_maps_url: ''
   },
   theme: {
     template_id: 'tpl-1',
@@ -742,12 +1044,61 @@ const form = ref({
   },
   story: '',
   gallery: [''],
-  gift: {
-    bank_name: '',
-    account_number: '',
-    account_holder: ''
-  }
+  gifts: [
+    {
+      id: 'gift-1',
+      bank_name: 'BCA',
+      account_number: '',
+      account_holder: '',
+      notes: ''
+    }
+  ]
 })
+
+// Time Summary Computed
+const akadTimeSummary = computed(() => {
+  if (!form.value.event.akad_time_start) return 'Waktu belum diatur'
+  if (form.value.event.akad_is_until_end) {
+    return `Pukul ${form.value.event.akad_time_start} ${form.value.event.akad_timezone} - Selesai`
+  }
+  return `Pukul ${form.value.event.akad_time_start} - ${form.value.event.akad_time_end || 'Selesai'} ${form.value.event.akad_timezone}`
+})
+
+const receptionTimeSummary = computed(() => {
+  if (!form.value.event.reception_time_start) return 'Waktu belum diatur'
+  if (form.value.event.reception_is_until_end) {
+    return `Pukul ${form.value.event.reception_time_start} ${form.value.event.reception_timezone} - Selesai`
+  }
+  return `Pukul ${form.value.event.reception_time_start} - ${form.value.event.reception_time_end || 'Selesai'} ${form.value.event.reception_timezone}`
+})
+
+function setAkadPreset(start: string, end: string, isUntilEnd: boolean) {
+  form.value.event.akad_time_start = start
+  form.value.event.akad_time_end = end
+  form.value.event.akad_is_until_end = isUntilEnd
+}
+
+function setReceptionPreset(start: string, end: string, isUntilEnd: boolean) {
+  form.value.event.reception_time_start = start
+  form.value.event.reception_time_end = end
+  form.value.event.reception_is_until_end = isUntilEnd
+}
+
+function addGiftAccount() {
+  form.value.gifts.push({
+    id: `gift-${Date.now()}`,
+    bank_name: 'BCA',
+    account_number: '',
+    account_holder: form.value.groom.full_name || form.value.bride.full_name || '',
+    notes: ''
+  })
+}
+
+function removeGiftAccount(index: number) {
+  if (form.value.gifts.length > 1) {
+    form.value.gifts.splice(index, 1)
+  }
+}
 
 // Dynamic Features Config from verify response
 const features = computed(() => {
@@ -817,11 +1168,37 @@ async function verifyClientAccess() {
       const inv = res.invitation
       if (inv.groom) form.value.groom = { ...form.value.groom, ...inv.groom }
       if (inv.bride) form.value.bride = { ...form.value.bride, ...inv.bride }
-      if (inv.event) form.value.event = { ...form.value.event, ...inv.event }
+      if (inv.event) {
+        form.value.event = {
+          ...form.value.event,
+          ...inv.event,
+          is_same_location: inv.event.is_same_location ?? true
+        }
+      }
       if (inv.theme) form.value.theme = { ...form.value.theme, ...inv.theme }
       if (inv.story) form.value.story = inv.story
       if (Array.isArray(inv.gallery) && inv.gallery.length > 0) form.value.gallery = [...inv.gallery]
-      if (inv.gift) form.value.gift = { ...form.value.gift, ...inv.gift }
+
+      // Populate gifts
+      if (Array.isArray(inv.gifts) && inv.gifts.length > 0) {
+        form.value.gifts = inv.gifts.map((g: any, idx: number) => ({
+          id: g.id || `gift-${idx}`,
+          bank_name: g.bank_name || '',
+          account_number: g.account_number || '',
+          account_holder: g.account_holder || '',
+          notes: g.notes || ''
+        }))
+      } else if (inv.gift && (inv.gift.bank_name || inv.gift.account_number)) {
+        form.value.gifts = [
+          {
+            id: 'gift-1',
+            bank_name: inv.gift.bank_name || '',
+            account_number: inv.gift.account_number || '',
+            account_holder: inv.gift.account_holder || '',
+            notes: ''
+          }
+        ]
+      }
     }
   } catch (err: any) {
     authError.value = true
@@ -847,6 +1224,26 @@ async function handleSaveInvitation() {
 
   saving.value = true
   try {
+    // Generate standardized time strings
+    form.value.event.akad_time = akadTimeSummary.value
+    form.value.event.reception_time = receptionTimeSummary.value
+
+    // Auto-sync locations based on toggle
+    if (form.value.event.is_same_location) {
+      form.value.event.akad_venue_name = form.value.event.venue_name
+      form.value.event.akad_address = form.value.event.address
+      form.value.event.akad_maps_url = form.value.event.maps_url
+      form.value.event.reception_venue_name = form.value.event.venue_name
+      form.value.event.reception_address = form.value.event.address
+      form.value.event.reception_maps_url = form.value.event.maps_url
+    } else {
+      form.value.event.venue_name = form.value.event.reception_venue_name || form.value.event.akad_venue_name
+      form.value.event.address = form.value.event.reception_address || form.value.event.akad_address
+      form.value.event.maps_url = form.value.event.reception_maps_url || form.value.event.akad_maps_url
+    }
+
+    const validGifts = form.value.gifts.filter(g => g.bank_name.trim() !== '' || g.account_number.trim() !== '')
+
     const payload = {
       groom: { ...form.value.groom },
       bride: { ...form.value.bride },
@@ -854,11 +1251,17 @@ async function handleSaveInvitation() {
       theme: { ...form.value.theme },
       story: form.value.story,
       gallery: form.value.gallery.filter(link => link.trim() !== ''),
-      gift: { ...form.value.gift }
+      gift: validGifts.length > 0 ? { ...validGifts[0] } : { bank_name: '', account_number: '', account_holder: '' },
+      gifts: validGifts.map(g => ({ ...g }))
     }
 
-    await clientSetupService.saveInvitation(token, payload)
-    toast.success('Undangan berhasil diperbarui!')
+    const saveRes = await clientSetupService.saveInvitation(token, payload)
+    
+    if (saveRes?.is_local_fallback) {
+      toast.info('Data berhasil disimpan secara lokal di browser Anda (Endpoint backend sedang disiapkan).')
+    } else {
+      toast.success('Data undangan berhasil disimpan!')
+    }
   } catch (err: any) {
     toast.error(handleApiError(err).message || 'Gagal menyimpan data undangan.')
   } finally {

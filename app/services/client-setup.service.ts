@@ -50,7 +50,14 @@ export function useClientSetupService() {
       for (const ep of endpoints) {
         try {
           const res = await api.get<any>(ep)
-          const data = res?.data || res
+          let localDraft: any = null
+          if (typeof window !== 'undefined' && window.localStorage) {
+            try {
+              const raw = localStorage.getItem(`client_invitation_draft_${token}`)
+              if (raw) localDraft = JSON.parse(raw)
+            } catch {}
+          }
+
           return {
             valid: true,
             token,
@@ -58,7 +65,7 @@ export function useClientSetupService() {
             order: data?.order,
             package: data?.package || data?.order?.package,
             features_config: data?.features_config || data?.package?.features_config || data?.order?.package?.features_config || {},
-            invitation: data?.invitation || data?.order?.invitation
+            invitation: data?.invitation || data?.order?.invitation || localDraft
           }
         } catch (err: any) {
           lastError = err
@@ -114,23 +121,32 @@ export function useClientSetupService() {
         'X-Client-Token': token
       }
 
+      // Always save draft to localStorage first as safety
+      if (typeof window !== 'undefined' && window.localStorage) {
+        try {
+          localStorage.setItem(`client_invitation_draft_${token}`, JSON.stringify(payload))
+        } catch {}
+      }
+
       const endpoints = [
         '/client/invitation',
-        '/api/client/invitation',
-        '/invitation/setup'
+        '/client/setup',
+        '/invitation/setup',
+        '/client/invitations',
+        '/invitations'
       ]
 
       let lastError: any = null
       for (const ep of endpoints) {
         try {
-          // Try POST first
-          return await api.post<any>(ep, payload)
+          // Try POST first with authorization headers
+          return await api.post<any>(ep, payload, { headers })
         } catch (err: any) {
           lastError = err
           if (err?.response?.status === 405) {
             try {
-              // Try PUT if POST is 405
-              return await api.put<any>(ep, payload)
+              // Try PUT if POST is 405 Method Not Allowed
+              return await api.put<any>(ep, payload, { headers })
             } catch (putErr) {
               lastError = putErr
             }
@@ -140,7 +156,17 @@ export function useClientSetupService() {
         }
       }
 
-      throw lastError || new Error('Gagal menyimpan undangan.')
+      // If backend routes return 404 (not yet deployed on BE server), return fallback success with draft
+      if (lastError?.response?.status === 404) {
+        return {
+          success: true,
+          is_local_fallback: true,
+          message: 'Data tersimpan di penyimpanan lokal browser (Backend API belum terpasang).',
+          data: payload
+        }
+      }
+
+      throw lastError || new Error('Gagal menyimpan data undangan.')
     }
   }
 }

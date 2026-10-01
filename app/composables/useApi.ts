@@ -91,15 +91,15 @@ export function useApi() {
   }
 
   return {
-    get: <T>(path: string, query?: Record<string, string | number | boolean | undefined>) =>
-      request<T>('GET', path, { query }),
-    post: <T>(path: string, body?: Record<string, unknown> | any) =>
-      request<T>('POST', path, { body }),
-    patch: <T>(path: string, body?: Record<string, unknown> | any) =>
-      request<T>('PATCH', path, { body }),
-    put: <T>(path: string, body?: Record<string, unknown> | any) =>
-      request<T>('PUT', path, { body }),
-    delete: <T>(path: string) =>
-      request<T>('DELETE', path),
+    get: <T>(path: string, query?: Record<string, string | number | boolean | undefined>, options?: { headers?: Record<string, string> }) =>
+      request<T>('GET', path, { query, headers: options?.headers }),
+    post: <T>(path: string, body?: Record<string, unknown> | any, options?: { headers?: Record<string, string>; query?: any }) =>
+      request<T>('POST', path, { body, headers: options?.headers, query: options?.query }),
+    patch: <T>(path: string, body?: Record<string, unknown> | any, options?: { headers?: Record<string, string>; query?: any }) =>
+      request<T>('PATCH', path, { body, headers: options?.headers, query: options?.query }),
+    put: <T>(path: string, body?: Record<string, unknown> | any, options?: { headers?: Record<string, string>; query?: any }) =>
+      request<T>('PUT', path, { body, headers: options?.headers, query: options?.query }),
+    delete: <T>(path: string, options?: { headers?: Record<string, string>; query?: any }) =>
+      request<T>('DELETE', path, { headers: options?.headers, query: options?.query }),
   }
 }
