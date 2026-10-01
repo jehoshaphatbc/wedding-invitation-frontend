@@ -3,8 +3,8 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-gray-900">Master Data Fitur</h1>
-        <p class="text-sm text-gray-500 mt-1">Kelola daftar master fitur yang tersedia untuk paket undangan.</p>
+        <h1 class="text-2xl font-bold text-gray-900">Feature Packages</h1>
+        <p class="text-sm text-gray-500 mt-1">Kelola master fitur untuk konfigurasi paket undangan.</p>
       </div>
       <button
         @click="openCreateModal"
@@ -145,7 +145,7 @@
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ editingItem ? 'Edit Master Fitur' : 'Tambah Master Fitur' }}
+          {{ editingItem ? 'Edit Feature Package' : 'Tambah Feature Package' }}
         </h3>
         
         <form @submit.prevent="saveFeature" class="space-y-4">
@@ -220,7 +220,7 @@
     <!-- Confirm Delete Modal -->
     <UiConfirmModal
       v-if="showDeleteModal && featureToDelete"
-      title="Hapus Master Fitur"
+      title="Hapus Feature Package"
       :message="`Apakah Anda yakin ingin menghapus fitur '${featureToDelete.name}' (${featureToDelete.key})?`"
       confirm-text="Hapus"
       :danger="true"
@@ -235,7 +235,13 @@ import type { Feature, FeatureFormData } from '~/types/feature'
 import { handleApiError } from '~/utils/errors'
 
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
-useHead({ title: 'Master Data Fitur', meta: [{ name: 'robots', content: 'noindex' }] })
+useHead({ title: 'Feature Packages', meta: [{ name: 'robots', content: 'noindex' }] })
+
+const { isSuperAdmin } = usePermission()
+
+if (!isSuperAdmin.value) {
+  await navigateTo('/dashboard')
+}
 
 const toast = useToast()
 const featureService = useFeatureService()
