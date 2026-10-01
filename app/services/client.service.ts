@@ -5,17 +5,42 @@ export function useClientService() {
   const api = useApi()
 
   return {
-    getClients(params?: { page?: number; per_page?: number; search?: string; sort?: string; order?: string }) {
-      return api.get<any>('/admin/clients', params as any).catch(async (err) => {
+    getClients(params?: {
+      page?: number
+      per_page?: number
+      limit?: number
+      search?: string
+      is_trashed?: boolean
+      sort?: string
+      order?: string
+    }) {
+      const cleanParams: any = { ...params }
+      if (cleanParams.per_page && !cleanParams.limit) {
+        cleanParams.limit = cleanParams.per_page
+      }
+      return api.get<any>('/admin/clients', cleanParams).catch(async (err) => {
         if (err?.response?.status === 404) {
-          return await api.get<any>('/clients', params as any)
+          return await api.get<any>('/clients', cleanParams)
         }
         throw err
       })
     },
 
-    getTrashedClients(params?: { page?: number; per_page?: number; search?: string; sort?: string; order?: string }) {
-      return api.get<any>('/admin/clients/trash', params as any)
+    getTrashedClients(params?: {
+      page?: number
+      per_page?: number
+      limit?: number
+      search?: string
+      sort?: string
+      order?: string
+    }) {
+      const cleanParams: any = { ...params, is_trashed: true }
+      return api.get<any>('/admin/clients/trash', cleanParams).catch(async (err) => {
+        if (err?.response?.status === 404) {
+          return await api.get<any>('/admin/clients', cleanParams)
+        }
+        throw err
+      })
     },
 
     getClient(id: string) {
@@ -37,9 +62,9 @@ export function useClientService() {
     },
 
     updateClient(id: string, data: Partial<ClientFormData>) {
-      return api.patch<ApiResponse<Client>>(`/admin/clients/${id}`, data).catch(async (err) => {
+      return api.put<ApiResponse<Client>>(`/admin/clients/${id}`, data).catch(async (err) => {
         if (err?.response?.status === 405 || err?.response?.status === 404) {
-          return await api.put<ApiResponse<Client>>(`/admin/clients/${id}`, data)
+          return await api.patch<ApiResponse<Client>>(`/admin/clients/${id}`, data)
         }
         throw err
       })
@@ -50,7 +75,12 @@ export function useClientService() {
     },
 
     restoreClient(id: string) {
-      return api.post<ApiResponse<null>>(`/admin/clients/${id}/restore`)
+      return api.post<ApiResponse<null>>(`/admin/clients/${id}/restore`).catch(async (err) => {
+        if (err?.response?.status === 404) {
+          return await api.post<ApiResponse<null>>('/admin/clients/restore', { id })
+        }
+        throw err
+      })
     },
 
     forceDeleteClient(id: string) {

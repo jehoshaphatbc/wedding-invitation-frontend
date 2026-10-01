@@ -13,9 +13,9 @@
           :class="viewMode === 'trash' ? 'bg-red-50 text-red-600 border-red-200' : 'text-gray-700 bg-white'"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          {{ viewMode === 'trash' ? 'View Active' : 'Trash' }}
+          {{ viewMode === 'trash' ? 'Lihat Order Aktif' : 'Trash' }}
         </button>
       </div>
     </div>
@@ -23,14 +23,14 @@
     <div class="bg-white rounded-lg shadow">
       <!-- Bulk Actions Bar -->
       <div v-if="selectedOrders.length > 0" class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex items-center justify-between">
-        <span class="text-sm text-blue-800 font-medium">{{ selectedOrders.length }} order(s) selected</span>
+        <span class="text-sm text-blue-800 font-medium">{{ selectedOrders.length }} order terpilih</span>
         <div class="flex gap-2">
           <template v-if="viewMode === 'active'">
             <button
               @click="showBulkDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Delete Selected
+              Hapus Terpilih
             </button>
           </template>
           <template v-else>
@@ -39,51 +39,74 @@
               @click="showBulkRestoreModal = true"
               class="px-3 py-1.5 text-sm font-medium text-green-600 bg-white border border-green-200 rounded hover:bg-green-50"
             >
-              Restore Selected
+              Pulihkan Terpilih
             </button>
             <button
               v-if="isSuperAdmin"
               @click="showBulkForceDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Force Delete Selected
+              Hapus Permanen Terpilih
             </button>
           </template>
         </div>
       </div>
 
-      <!-- Search & Status Filter Bar -->
-      <div class="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-3 justify-between items-stretch sm:items-center">
+      <!-- Search & Status Filter Tab Bar -->
+      <div class="p-4 border-b border-gray-200 flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center">
+        <!-- Search Input -->
         <div class="relative flex-1 max-w-md">
           <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
           </svg>
           <input
             v-model="search"
             type="text"
-            placeholder="Search invoice, client name, or email..."
+            placeholder="Cari invoice, nama klien, atau email..."
             class="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
 
-        <div class="flex items-center gap-2">
-          <label class="text-xs font-semibold text-gray-500 whitespace-nowrap">Filter Status:</label>
-          <select
-            v-model="statusFilter"
-            class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+        <!-- Status Filter Tabs -->
+        <div class="flex items-center gap-1.5 bg-gray-100 p-1 rounded-lg overflow-x-auto">
+          <button
+            @click="setStatusFilter('')"
+            class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all whitespace-nowrap"
+            :class="statusFilter === '' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
           >
-            <option value="">All Statuses</option>
-            <option value="paid">Paid</option>
-            <option value="unpaid">Unpaid</option>
-            <option value="expired">Expired</option>
-          </select>
+            Semua
+          </button>
+          <button
+            @click="setStatusFilter('paid')"
+            class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap"
+            :class="statusFilter === 'paid' ? 'bg-white text-green-700 shadow-sm' : 'text-gray-600 hover:text-green-700'"
+          >
+            <span class="w-2 h-2 rounded-full bg-green-500" />
+            Paid
+          </button>
+          <button
+            @click="setStatusFilter('unpaid')"
+            class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap"
+            :class="statusFilter === 'unpaid' ? 'bg-white text-yellow-700 shadow-sm' : 'text-gray-600 hover:text-yellow-700'"
+          >
+            <span class="w-2 h-2 rounded-full bg-yellow-500" />
+            Unpaid
+          </button>
+          <button
+            @click="setStatusFilter('expired')"
+            class="px-3 py-1.5 text-xs font-semibold rounded-md transition-all flex items-center gap-1.5 whitespace-nowrap"
+            :class="statusFilter === 'expired' ? 'bg-white text-gray-700 shadow-sm' : 'text-gray-600 hover:text-gray-900'"
+          >
+            <span class="w-2 h-2 rounded-full bg-gray-400" />
+            Expired
+          </button>
         </div>
       </div>
 
       <!-- Table -->
-      <div class="overflow-visible">
+      <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
             <tr>
               <th class="px-4 py-3 w-4">
                 <input type="checkbox" v-model="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
@@ -91,19 +114,19 @@
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('invoice_number')">
                 Invoice <span v-if="sortBy === 'invoice_number'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
-              <th class="px-4 py-3">Client</th>
-              <th class="px-4 py-3">Package</th>
+              <th class="px-4 py-3">Klien</th>
+              <th class="px-4 py-3">Paket</th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('total_amount')">
                 Total <span v-if="sortBy === 'total_amount'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
               <th class="px-4 py-3 text-center">Status</th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">
-                Date <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                Tanggal <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
-              <th class="px-4 py-3 text-center">Actions</th>
+              <th class="px-4 py-3 text-center w-24">Aksi</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-gray-200">
             <tr v-if="loading">
               <td colspan="8" class="py-12 text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
@@ -111,11 +134,11 @@
             </tr>
             <tr v-else-if="!orders || orders.length === 0">
               <td colspan="8" class="py-12 text-center text-gray-500">
-                No orders found.
+                Tidak ada data pesanan ditemukan.
               </td>
             </tr>
             <template v-else>
-              <tr v-for="order in orders" :key="order.id" class="border-b hover:bg-gray-50 transition-colors">
+              <tr v-for="order in orders" :key="order.id" class="hover:bg-gray-50 transition-colors">
                 <td class="px-4 py-3">
                   <input type="checkbox" :value="order.id" v-model="selectedOrders" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                 </td>
@@ -127,13 +150,27 @@
                 <td class="px-4 py-3">
                   <div class="font-medium text-gray-900">{{ getClientName(order) }}</div>
                   <div class="text-xs text-gray-500">{{ getClientEmail(order) }}</div>
+                  <div v-if="order.client?.whatsapp || order.client_whatsapp" class="text-xs text-emerald-600 font-mono mt-0.5">
+                    {{ order.client?.whatsapp || order.client_whatsapp }}
+                  </div>
                 </td>
                 <td class="px-4 py-3">
-                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
-                    {{ getPackageName(order) }}
-                  </span>
+                  <div class="flex flex-col gap-1 items-start">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                      {{ getPackageName(order) }}
+                    </span>
+                    <span
+                      v-if="hasQrFeature(order)"
+                      class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200"
+                    >
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                      </svg>
+                      QR Check-in
+                    </span>
+                  </div>
                 </td>
-                <td class="px-4 py-3 font-semibold text-gray-800">
+                <td class="px-4 py-3 font-semibold text-gray-900">
                   Rp {{ (order.total_amount ?? 0).toLocaleString('id-ID') }}
                 </td>
                 <td class="px-4 py-3 text-center">
@@ -158,7 +195,7 @@
                   </span>
                 </td>
                 <td class="px-4 py-3 text-xs text-gray-500 whitespace-nowrap">
-                  {{ order.created_at ? new Date(order.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' }}
+                  {{ order.created_at ? new Date(order.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' }}
                 </td>
                 <td class="px-4 py-3 text-center relative">
                   <button
@@ -172,9 +209,21 @@
 
                   <div
                     v-show="activeDropdown === order.id"
-                    class="absolute right-8 top-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
+                    class="absolute right-8 top-10 mt-1 w-52 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
                   >
                     <template v-if="viewMode === 'active'">
+                      <!-- Action if Unpaid: Open payment URL -->
+                      <button
+                        v-if="isUnpaid(order.status) && order.payment_url"
+                        class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left border-b border-gray-100"
+                        @click.stop="openPaymentUrl(order); activeDropdown = null"
+                      >
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                        Buka Link Pembayaran
+                      </button>
+
                       <!-- Special actions for Paid status -->
                       <template v-if="isPaid(order.status)">
                         <button
@@ -187,6 +236,7 @@
                           Salin Link Akses Klien
                         </button>
                         <button
+                          v-if="hasQrFeature(order)"
                           class="flex items-center px-3 py-2 text-sm hover:bg-purple-50 text-purple-700 w-full text-left border-b border-gray-100"
                           @click.stop="copyScannerLink(order); activeDropdown = null"
                         >
@@ -205,7 +255,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Delete Order
+                        Hapus ke Trash
                       </button>
                     </template>
                     <template v-else>
@@ -217,7 +267,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
                         </svg>
-                        Restore
+                        Pulihkan
                       </button>
                       <button
                         v-if="isSuperAdmin"
@@ -227,7 +277,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                         </svg>
-                        Force Delete
+                        Hapus Permanen
                       </button>
                     </template>
                   </div>
@@ -241,8 +291,8 @@
       <!-- Pagination -->
       <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
         <span class="text-sm text-gray-500">
-          Showing {{ (meta.page - 1) * meta.per_page + 1 }} to
-          {{ Math.min(meta.page * meta.per_page, meta.total) }} of {{ meta.total }} orders
+          Menampilkan {{ (meta.page - 1) * meta.per_page + 1 }} sampai
+          {{ Math.min(meta.page * meta.per_page, meta.total) }} dari {{ meta.total }} pesanan
         </span>
         <div class="flex gap-1">
           <button
@@ -250,7 +300,7 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page - 1)"
           >
-            Previous
+            Sebelumnya
           </button>
           <button
             v-for="p in visiblePages"
@@ -266,18 +316,18 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page + 1)"
           >
-            Next
+            Berikutnya
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Confirmation Modals -->
+    <!-- Modals Confirmation State -->
     <UiConfirmModal
       v-if="showDeleteModal && orderToDelete"
-      title="Delete Order"
-      :message="`Are you sure you want to move order '${orderToDelete.invoice_number || orderToDelete.id}' to trash?`"
-      confirm-text="Delete"
+      title="Hapus Pesanan"
+      :message="`Apakah Anda yakin ingin memindahkan pesanan ${orderToDelete.invoice_number || orderToDelete.id} ke trash?`"
+      confirm-text="Hapus"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
@@ -285,18 +335,18 @@
 
     <UiConfirmModal
       v-if="showRestoreModal && orderToRestore"
-      title="Restore Order"
-      :message="`Are you sure you want to restore order '${orderToRestore.invoice_number || orderToRestore.id}' from trash?`"
-      confirm-text="Restore"
+      title="Pulihkan Pesanan"
+      :message="`Apakah Anda yakin ingin memulihkan pesanan ${orderToRestore.invoice_number || orderToRestore.id} dari trash?`"
+      confirm-text="Pulihkan"
       @confirm="handleRestore"
       @cancel="showRestoreModal = false"
     />
 
     <UiConfirmModal
       v-if="showForceDeleteModal && orderToForceDelete"
-      title="Force Delete Order"
-      :message="`Are you sure you want to PERMANENTLY delete order '${orderToForceDelete.invoice_number || orderToForceDelete.id}'? This action cannot be undone.`"
-      confirm-text="Force Delete"
+      title="Hapus Permanen Pesanan"
+      :message="`Apakah Anda yakin ingin MENGHAPUS PERMANEN pesanan ${orderToForceDelete.invoice_number || orderToForceDelete.id}? Tindakan ini tidak dapat dibatalkan.`"
+      confirm-text="Hapus Permanen"
       :danger="true"
       require-input="DELETE"
       @confirm="handleForceDelete"
@@ -305,9 +355,9 @@
 
     <UiConfirmModal
       v-if="showBulkDeleteModal"
-      title="Bulk Delete Orders"
-      :message="`Are you sure you want to move ${selectedOrders.length} selected orders to trash?`"
-      confirm-text="Delete All"
+      title="Hapus Pesanan Terpilih"
+      :message="`Apakah Anda yakin ingin memindahkan ${selectedOrders.length} pesanan terpilih ke trash?`"
+      confirm-text="Hapus Semua"
       :danger="true"
       @confirm="handleBulkDelete"
       @cancel="showBulkDeleteModal = false"
@@ -315,18 +365,18 @@
 
     <UiConfirmModal
       v-if="showBulkRestoreModal"
-      title="Bulk Restore Orders"
-      :message="`Are you sure you want to restore ${selectedOrders.length} selected orders from trash?`"
-      confirm-text="Restore All"
+      title="Pulihkan Pesanan Terpilih"
+      :message="`Apakah Anda yakin ingin memulihkan ${selectedOrders.length} pesanan terpilih dari trash?`"
+      confirm-text="Pulihkan Semua"
       @confirm="handleBulkRestore"
       @cancel="showBulkRestoreModal = false"
     />
 
     <UiConfirmModal
       v-if="showBulkForceDeleteModal"
-      title="Bulk Force Delete Orders"
-      :message="`Are you sure you want to PERMANENTLY delete ${selectedOrders.length} selected orders?`"
-      confirm-text="Force Delete All"
+      title="Hapus Permanen Pesanan Terpilih"
+      :message="`Apakah Anda yakin ingin MENGHAPUS PERMANEN ${selectedOrders.length} pesanan terpilih?`"
+      confirm-text="Hapus Permanen Semua"
       :danger="true"
       require-input="DELETE"
       @confirm="handleBulkForceDelete"
@@ -336,7 +386,7 @@
 </template>
 
 <script setup lang="ts">
-import type { Order } from '~/types/order'
+import type { Order, OrderStatus } from '~/types/order'
 import { handleApiError } from '~/utils/errors'
 
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
@@ -387,7 +437,7 @@ const selectAll = computed({
   }
 })
 
-// Modals Confirmation State
+// Confirmation States
 const orderToDelete = ref<Order | null>(null)
 const orderToRestore = ref<Order | null>(null)
 const orderToForceDelete = ref<Order | null>(null)
@@ -398,13 +448,12 @@ const showBulkDeleteModal = ref(false)
 const showBulkRestoreModal = ref(false)
 const showBulkForceDeleteModal = ref(false)
 
-function isPaid(status?: string): boolean {
-  return String(status || '').toLowerCase() === 'paid'
+function isPaid(status: string): boolean {
+  return status?.toLowerCase() === 'paid'
 }
 
-function isUnpaid(status?: string): boolean {
-  const s = String(status || '').toLowerCase()
-  return s === 'unpaid' || s === 'pending'
+function isUnpaid(status: string): boolean {
+  return status?.toLowerCase() === 'unpaid' || status?.toLowerCase() === 'pending'
 }
 
 function getClientName(order: Order): string {
@@ -419,9 +468,35 @@ function getPackageName(order: Order): string {
   return order.package?.name || order.package_name || '-'
 }
 
+function hasQrFeature(order: Order): boolean {
+  return Boolean(order.scanner_token || order.package?.features_config?.has_qr)
+}
+
+function setStatusFilter(status: string) {
+  statusFilter.value = status
+  currentPage.value = 1
+  loadOrders()
+}
+
+function openPaymentUrl(order: Order) {
+  if (order.payment_url && typeof window !== 'undefined') {
+    window.open(order.payment_url, '_blank')
+  } else {
+    toast.error('Link pembayaran tidak tersedia.')
+  }
+}
+
 // Special Actions: Copy Link Akses Klien & Copy Link Scanner (Hari H)
 async function copyMagicLink(order: Order) {
-  const link = order.magic_link || (typeof window !== 'undefined' ? `${window.location.origin}/invitation/${order.id}?auth=magic` : '')
+  let link = ''
+  if (order.form_token) {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/form/${order.form_token}` : ''
+  } else if (order.magic_link) {
+    link = order.magic_link
+  } else {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/${order.id}?auth=magic` : ''
+  }
+
   try {
     if (navigator?.clipboard) {
       await navigator.clipboard.writeText(link)
@@ -435,7 +510,15 @@ async function copyMagicLink(order: Order) {
 }
 
 async function copyScannerLink(order: Order) {
-  const link = order.scanner_link || (typeof window !== 'undefined' ? `${window.location.origin}/checkin/${order.id}/scanner` : '')
+  let link = ''
+  if (order.scanner_token) {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/checkin/scanner/${order.scanner_token}` : ''
+  } else if (order.scanner_link) {
+    link = order.scanner_link
+  } else {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/checkin/${order.id}/scanner` : ''
+  }
+
   try {
     if (navigator?.clipboard) {
       await navigator.clipboard.writeText(link)
@@ -455,6 +538,7 @@ async function loadOrders() {
     const params = {
       page: currentPage.value,
       per_page: 15,
+      limit: 15,
       search: search.value || undefined,
       status: statusFilter.value || undefined,
       sort: sortBy.value,
@@ -490,7 +574,7 @@ async function handleDelete() {
   if (!orderToDelete.value) return
   try {
     await orderService.deleteOrder(orderToDelete.value.id)
-    toast.success('Order moved to trash successfully')
+    toast.success('Pesanan berhasil dipindahkan ke trash')
     showDeleteModal.value = false
     orderToDelete.value = null
     loadOrders()
@@ -508,14 +592,14 @@ async function handleRestore() {
   if (!orderToRestore.value) return
   try {
     await orderService.restoreOrder(orderToRestore.value.id)
-    toast.success('Order restored successfully')
+    toast.success('Pesanan berhasil dipulihkan')
     showRestoreModal.value = false
     orderToRestore.value = null
     loadOrders()
   } catch (e) {
     try {
       await orderService.bulkRestoreOrders([orderToRestore.value.id])
-      toast.success('Order restored successfully')
+      toast.success('Pesanan berhasil dipulihkan')
       showRestoreModal.value = false
       orderToRestore.value = null
       loadOrders()
@@ -534,14 +618,14 @@ async function handleForceDelete() {
   if (!orderToForceDelete.value) return
   try {
     await orderService.forceDeleteOrder(orderToForceDelete.value.id)
-    toast.success('Order permanently deleted')
+    toast.success('Pesanan berhasil dihapus permanen')
     showForceDeleteModal.value = false
     orderToForceDelete.value = null
     loadOrders()
   } catch (e) {
     try {
       await orderService.bulkForceDeleteOrders([orderToForceDelete.value.id])
-      toast.success('Order permanently deleted')
+      toast.success('Pesanan berhasil dihapus permanen')
       showForceDeleteModal.value = false
       orderToForceDelete.value = null
       loadOrders()
@@ -554,7 +638,7 @@ async function handleForceDelete() {
 async function handleBulkDelete() {
   try {
     await orderService.bulkDeleteOrders(selectedOrders.value)
-    toast.success('Selected orders moved to trash successfully')
+    toast.success('Pesanan terpilih berhasil dipindahkan ke trash')
     showBulkDeleteModal.value = false
     loadOrders()
   } catch (e: any) {
@@ -565,7 +649,7 @@ async function handleBulkDelete() {
 async function handleBulkRestore() {
   try {
     await orderService.bulkRestoreOrders(selectedOrders.value)
-    toast.success('Selected orders restored successfully')
+    toast.success('Pesanan terpilih berhasil dipulihkan')
     showBulkRestoreModal.value = false
     loadOrders()
   } catch (e: any) {
@@ -576,7 +660,7 @@ async function handleBulkRestore() {
 async function handleBulkForceDelete() {
   try {
     await orderService.bulkForceDeleteOrders(selectedOrders.value)
-    toast.success('Selected orders permanently deleted')
+    toast.success('Pesanan terpilih berhasil dihapus permanen')
     showBulkForceDeleteModal.value = false
     loadOrders()
   } catch (e: any) {
@@ -600,7 +684,7 @@ function goToPage(page: number) {
   loadOrders()
 }
 
-watch([search, statusFilter], () => {
+watch(search, () => {
   clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
     currentPage.value = 1

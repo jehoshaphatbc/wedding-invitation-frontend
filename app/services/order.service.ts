@@ -8,14 +8,20 @@ export function useOrderService() {
     getOrders(params?: {
       page?: number
       per_page?: number
+      limit?: number
       search?: string
       status?: string
+      is_trashed?: boolean
       sort?: string
       order?: string
     }) {
-      return api.get<any>('/admin/orders', params as any).catch(async (err) => {
+      const cleanParams: any = { ...params }
+      if (cleanParams.per_page && !cleanParams.limit) {
+        cleanParams.limit = cleanParams.per_page
+      }
+      return api.get<any>('/admin/orders', cleanParams).catch(async (err) => {
         if (err?.response?.status === 404) {
-          return await api.get<any>('/orders', params as any)
+          return await api.get<any>('/orders', cleanParams)
         }
         throw err
       })
@@ -24,12 +30,19 @@ export function useOrderService() {
     getTrashedOrders(params?: {
       page?: number
       per_page?: number
+      limit?: number
       search?: string
       status?: string
       sort?: string
       order?: string
     }) {
-      return api.get<any>('/admin/orders/trash', params as any)
+      const cleanParams: any = { ...params, is_trashed: true }
+      return api.get<any>('/admin/orders/trash', cleanParams).catch(async (err) => {
+        if (err?.response?.status === 404) {
+          return await api.get<any>('/orders', cleanParams)
+        }
+        throw err
+      })
     },
 
     getOrder(id: string) {
@@ -41,10 +54,21 @@ export function useOrderService() {
       })
     },
 
-    updateStatus(id: string, status: OrderStatus) {
-      return api.patch<ApiResponse<Order>>(`/admin/orders/${id}/status`, { status }).catch(async (err) => {
+    updateOrder(id: string, data: { status?: OrderStatus; total_amount?: number }) {
+      return api.put<ApiResponse<Order>>(`/admin/orders/${id}`, data).catch(async (err) => {
         if (err?.response?.status === 405 || err?.response?.status === 404) {
-          return await api.put<ApiResponse<Order>>(`/admin/orders/${id}/status`, { status })
+          return await api.patch<ApiResponse<Order>>(`/admin/orders/${id}`, data)
+        }
+        throw err
+      })
+    },
+
+    updateStatus(id: string, status: OrderStatus) {
+      return api.put<ApiResponse<Order>>(`/admin/orders/${id}`, { status }).catch(async (err) => {
+        if (err?.response?.status === 405 || err?.response?.status === 404) {
+          return await api.patch<ApiResponse<Order>>(`/admin/orders/${id}/status`, { status }).catch(async () => {
+            return await api.patch<ApiResponse<Order>>(`/admin/orders/${id}`, { status })
+          })
         }
         throw err
       })
@@ -55,7 +79,12 @@ export function useOrderService() {
     },
 
     restoreOrder(id: string) {
-      return api.post<ApiResponse<null>>(`/admin/orders/${id}/restore`)
+      return api.post<ApiResponse<null>>(`/admin/orders/${id}/restore`).catch(async (err) => {
+        if (err?.response?.status === 404) {
+          return await api.post<ApiResponse<null>>('/admin/orders/restore', { id })
+        }
+        throw err
+      })
     },
 
     forceDeleteOrder(id: string) {

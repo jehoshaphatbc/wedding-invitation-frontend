@@ -3,7 +3,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Clients</h1>
-        <p class="text-sm text-gray-500 mt-1">Manage client profiles, WhatsApp contacts, and membership details.</p>
+        <p class="text-sm text-gray-500 mt-1">Kelola data klien, riwayat pesanan terintegrasi, dan Link Akses Klien.</p>
       </div>
       <div class="flex gap-2">
         <button
@@ -13,19 +13,19 @@
           :class="viewMode === 'trash' ? 'bg-red-50 text-red-600 border-red-200' : 'text-gray-700 bg-white'"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          {{ viewMode === 'trash' ? 'View Active' : 'Trash' }}
+          {{ viewMode === 'trash' ? 'Lihat Klien Aktif' : 'Trash' }}
         </button>
         <button
           v-if="viewMode === 'active'"
           @click="openCreateModal"
-          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-sm"
+          class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2"
         >
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Add Client
+          Tambah Klien
         </button>
       </div>
     </div>
@@ -33,14 +33,14 @@
     <div class="bg-white rounded-lg shadow">
       <!-- Bulk Actions Bar -->
       <div v-if="selectedClients.length > 0" class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex items-center justify-between">
-        <span class="text-sm text-blue-800 font-medium">{{ selectedClients.length }} clients selected</span>
+        <span class="text-sm text-blue-800 font-medium">{{ selectedClients.length }} klien terpilih</span>
         <div class="flex gap-2">
           <template v-if="viewMode === 'active'">
             <button
               @click="showBulkDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Delete Selected
+              Hapus Terpilih
             </button>
           </template>
           <template v-else>
@@ -49,14 +49,14 @@
               @click="showBulkRestoreModal = true"
               class="px-3 py-1.5 text-sm font-medium text-green-600 bg-white border border-green-200 rounded hover:bg-green-50"
             >
-              Restore Selected
+              Pulihkan Terpilih
             </button>
             <button
               v-if="isSuperAdmin"
               @click="showBulkForceDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Force Delete Selected
+              Hapus Permanen Terpilih
             </button>
           </template>
         </div>
@@ -71,144 +71,336 @@
           <input
             v-model="search"
             type="text"
-            placeholder="Search by name or email..."
+            placeholder="Cari nama, email, atau WhatsApp..."
             class="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
       </div>
 
       <!-- Table -->
-      <div class="overflow-visible">
+      <div class="overflow-x-auto">
         <table class="w-full text-sm text-left">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
             <tr>
               <th class="px-4 py-3 w-4">
                 <input type="checkbox" v-model="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
               </th>
+              <th class="px-2 py-3 w-8 text-center">
+                <span class="sr-only">Expand</span>
+              </th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('name')">
-                Name <span v-if="sortBy === 'name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                Nama <span v-if="sortBy === 'name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('email')">
                 Email <span v-if="sortBy === 'email'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
               <th class="px-4 py-3">WhatsApp</th>
+              <th class="px-4 py-3">Total Transaksi</th>
+              <th class="px-4 py-3 text-center">Order Terakhir</th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">
-                Joined Date <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                Bergabung <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
-              <th class="px-4 py-3 text-center">Actions</th>
+              <th class="px-4 py-3 text-center w-24">Aksi</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody class="divide-y divide-gray-200">
             <tr v-if="loading">
-              <td colspan="6" class="py-12 text-center">
+              <td colspan="9" class="py-12 text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               </td>
             </tr>
             <tr v-else-if="!clients || clients.length === 0">
-              <td colspan="6" class="py-12 text-center text-gray-500">
-                No clients found.
+              <td colspan="9" class="py-12 text-center text-gray-500">
+                Tidak ada data klien ditemukan.
               </td>
             </tr>
             <template v-else>
-              <tr v-for="client in clients" :key="client.id" class="border-b hover:bg-gray-50 transition-colors">
-                <td class="px-4 py-3">
-                  <input type="checkbox" :value="client.id" v-model="selectedClients" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                </td>
-                <td class="px-4 py-3">
-                  <div class="font-medium text-gray-900">{{ client.name }}</div>
-                </td>
-                <td class="px-4 py-3 text-gray-600">
-                  <a :href="`mailto:${client.email}`" class="hover:underline hover:text-blue-600">
-                    {{ client.email }}
-                  </a>
-                </td>
-                <td class="px-4 py-3 text-gray-600">
-                  <template v-if="client.whatsapp || client.phone">
-                    <a
-                      :href="formatWaUrl(client.whatsapp || client.phone)"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+              <template v-for="client in clients" :key="client.id">
+                <!-- Main Client Row -->
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-4 py-3">
+                    <input type="checkbox" :value="client.id" v-model="selectedClients" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                  </td>
+                  <td class="px-2 py-3 text-center">
+                    <button
+                      type="button"
+                      @click="toggleExpand(client.id)"
+                      class="p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-transform"
+                      :title="isExpanded(client.id) ? 'Tutup riwayat pesanan' : 'Lihat riwayat pesanan'"
                     >
-                      <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.585 1.961.947 3.24.947 3.181 0 5.767-2.587 5.768-5.766.001-3.182-2.585-5.768-5.768-5.768zm0 10.366c-1.116 0-2.02-.345-2.85-.929l-.204-.144-1.579.414.422-1.54-.15-.238c-.627-.996-.957-1.87-.956-2.909.001-2.48 2.019-4.498 4.5-4.498 2.48 0 4.498 2.018 4.498 4.498 0 2.48-2.018 4.498-4.498 4.498z"/>
+                      <svg
+                        class="w-4 h-4 transform transition-transform duration-200"
+                        :class="isExpanded(client.id) ? 'rotate-90 text-blue-600' : 'text-gray-400'"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                       </svg>
-                      {{ client.whatsapp || client.phone }}
+                    </button>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="font-medium text-gray-900 flex items-center gap-2">
+                      {{ client.name }}
+                      <span
+                        v-if="client.orders && client.orders.length > 0"
+                        class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-blue-50 text-blue-600"
+                      >
+                        {{ client.orders.length }} Order
+                      </span>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-gray-600">
+                    <a :href="`mailto:${client.email}`" class="hover:underline hover:text-blue-600">
+                      {{ client.email }}
                     </a>
-                  </template>
-                  <span v-else class="text-gray-400 italic">-</span>
-                </td>
-                <td class="px-4 py-3 text-gray-600">
-                  {{ client.created_at ? new Date(client.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' }}
-                </td>
-                <td class="px-4 py-3 text-center relative">
-                  <button
-                    @click.stop="activeDropdown = activeDropdown === client.id ? null : client.id"
-                    class="p-1 rounded hover:bg-gray-200 text-gray-500"
-                  >
-                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-                    </svg>
-                  </button>
+                  </td>
+                  <td class="px-4 py-3 text-gray-600">
+                    <template v-if="client.whatsapp || client.phone">
+                      <a
+                        :href="formatWaUrl(client.whatsapp || client.phone)"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200"
+                      >
+                        <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.969.585 1.961.947 3.24.947 3.181 0 5.767-2.587 5.768-5.766.001-3.182-2.585-5.768-5.768-5.768zm0 10.366c-1.116 0-2.02-.345-2.85-.929l-.204-.144-1.579.414.422-1.54-.15-.238c-.627-.996-.957-1.87-.956-2.909.001-2.48 2.019-4.498 4.5-4.498 2.48 0 4.498 2.018 4.498 4.498 0 2.48-2.018 4.498-4.498 4.498z"/>
+                        </svg>
+                        {{ client.whatsapp || client.phone }}
+                      </a>
+                    </template>
+                    <span v-else class="text-gray-400 italic">-</span>
+                  </td>
+                  <td class="px-4 py-3">
+                    <div class="font-semibold text-gray-900">
+                      Rp {{ getClientTotalSpent(client).toLocaleString('id-ID') }}
+                    </div>
+                    <div class="text-xs text-gray-500">
+                      {{ getClientOrdersCount(client) }} Transaksi
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-center">
+                    <span
+                      v-if="getClientLatestStatus(client) === 'paid'"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200"
+                    >
+                      ✓ Paid
+                    </span>
+                    <span
+                      v-else-if="getClientLatestStatus(client) === 'unpaid'"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200"
+                    >
+                      ⏳ Unpaid
+                    </span>
+                    <span
+                      v-else-if="getClientLatestStatus(client) === 'expired'"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200"
+                    >
+                      ✕ Expired
+                    </span>
+                    <span v-else class="text-gray-400 text-xs italic">-</span>
+                  </td>
+                  <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">
+                    {{ client.created_at ? new Date(client.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' }}
+                  </td>
+                  <td class="px-4 py-3 text-center relative">
+                    <button
+                      @click.stop="activeDropdown = activeDropdown === client.id ? null : client.id"
+                      class="p-1 rounded hover:bg-gray-200 text-gray-500"
+                    >
+                      <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                      </svg>
+                    </button>
 
-                  <div
-                    v-show="activeDropdown === client.id"
-                    class="absolute right-8 top-10 mt-1 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
-                  >
-                    <template v-if="viewMode === 'active'">
-                      <button
-                        class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left"
-                        @click.stop="copyClientAccessLink(client); activeDropdown = null"
-                      >
-                        <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
-                        </svg>
-                        Salin Link Akses Klien
-                      </button>
-                      <button
-                        class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-gray-700"
-                        @click.stop="openEditModal(client); activeDropdown = null"
-                      >
-                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                        </svg>
-                        Edit
-                      </button>
-                      <button
-                        class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-red-600"
-                        @click.stop="confirmDelete(client); activeDropdown = null"
-                      >
-                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                        Delete
-                      </button>
-                    </template>
-                    <template v-else>
-                      <button
-                        v-if="isSuperAdmin"
-                        class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-green-600"
-                        @click.stop="confirmRestore(client); activeDropdown = null"
-                      >
-                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
-                        </svg>
-                        Restore
-                      </button>
-                      <button
-                        v-if="isSuperAdmin"
-                        class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-red-600"
-                        @click.stop="confirmForceDelete(client); activeDropdown = null"
-                      >
-                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                        </svg>
-                        Force Delete
-                      </button>
-                    </template>
-                  </div>
-                </td>
-              </tr>
+                    <div
+                      v-show="activeDropdown === client.id"
+                      class="absolute right-8 top-10 mt-1 w-52 bg-white rounded-md shadow-lg border border-gray-200 z-50 overflow-hidden text-left"
+                    >
+                      <template v-if="viewMode === 'active'">
+                        <button
+                          class="flex items-center px-3 py-2 text-sm hover:bg-blue-50 text-blue-700 w-full text-left"
+                          @click.stop="copyClientAccessLink(client); activeDropdown = null"
+                        >
+                          <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                          </svg>
+                          Salin Link Akses Klien
+                        </button>
+                        <button
+                          class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-gray-700"
+                          @click.stop="openEditModal(client); activeDropdown = null"
+                        >
+                          <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                          </svg>
+                          Edit Klien
+                        </button>
+                        <button
+                          class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-red-600"
+                          @click.stop="confirmDelete(client); activeDropdown = null"
+                        >
+                          <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                          </svg>
+                          Hapus ke Trash
+                        </button>
+                      </template>
+                      <template v-else>
+                        <button
+                          v-if="isSuperAdmin"
+                          class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-green-600"
+                          @click.stop="confirmRestore(client); activeDropdown = null"
+                        >
+                          <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/>
+                          </svg>
+                          Pulihkan
+                        </button>
+                        <button
+                          v-if="isSuperAdmin"
+                          class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-red-600"
+                          @click.stop="confirmForceDelete(client); activeDropdown = null"
+                        >
+                          <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                          </svg>
+                          Hapus Permanen
+                        </button>
+                      </template>
+                    </div>
+                  </td>
+                </tr>
+
+                <!-- Expandable Row: Riwayat Pesanan Client -->
+                <tr v-if="isExpanded(client.id)" class="bg-gray-50/80 border-b border-gray-200">
+                  <td colspan="9" class="p-4 pl-12">
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-sm">
+                      <div class="flex items-center justify-between mb-3 border-b border-gray-100 pb-2.5">
+                        <div class="flex items-center gap-2">
+                          <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                          </svg>
+                          <span class="text-xs font-bold text-gray-800 uppercase tracking-wider">
+                            Riwayat Pesanan Milik {{ client.name }} ({{ client.orders?.length || 0 }})
+                          </span>
+                        </div>
+                      </div>
+
+                      <div v-if="client.orders && client.orders.length > 0" class="overflow-x-auto">
+                        <table class="w-full text-xs text-left">
+                          <thead class="text-[11px] text-gray-500 uppercase bg-gray-50 border-b border-gray-200">
+                            <tr>
+                              <th class="px-3 py-2">Invoice</th>
+                              <th class="px-3 py-2">Paket & Fitur</th>
+                              <th class="px-3 py-2">Total Biaya</th>
+                              <th class="px-3 py-2 text-center">Status</th>
+                              <th class="px-3 py-2 text-center">Tautan Cepat</th>
+                            </tr>
+                          </thead>
+                          <tbody class="divide-y divide-gray-100">
+                            <tr v-for="order in client.orders" :key="order.id" class="hover:bg-blue-50/40">
+                              <td class="px-3 py-2.5 font-mono font-medium text-gray-900">
+                                {{ order.invoice_number || `#INV-${order.id.slice(0, 8).toUpperCase()}` }}
+                              </td>
+                              <td class="px-3 py-2.5">
+                                <div class="font-medium text-gray-800">
+                                  {{ order.package?.name || order.package_name || 'Paket Undangan' }}
+                                </div>
+                                <div class="flex items-center gap-1.5 mt-1">
+                                  <span
+                                    v-if="order.scanner_token || order.package?.features_config?.has_qr"
+                                    class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-purple-50 text-purple-700 border border-purple-200"
+                                  >
+                                    QR Check-in Aktif
+                                  </span>
+                                  <span
+                                    v-if="order.package?.features_config?.has_gallery"
+                                    class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  >
+                                    Galeri Foto
+                                  </span>
+                                </div>
+                              </td>
+                              <td class="px-3 py-2.5 font-semibold text-gray-900">
+                                Rp {{ (order.total_amount ?? 0).toLocaleString('id-ID') }}
+                              </td>
+                              <td class="px-3 py-2.5 text-center">
+                                <span
+                                  v-if="order.status === 'paid'"
+                                  class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-100 text-green-800 border border-green-200"
+                                >
+                                  Paid
+                                </span>
+                                <span
+                                  v-else-if="order.status === 'unpaid'"
+                                  class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200"
+                                >
+                                  Unpaid
+                                </span>
+                                <span
+                                  v-else
+                                  class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-700 border border-gray-200"
+                                >
+                                  Expired
+                                </span>
+                              </td>
+                              <td class="px-3 py-2.5 text-center">
+                                <div class="flex items-center justify-center gap-2">
+                                  <!-- Buka Pembayaran if unpaid -->
+                                  <button
+                                    v-if="order.status === 'unpaid' && order.payment_url"
+                                    type="button"
+                                    @click="openOrderPayment(order)"
+                                    class="px-2.5 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 flex items-center gap-1"
+                                  >
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                                    </svg>
+                                    Bayar
+                                  </button>
+
+                                  <!-- Salin Form Token Link if paid -->
+                                  <template v-if="order.status === 'paid'">
+                                    <button
+                                      type="button"
+                                      @click="copyOrderFormLink(order)"
+                                      class="px-2.5 py-1 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 flex items-center gap-1"
+                                      title="Salin Link Form Klien"
+                                    >
+                                      <svg class="w-3 h-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                                      </svg>
+                                      Salin Link Akses Klien
+                                    </button>
+
+                                    <!-- Salin Scanner Link if QR enabled -->
+                                    <button
+                                      v-if="order.scanner_token || order.package?.features_config?.has_qr"
+                                      type="button"
+                                      @click="copyOrderScannerLink(order)"
+                                      class="px-2.5 py-1 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded hover:bg-purple-100 flex items-center gap-1"
+                                      title="Salin Link Scanner (Hari H)"
+                                    >
+                                      <svg class="w-3 h-3 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+                                      </svg>
+                                      Salin Link Scanner (Hari H)
+                                    </button>
+                                  </template>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                      <div v-else class="text-xs text-gray-500 py-3 italic text-center">
+                        Belum ada riwayat transaksi pesanan untuk klien ini.
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+              </template>
             </template>
           </tbody>
         </table>
@@ -217,8 +409,8 @@
       <!-- Pagination -->
       <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
         <span class="text-sm text-gray-500">
-          Showing {{ (meta.page - 1) * meta.per_page + 1 }} to
-          {{ Math.min(meta.page * meta.per_page, meta.total) }} of {{ meta.total }} clients
+          Menampilkan {{ (meta.page - 1) * meta.per_page + 1 }} sampai
+          {{ Math.min(meta.page * meta.per_page, meta.total) }} dari {{ meta.total }} klien
         </span>
         <div class="flex gap-1">
           <button
@@ -226,7 +418,7 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page - 1)"
           >
-            Previous
+            Sebelumnya
           </button>
           <button
             v-for="p in visiblePages"
@@ -242,52 +434,69 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page + 1)"
           >
-            Next
+            Berikutnya
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Modal Form Client -->
+    <!-- Modal Form Create / Edit Client -->
     <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div class="bg-white rounded-lg shadow-xl max-w-md w-full p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">
-          {{ editingId ? 'Edit Client' : 'Add New Client' }}
-        </h3>
+      <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
+          <h3 class="text-lg font-semibold text-gray-900">{{ editingId ? 'Edit Klien' : 'Tambah Klien Baru' }}</h3>
+          <button
+            type="button"
+            @click="showModal = false"
+            class="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
         <form @submit.prevent="saveClient" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Nama Lengkap / Pasangan <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="form.name"
               type="text"
               required
-              placeholder="e.g. Jessica & Robert"
+              placeholder="Contoh: Dimas & Anisa"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Email <span class="text-red-500">*</span>
+            </label>
             <input
               v-model="form.email"
               type="email"
               required
-              placeholder="client@example.com"
+              placeholder="klien@example.com"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">WhatsApp Number *</label>
-            <input
-              v-model="form.whatsapp"
-              type="tel"
-              required
-              placeholder="081234567890"
-              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-            />
-            <p class="text-xs text-gray-400 mt-1">Use local (08...) or international format (628...).</p>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Nomor WhatsApp <span class="text-red-500">*</span>
+            </label>
+            <div class="relative">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">🇮🇩 +62</span>
+              <input
+                v-model="form.whatsapp"
+                type="tel"
+                required
+                placeholder="81234567890"
+                class="w-full rounded-lg border border-gray-300 pl-16 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
           </div>
 
           <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-6">
@@ -296,7 +505,7 @@
               @click="showModal = false"
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Cancel
+              Batal
             </button>
             <button
               type="submit"
@@ -304,19 +513,19 @@
               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
               <div v-if="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              Save
+              <span>{{ saving ? 'Menyimpan...' : 'Simpan' }}</span>
             </button>
           </div>
         </form>
       </div>
     </div>
 
-    <!-- Confirmation Modals -->
+    <!-- Modals Confirmation State -->
     <UiConfirmModal
       v-if="showDeleteModal && clientToDelete"
-      title="Delete Client"
-      :message="`Are you sure you want to move client '${clientToDelete.name}' to trash?`"
-      confirm-text="Delete"
+      title="Hapus Klien"
+      :message="`Apakah Anda yakin ingin memindahkan klien '${clientToDelete.name}' ke trash?`"
+      confirm-text="Hapus"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
@@ -324,18 +533,18 @@
 
     <UiConfirmModal
       v-if="showRestoreModal && clientToRestore"
-      title="Restore Client"
-      :message="`Are you sure you want to restore client '${clientToRestore.name}' from trash?`"
-      confirm-text="Restore"
+      title="Pulihkan Klien"
+      :message="`Apakah Anda yakin ingin memulihkan klien '${clientToRestore.name}' dari trash?`"
+      confirm-text="Pulihkan"
       @confirm="handleRestore"
       @cancel="showRestoreModal = false"
     />
 
     <UiConfirmModal
       v-if="showForceDeleteModal && clientToForceDelete"
-      title="Force Delete Client"
-      :message="`Are you sure you want to PERMANENTLY delete client '${clientToForceDelete.name}'? This action cannot be undone.`"
-      confirm-text="Force Delete"
+      title="Hapus Permanen Klien"
+      :message="`Apakah Anda yakin ingin MENGHAPUS PERMANEN klien '${clientToForceDelete.name}'? Tindakan ini tidak dapat dibatalkan.`"
+      confirm-text="Hapus Permanen"
       :danger="true"
       require-input="DELETE"
       @confirm="handleForceDelete"
@@ -344,9 +553,9 @@
 
     <UiConfirmModal
       v-if="showBulkDeleteModal"
-      title="Bulk Delete Clients"
-      :message="`Are you sure you want to move ${selectedClients.length} selected clients to trash?`"
-      confirm-text="Delete All"
+      title="Hapus Klien Terpilih"
+      :message="`Apakah Anda yakin ingin memindahkan ${selectedClients.length} klien terpilih ke trash?`"
+      confirm-text="Hapus Semua"
       :danger="true"
       @confirm="handleBulkDelete"
       @cancel="showBulkDeleteModal = false"
@@ -354,18 +563,18 @@
 
     <UiConfirmModal
       v-if="showBulkRestoreModal"
-      title="Bulk Restore Clients"
-      :message="`Are you sure you want to restore ${selectedClients.length} selected clients from trash?`"
-      confirm-text="Restore All"
+      title="Pulihkan Klien Terpilih"
+      :message="`Apakah Anda yakin ingin memulihkan ${selectedClients.length} klien terpilih dari trash?`"
+      confirm-text="Pulihkan Semua"
       @confirm="handleBulkRestore"
       @cancel="showBulkRestoreModal = false"
     />
 
     <UiConfirmModal
       v-if="showBulkForceDeleteModal"
-      title="Bulk Force Delete Clients"
-      :message="`Are you sure you want to PERMANENTLY delete ${selectedClients.length} selected clients?`"
-      confirm-text="Force Delete All"
+      title="Hapus Permanen Klien Terpilih"
+      :message="`Apakah Anda yakin ingin MENGHAPUS PERMANEN ${selectedClients.length} klien terpilih?`"
+      confirm-text="Hapus Permanen Semua"
       :danger="true"
       require-input="DELETE"
       @confirm="handleBulkForceDelete"
@@ -376,6 +585,7 @@
 
 <script setup lang="ts">
 import type { Client, ClientFormData } from '~/types/client'
+import type { Order } from '~/types/order'
 import { handleApiError } from '~/utils/errors'
 
 definePageMeta({ layout: 'dashboard', middleware: 'auth' })
@@ -389,6 +599,21 @@ const isSuperAdmin = computed(() => authStore.user?.roles?.some(r => r.name.toLo
 const canViewTrash = computed(() => isSuperAdmin.value)
 const viewMode = ref<'active' | 'trash'>('active')
 const activeDropdown = ref<string | null>(null)
+
+// Expandable rows state
+const expandedRowIds = ref<Set<string>>(new Set())
+
+function isExpanded(id: string): boolean {
+  return expandedRowIds.value.has(id)
+}
+
+function toggleExpand(id: string) {
+  if (expandedRowIds.value.has(id)) {
+    expandedRowIds.value.delete(id)
+  } else {
+    expandedRowIds.value.add(id)
+  }
+}
 
 const sortBy = ref('created_at')
 const sortOrder = ref('desc')
@@ -455,8 +680,83 @@ function formatWaUrl(wa?: string | null): string {
   return `https://wa.me/${digits}`
 }
 
+function getClientOrdersCount(client: Client): number {
+  return client.orders?.length ?? client.orders_count ?? 0
+}
+
+function getClientTotalSpent(client: Client): number {
+  if (!client.orders || client.orders.length === 0) return 0
+  return client.orders.reduce((sum, ord) => sum + (ord.total_amount || 0), 0)
+}
+
+function getClientLatestStatus(client: Client): string | null {
+  if (!client.orders || client.orders.length === 0) return null
+  return client.orders[0]?.status || null
+}
+
+function openOrderPayment(order: Order) {
+  if (order.payment_url && typeof window !== 'undefined') {
+    window.open(order.payment_url, '_blank')
+  } else {
+    toast.error('Link pembayaran tidak tersedia.')
+  }
+}
+
+async function copyOrderFormLink(order: Order) {
+  let link = ''
+  if (order.form_token) {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/form/${order.form_token}` : ''
+  } else if (order.magic_link) {
+    link = order.magic_link
+  } else {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/${order.id}?auth=magic` : ''
+  }
+
+  try {
+    if (navigator?.clipboard) {
+      await navigator.clipboard.writeText(link)
+      toast.success('Link Akses Klien berhasil disalin!')
+    } else {
+      toast.success(`Link Akses Klien: ${link}`)
+    }
+  } catch (err) {
+    toast.error('Gagal menyalin Link Akses Klien ke clipboard.')
+  }
+}
+
+async function copyOrderScannerLink(order: Order) {
+  let link = ''
+  if (order.scanner_token) {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/checkin/scanner/${order.scanner_token}` : ''
+  } else if (order.scanner_link) {
+    link = order.scanner_link
+  } else {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/checkin/${order.id}/scanner` : ''
+  }
+
+  try {
+    if (navigator?.clipboard) {
+      await navigator.clipboard.writeText(link)
+      toast.success('Link Scanner (Hari H) berhasil disalin!')
+    } else {
+      toast.success(`Link Scanner (Hari H): ${link}`)
+    }
+  } catch (err) {
+    toast.error('Gagal menyalin Link Scanner (Hari H) ke clipboard.')
+  }
+}
+
 async function copyClientAccessLink(client: Client) {
-  const link = (client as any).magic_link || (typeof window !== 'undefined' ? `${window.location.origin}/invitation/${client.id}?auth=magic` : '')
+  const paidOrder = client.orders?.find(o => o.status === 'paid' && o.form_token)
+  let link = ''
+  if (paidOrder?.form_token) {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/form/${paidOrder.form_token}` : ''
+  } else if (client.magic_link) {
+    link = client.magic_link
+  } else {
+    link = typeof window !== 'undefined' ? `${window.location.origin}/invitation/${client.id}?auth=magic` : ''
+  }
+
   try {
     if (navigator?.clipboard) {
       await navigator.clipboard.writeText(link)
@@ -476,6 +776,7 @@ async function loadClients() {
     const params = {
       page: currentPage.value,
       per_page: 15,
+      limit: 15,
       search: search.value || undefined,
       sort: sortBy.value,
       order: sortOrder.value
@@ -524,12 +825,25 @@ function openEditModal(client: Client) {
 async function saveClient() {
   saving.value = true
   try {
+    let cleanWa = form.value.whatsapp.trim().replace(/\D/g, '')
+    if (cleanWa.startsWith('0')) {
+      cleanWa = '62' + cleanWa.slice(1)
+    } else if (!cleanWa.startsWith('62')) {
+      cleanWa = '62' + cleanWa
+    }
+
+    const payload = {
+      name: form.value.name.trim(),
+      email: form.value.email.trim(),
+      whatsapp: cleanWa
+    }
+
     if (editingId.value) {
-      await clientService.updateClient(editingId.value, form.value)
-      toast.success('Client updated successfully')
+      await clientService.updateClient(editingId.value, payload)
+      toast.success('Data klien berhasil diperbarui')
     } else {
-      await clientService.createClient(form.value)
-      toast.success('Client added successfully')
+      await clientService.createClient(payload)
+      toast.success('Klien baru berhasil ditambahkan')
     }
     showModal.value = false
     await loadClients()
@@ -549,7 +863,7 @@ async function handleDelete() {
   if (!clientToDelete.value) return
   try {
     await clientService.deleteClient(clientToDelete.value.id)
-    toast.success('Client moved to trash')
+    toast.success('Klien berhasil dipindahkan ke trash')
     showDeleteModal.value = false
     clientToDelete.value = null
     loadClients()
@@ -567,14 +881,14 @@ async function handleRestore() {
   if (!clientToRestore.value) return
   try {
     await clientService.restoreClient(clientToRestore.value.id)
-    toast.success('Client restored successfully')
+    toast.success('Klien berhasil dipulihkan')
     showRestoreModal.value = false
     clientToRestore.value = null
     loadClients()
   } catch (e) {
     try {
       await clientService.bulkRestoreClients([clientToRestore.value.id])
-      toast.success('Client restored successfully')
+      toast.success('Klien berhasil dipulihkan')
       showRestoreModal.value = false
       clientToRestore.value = null
       loadClients()
@@ -593,14 +907,14 @@ async function handleForceDelete() {
   if (!clientToForceDelete.value) return
   try {
     await clientService.forceDeleteClient(clientToForceDelete.value.id)
-    toast.success('Client permanently deleted')
+    toast.success('Klien berhasil dihapus permanen')
     showForceDeleteModal.value = false
     clientToForceDelete.value = null
     loadClients()
   } catch (e) {
     try {
       await clientService.bulkForceDeleteClients([clientToForceDelete.value.id])
-      toast.success('Client permanently deleted')
+      toast.success('Klien berhasil dihapus permanen')
       showForceDeleteModal.value = false
       clientToForceDelete.value = null
       loadClients()
@@ -613,7 +927,7 @@ async function handleForceDelete() {
 async function handleBulkDelete() {
   try {
     await clientService.bulkDeleteClients(selectedClients.value)
-    toast.success('Selected clients moved to trash')
+    toast.success('Klien terpilih berhasil dipindahkan ke trash')
     showBulkDeleteModal.value = false
     loadClients()
   } catch (e: any) {
@@ -624,7 +938,7 @@ async function handleBulkDelete() {
 async function handleBulkRestore() {
   try {
     await clientService.bulkRestoreClients(selectedClients.value)
-    toast.success('Selected clients restored successfully')
+    toast.success('Klien terpilih berhasil dipulihkan')
     showBulkRestoreModal.value = false
     loadClients()
   } catch (e: any) {
@@ -635,7 +949,7 @@ async function handleBulkRestore() {
 async function handleBulkForceDelete() {
   try {
     await clientService.bulkForceDeleteClients(selectedClients.value)
-    toast.success('Selected clients permanently deleted')
+    toast.success('Klien terpilih berhasil dihapus permanen')
     showBulkForceDeleteModal.value = false
     loadClients()
   } catch (e: any) {
