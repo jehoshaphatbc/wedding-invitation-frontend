@@ -4,7 +4,7 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
       <div>
         <h1 class="text-2xl font-bold text-gray-900">Templates</h1>
-        <p class="text-sm text-gray-500 mt-1">Kelola template desain undangan, nama komponen Nuxt, dan status aktif.</p>
+        <p class="text-sm text-gray-500 mt-1">Manage invitation design templates, Nuxt component names, and active status.</p>
       </div>
       <div class="flex gap-2">
         <button
@@ -16,7 +16,7 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
           </svg>
-          {{ viewMode === 'trash' ? 'Lihat Template Aktif' : 'Trash' }}
+          {{ viewMode === 'trash' ? 'View Active Templates' : 'Trash' }}
         </button>
         <button
           v-if="viewMode === 'active'"
@@ -26,7 +26,7 @@
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
-          Tambah Template
+          Add Template
         </button>
       </div>
     </div>
@@ -34,14 +34,14 @@
     <div class="bg-white rounded-lg shadow">
       <!-- Bulk Actions Bar -->
       <div v-if="selectedTemplates.length > 0" class="bg-blue-50 px-4 py-3 border-b border-blue-100 flex items-center justify-between">
-        <span class="text-sm text-blue-800 font-medium">{{ selectedTemplates.length }} template dipilih</span>
+        <span class="text-sm text-blue-800 font-medium">{{ selectedTemplates.length }} template(s) selected</span>
         <div class="flex gap-2">
           <template v-if="viewMode === 'active'">
             <button
               @click="showBulkDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Hapus Terpilih
+              Delete Selected
             </button>
           </template>
           <template v-else>
@@ -50,14 +50,14 @@
               @click="showBulkRestoreModal = true"
               class="px-3 py-1.5 text-sm font-medium text-green-600 bg-white border border-green-200 rounded hover:bg-green-50"
             >
-              Pulihkan Terpilih
+              Restore Selected
             </button>
             <button
               v-if="isSuperAdmin"
               @click="showBulkForceDeleteModal = true"
               class="px-3 py-1.5 text-sm font-medium text-red-600 bg-white border border-red-200 rounded hover:bg-red-50"
             >
-              Hapus Permanen Terpilih
+              Permanently Delete Selected
             </button>
           </template>
         </div>
@@ -72,7 +72,7 @@
           <input
             v-model="search"
             type="text"
-            placeholder="Cari nama template atau komponen..."
+            placeholder="Search template name or component..."
             class="w-full rounded-lg border border-gray-300 pl-9 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
@@ -83,9 +83,9 @@
             v-model="statusFilter"
             class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
           >
-            <option value="">Semua Status</option>
-            <option value="active">Aktif</option>
-            <option value="inactive">Non-Aktif</option>
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
           </select>
         </div>
       </div>
@@ -107,7 +107,7 @@
                 class="px-4 py-3 cursor-pointer hover:bg-gray-100"
                 @click="toggleSort('name')"
               >
-                Nama Template <span v-if="sortBy === 'name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
+                Template Name <span v-if="sortBy === 'name'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
               <th
                 class="px-4 py-3 cursor-pointer hover:bg-gray-100"
@@ -121,7 +121,7 @@
               >
                 Status <span v-if="sortBy === 'is_active'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
-              <th class="px-4 py-3 text-center w-24">Aksi</th>
+              <th class="px-4 py-3 text-center w-24">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200">
@@ -132,7 +132,7 @@
             </tr>
             <tr v-else-if="!filteredTemplates || filteredTemplates.length === 0">
               <td colspan="6" class="py-12 text-center text-gray-500">
-                Tidak ada template ditemukan.
+                No templates found.
               </td>
             </tr>
             <template v-else>
@@ -182,13 +182,13 @@
                     v-if="tpl.is_active"
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200"
                   >
-                    Aktif
+                    Active
                   </span>
                   <span
                     v-else
                     class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200"
                   >
-                    Non-Aktif
+                    Inactive
                   </span>
                 </td>
                 <td class="px-4 py-3 text-center relative">
@@ -214,7 +214,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
                         </svg>
-                        Salin URL Gambar
+                        Copy Image URL
                       </button>
                       <button
                         class="flex items-center px-3 py-2 text-sm hover:bg-gray-50 w-full text-left text-gray-700"
@@ -232,7 +232,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Hapus
+                        Delete
                       </button>
                     </template>
                     <template v-else>
@@ -244,7 +244,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                         </svg>
-                        Pulihkan
+                        Restore
                       </button>
                       <button
                         v-if="isSuperAdmin"
@@ -254,7 +254,7 @@
                         <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        Hapus Permanen
+                        Permanently Delete
                       </button>
                     </template>
                   </div>
@@ -268,8 +268,8 @@
       <!-- Pagination -->
       <div v-if="meta && meta.last_page > 1" class="flex items-center justify-between px-4 py-3 border-t border-gray-200">
         <span class="text-sm text-gray-500">
-          Menampilkan {{ (meta.page - 1) * meta.per_page + 1 }} sampai
-          {{ Math.min(meta.page * meta.per_page, meta.total) }} dari {{ meta.total }} template
+          Showing {{ (meta.page - 1) * meta.per_page + 1 }} to
+          {{ Math.min(meta.page * meta.per_page, meta.total) }} of {{ meta.total }} templates
         </span>
         <div class="flex gap-1">
           <button
@@ -277,7 +277,7 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page - 1)"
           >
-            Sebelumnya
+            Previous
           </button>
           <button
             v-for="p in visiblePages"
@@ -293,7 +293,7 @@
             class="px-3 py-1 text-sm rounded border border-gray-300 disabled:opacity-50 hover:bg-gray-50"
             @click="goToPage(meta.page + 1)"
           >
-            Berikutnya
+            Next
           </button>
         </div>
       </div>
@@ -304,7 +304,7 @@
       <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
           <h3 class="text-lg font-semibold text-gray-900">
-            {{ editingId ? 'Edit Template' : 'Tambah Template Baru' }}
+            {{ editingId ? 'Edit Template' : 'Add New Template' }}
           </h3>
           <button
             type="button"
@@ -321,13 +321,13 @@
           <!-- Input Name -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              Nama Template <span class="text-red-500">*</span>
+              Template Name <span class="text-red-500">*</span>
             </label>
             <input
               v-model="form.name"
               type="text"
               required
-              placeholder="Contoh: Classic Elegance"
+              placeholder="e.g. Classic Elegance"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
           </div>
@@ -341,11 +341,11 @@
               v-model="form.nuxt_component"
               type="text"
               required
-              placeholder="Contoh: TemplateA"
+              placeholder="e.g. TemplateA"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
             <p class="mt-1 text-xs text-gray-500">
-              Nama file komponen Vue tanpa ekstensi, contoh: TemplateA
+              Vue component file name without extension, e.g. TemplateA
             </p>
           </div>
 
@@ -398,7 +398,7 @@
                   v-if="previewError"
                   class="absolute inset-0 bg-gray-100 flex items-center justify-center p-1 text-center"
                 >
-                  <span class="text-[10px] text-red-500 leading-tight">Gagal memuat</span>
+                  <span class="text-[10px] text-red-500 leading-tight">Failed to load</span>
                 </div>
               </div>
               <div class="flex-1 min-w-0">
@@ -409,7 +409,7 @@
                   @click="form.thumbnail_url = ''"
                   class="mt-1 text-xs text-red-600 hover:text-red-700 font-medium"
                 >
-                  Hapus URL
+                  Clear URL
                 </button>
               </div>
             </div>
@@ -419,8 +419,8 @@
           <div class="pt-2">
             <div class="flex items-center justify-between p-3.5 bg-gray-50 rounded-lg border border-gray-200">
               <div>
-                <span class="text-sm font-medium text-gray-900 block">Status Aktif</span>
-                <span class="text-xs text-gray-500">Aktifkan template agar dapat digunakan pada undangan</span>
+                <span class="text-sm font-medium text-gray-900 block">Active Status</span>
+                <span class="text-xs text-gray-500">Activate template to make it available for invitations</span>
               </div>
               <button
                 type="button"
@@ -445,7 +445,7 @@
               @click="showModal = false"
               class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
             >
-              Batal
+              Cancel
             </button>
             <button
               type="submit"
@@ -453,7 +453,7 @@
               class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             >
               <div v-if="saving" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-              <span>{{ saving ? 'Menyimpan...' : 'Simpan' }}</span>
+              <span>{{ saving ? 'Saving...' : 'Save' }}</span>
             </button>
           </div>
         </form>
@@ -463,9 +463,9 @@
     <!-- Confirmation Modals -->
     <UiConfirmModal
       v-if="showDeleteModal && templateToDelete"
-      title="Hapus Template"
-      :message="`Apakah Anda yakin ingin memindahkan template '${templateToDelete.name}' ke trash?`"
-      confirm-text="Hapus"
+      title="Delete Template"
+      :message="`Are you sure you want to move template '${templateToDelete.name}' to trash?`"
+      confirm-text="Delete"
       :danger="true"
       @confirm="handleDelete"
       @cancel="showDeleteModal = false"
@@ -473,18 +473,18 @@
 
     <UiConfirmModal
       v-if="showRestoreModal && templateToRestore"
-      title="Pulihkan Template"
-      :message="`Apakah Anda yakin ingin memulihkan template '${templateToRestore.name}' dari trash?`"
-      confirm-text="Pulihkan"
+      title="Restore Template"
+      :message="`Are you sure you want to restore template '${templateToRestore.name}' from trash?`"
+      confirm-text="Restore"
       @confirm="handleRestore"
       @cancel="showRestoreModal = false"
     />
 
     <UiConfirmModal
       v-if="showForceDeleteModal && templateToForceDelete"
-      title="Hapus Permanen Template"
-      :message="`Apakah Anda yakin ingin MENGHAPUS PERMANEN template '${templateToForceDelete.name}'? Tindakan ini tidak dapat dibatalkan.`"
-      confirm-text="Hapus Permanen"
+      title="Permanently Delete Template"
+      :message="`Are you sure you want to PERMANENTLY DELETE template '${templateToForceDelete.name}'? This action cannot be undone.`"
+      confirm-text="Permanently Delete"
       :danger="true"
       require-input="DELETE"
       @confirm="handleForceDelete"
@@ -493,9 +493,9 @@
 
     <UiConfirmModal
       v-if="showBulkDeleteModal"
-      title="Hapus Template Terpilih"
-      :message="`Apakah Anda yakin ingin memindahkan ${selectedTemplates.length} template terpilih ke trash?`"
-      confirm-text="Hapus Semua"
+      title="Delete Selected Templates"
+      :message="`Are you sure you want to move ${selectedTemplates.length} selected template(s) to trash?`"
+      confirm-text="Delete All"
       :danger="true"
       @confirm="handleBulkDelete"
       @cancel="showBulkDeleteModal = false"
@@ -503,18 +503,18 @@
 
     <UiConfirmModal
       v-if="showBulkRestoreModal"
-      title="Pulihkan Template Terpilih"
-      :message="`Apakah Anda yakin ingin memulihkan ${selectedTemplates.length} template terpilih dari trash?`"
-      confirm-text="Pulihkan Semua"
+      title="Restore Selected Templates"
+      :message="`Are you sure you want to restore ${selectedTemplates.length} selected template(s) from trash?`"
+      confirm-text="Restore All"
       @confirm="handleBulkRestore"
       @cancel="showBulkRestoreModal = false"
     />
 
     <UiConfirmModal
       v-if="showBulkForceDeleteModal"
-      title="Hapus Permanen Template Terpilih"
-      :message="`Apakah Anda yakin ingin MENGHAPUS PERMANEN ${selectedTemplates.length} template terpilih?`"
-      confirm-text="Hapus Permanen Semua"
+      title="Permanently Delete Selected Templates"
+      :message="`Are you sure you want to PERMANENTLY DELETE ${selectedTemplates.length} selected template(s)?`"
+      confirm-text="Permanently Delete All"
       :danger="true"
       require-input="DELETE"
       @confirm="handleBulkForceDelete"
@@ -628,12 +628,12 @@ async function copyThumbnailUrl(tpl: Template) {
   try {
     if (navigator?.clipboard) {
       await navigator.clipboard.writeText(url)
-      toast.success('URL gambar template berhasil disalin!')
+      toast.success('Template image URL copied to clipboard!')
     } else {
       toast.success(`URL: ${url}`)
     }
   } catch {
-    toast.error('Gagal menyalin URL gambar template.')
+    toast.error('Failed to copy template image URL.')
   }
 }
 
@@ -718,27 +718,27 @@ async function onFileInputChange(e: Event) {
   if (target.files && target.files.length > 0) {
     const file = target.files[0]
     if (!file.type.startsWith('image/')) {
-      toast.error('File harus berupa gambar (PNG, JPG, WEBP, SVG)')
+      toast.error('File must be an image (PNG, JPG, WEBP, SVG)')
       return
     }
     if (file.size > 5 * 1024 * 1024) {
-      toast.error('Ukuran gambar tidak boleh melebihi 5MB')
+      toast.error('Image size cannot exceed 5MB')
       return
     }
 
     try {
-      toast.info('Mengunggah gambar...')
+      toast.info('Uploading image...')
       const uploadRes = await templateService.uploadImage(file)
       const uploadedUrl = uploadRes?.data?.url || uploadRes?.data?.file_url || uploadRes?.data?.thumbnail_url || (typeof uploadRes?.data === 'string' ? uploadRes.data : '') || uploadRes?.url || ''
       if (uploadedUrl) {
         form.value.thumbnail_url = uploadedUrl
         previewError.value = false
-        toast.success('Gambar berhasil diunggah')
+        toast.success('Image uploaded successfully')
       } else {
-        toast.error('Gagal mendapatkan URL gambar hasil unggahan.')
+        toast.error('Failed to get image URL from upload response.')
       }
     } catch (err) {
-      toast.error('Gagal mengunggah thumbnail: ' + handleApiError(err).message)
+      toast.error('Failed to upload thumbnail: ' + handleApiError(err).message)
     }
   }
 }
@@ -755,10 +755,10 @@ async function saveTemplate() {
 
     if (editingId.value) {
       await templateService.updateTemplate(editingId.value, payload)
-      toast.success('Template berhasil diperbarui')
+      toast.success('Template updated successfully')
     } else {
       await templateService.createTemplate(payload)
-      toast.success('Template berhasil disimpan')
+      toast.success('Template saved successfully')
     }
 
     showModal.value = false
@@ -779,7 +779,7 @@ async function handleDelete() {
   if (!templateToDelete.value) return
   try {
     await templateService.deleteTemplate(templateToDelete.value.id)
-    toast.success('Template berhasil dipindahkan ke trash')
+    toast.success('Template moved to trash successfully')
     showDeleteModal.value = false
     templateToDelete.value = null
     loadTemplates()
@@ -797,14 +797,14 @@ async function handleRestore() {
   if (!templateToRestore.value) return
   try {
     await templateService.restoreTemplate(templateToRestore.value.id)
-    toast.success('Template berhasil dipulihkan')
+    toast.success('Template restored successfully')
     showRestoreModal.value = false
     templateToRestore.value = null
     loadTemplates()
   } catch (e) {
     try {
       await templateService.bulkRestoreTemplates([templateToRestore.value.id])
-      toast.success('Template berhasil dipulihkan')
+      toast.success('Template restored successfully')
       showRestoreModal.value = false
       templateToRestore.value = null
       loadTemplates()
@@ -823,14 +823,14 @@ async function handleForceDelete() {
   if (!templateToForceDelete.value) return
   try {
     await templateService.forceDeleteTemplate(templateToForceDelete.value.id)
-    toast.success('Template berhasil dihapus permanen')
+    toast.success('Template permanently deleted')
     showForceDeleteModal.value = false
     templateToForceDelete.value = null
     loadTemplates()
   } catch (e) {
     try {
       await templateService.bulkForceDeleteTemplates([templateToForceDelete.value.id])
-      toast.success('Template berhasil dihapus permanen')
+      toast.success('Template permanently deleted')
       showForceDeleteModal.value = false
       templateToForceDelete.value = null
       loadTemplates()
@@ -843,7 +843,7 @@ async function handleForceDelete() {
 async function handleBulkDelete() {
   try {
     await templateService.bulkDeleteTemplates(selectedTemplates.value)
-    toast.success('Template terpilih berhasil dipindahkan ke trash')
+    toast.success('Selected templates moved to trash')
     showBulkDeleteModal.value = false
     loadTemplates()
   } catch (e: any) {
@@ -854,7 +854,7 @@ async function handleBulkDelete() {
 async function handleBulkRestore() {
   try {
     await templateService.bulkRestoreTemplates(selectedTemplates.value)
-    toast.success('Template terpilih berhasil dipulihkan')
+    toast.success('Selected templates restored successfully')
     showBulkRestoreModal.value = false
     loadTemplates()
   } catch (e: any) {
@@ -865,7 +865,7 @@ async function handleBulkRestore() {
 async function handleBulkForceDelete() {
   try {
     await templateService.bulkForceDeleteTemplates(selectedTemplates.value)
-    toast.success('Template terpilih berhasil dihapus permanen')
+    toast.success('Selected templates permanently deleted')
     showBulkForceDeleteModal.value = false
     loadTemplates()
   } catch (e: any) {

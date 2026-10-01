@@ -8,15 +8,37 @@
             H
           </div>
           <div>
-            <h1 class="text-base font-bold text-gray-900 leading-tight">Setup Undangan Digital</h1>
-            <p class="text-xs text-gray-500">Harsava Wedding Invitation Portal</p>
+            <h1 class="text-base font-bold text-gray-900 leading-tight">{{ t('portal_title') }}</h1>
+            <p class="text-xs text-gray-500">{{ t('portal_subtitle') }}</p>
           </div>
         </div>
 
-        <div v-if="verifyData?.package" class="hidden sm:flex items-center gap-2">
-          <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-            {{ verifyData.package.name }}
-          </span>
+        <div class="flex items-center gap-3">
+          <div v-if="verifyData?.package" class="hidden sm:flex items-center gap-2">
+            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+              {{ verifyData.package.name }}
+            </span>
+          </div>
+
+          <!-- Language Switcher Toggle -->
+          <div class="inline-flex items-center p-1 bg-gray-100 rounded-xl border border-gray-200">
+            <button
+              type="button"
+              @click="lang = 'id'"
+              class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-all"
+              :class="lang === 'id' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'"
+            >
+              🇮🇩 ID
+            </button>
+            <button
+              type="button"
+              @click="lang = 'en'"
+              class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-all"
+              :class="lang === 'en' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'"
+            >
+              🇬🇧 EN
+            </button>
+          </div>
         </div>
       </div>
     </header>
@@ -26,8 +48,8 @@
       <!-- Loading State -->
       <div v-if="checkingToken" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center my-8">
         <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-4" />
-        <h2 class="text-base font-semibold text-gray-900">Memverifikasi Akses Klien...</h2>
-        <p class="text-xs text-gray-500 mt-1">Mohon tunggu selagi kami memvalidasi token akses Anda.</p>
+        <h2 class="text-base font-semibold text-gray-900">{{ t('verifying_title') }}</h2>
+        <p class="text-xs text-gray-500 mt-1">{{ t('verifying_desc') }}</p>
       </div>
 
       <!-- Invalid Token / Error State -->
@@ -37,15 +59,15 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
           </svg>
         </div>
-        <h2 class="text-xl font-bold text-gray-900 mb-2">Link Akses Tidak Valid</h2>
+        <h2 class="text-xl font-bold text-gray-900 mb-2">{{ t('invalid_token_title') }}</h2>
         <p class="text-sm text-gray-600 mb-6">
-          {{ authErrorMessage || 'Token akses tidak ditemukan atau link sudah kedaluwarsa. Silakan periksa kembali link yang Anda terima melalui WhatsApp atau email.' }}
+          {{ authErrorMessage || t('invalid_token_default') }}
         </p>
         <NuxtLink
           to="/"
           class="inline-flex items-center px-5 py-2.5 rounded-xl text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-sm"
         >
-          Kembali ke Beranda
+          {{ t('back_to_home') }}
         </NuxtLink>
       </div>
 
@@ -55,16 +77,16 @@
         <div class="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl p-6 text-white mb-6 shadow-sm">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <span class="text-xs uppercase font-bold tracking-wider text-blue-200">Portal Klien</span>
+              <span class="text-xs uppercase font-bold tracking-wider text-blue-200">{{ t('client_portal') }}</span>
               <h2 class="text-xl sm:text-2xl font-bold mt-0.5">
-                Selamat Datang, {{ verifyData?.client?.name || 'Calon Mempelai' }}!
+                {{ t('welcome') }}, {{ verifyData?.client?.name || t('welcome_default_name') }}!
               </h2>
               <p class="text-xs sm:text-sm text-blue-100 mt-1 max-w-xl">
-                Lengkapi formulir di bawah ini untuk memulai pembuatan dan kustomisasi undangan digital Anda.
+                {{ t('welcome_desc') }}
               </p>
             </div>
             <div v-if="verifyData?.package" class="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs border border-white/20">
-              <span class="text-blue-200 block text-[10px] uppercase font-bold">Paket Aktif</span>
+              <span class="text-blue-200 block text-[10px] uppercase font-bold">{{ t('active_pkg') }}</span>
               <span class="font-bold text-white">{{ verifyData.package.name }}</span>
             </div>
           </div>
@@ -100,48 +122,48 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                   </svg>
                 </span>
-                Data Calon Mempelai
+                {{ t('couple_header') }}
               </h3>
-              <p class="text-xs text-gray-500 mt-1">Masukkan informasi lengkap pasangan pengantin pria dan wanita.</p>
+              <p class="text-xs text-gray-500 mt-1">{{ t('couple_header_desc') }}</p>
             </div>
 
             <!-- Mempelai Pria -->
             <div class="border-t border-gray-100 pt-6">
               <h4 class="text-sm font-bold text-blue-700 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <span>🤵</span> Mempelai Pria (Groom)
+                <span>🤵</span> {{ t('groom_title') }}
               </h4>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Lengkap Pria <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('groom_full_name') }} <span class="text-red-500">*</span></label>
                   <input
                     v-model="form.groom.full_name"
                     type="text"
                     required
-                    placeholder="Contoh: Muhammad Dimas Pratama, S.T."
+                    :placeholder="t('groom_full_name_ph')"
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Panggilan Pria <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('groom_nickname') }} <span class="text-red-500">*</span></label>
                   <input
                     v-model="form.groom.nickname"
                     type="text"
                     required
-                    placeholder="Contoh: Dimas"
+                    :placeholder="t('groom_nickname_ph')"
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Orang Tua Pria</label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('groom_parents') }}</label>
                   <input
                     v-model="form.groom.parents"
                     type="text"
-                    placeholder="Putra dari Bpk. Bambang & Ibu Sri"
+                    :placeholder="t('groom_parents_ph')"
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Akun Instagram Pria</label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('groom_ig') }}</label>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
                     <input
@@ -158,40 +180,40 @@
             <!-- Mempelai Wanita -->
             <div class="border-t border-gray-100 pt-6">
               <h4 class="text-sm font-bold text-pink-700 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-                <span>👰</span> Mempelai Wanita (Bride)
+                <span>👰</span> {{ t('bride_title') }}
               </h4>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Lengkap Wanita <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('bride_full_name') }} <span class="text-red-500">*</span></label>
                   <input
                     v-model="form.bride.full_name"
                     type="text"
                     required
-                    placeholder="Contoh: Anisa Rahmawati, S.Ked."
+                    :placeholder="t('bride_full_name_ph')"
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Panggilan Wanita <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('bride_nickname') }} <span class="text-red-500">*</span></label>
                   <input
                     v-model="form.bride.nickname"
                     type="text"
                     required
-                    placeholder="Contoh: Anisa"
+                    :placeholder="t('bride_nickname_ph')"
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Orang Tua Wanita</label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('bride_parents') }}</label>
                   <input
                     v-model="form.bride.parents"
                     type="text"
-                    placeholder="Putri dari Bpk. Haryono & Ibu Endang"
+                    :placeholder="t('bride_parents_ph')"
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Akun Instagram Wanita</label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('bride_ig') }}</label>
                   <div class="relative">
                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">@</span>
                     <input
@@ -215,16 +237,16 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
                 </span>
-                Data Waktu & Lokasi Acara
+                {{ t('event_header') }}
               </h3>
-              <p class="text-xs text-gray-500 mt-1">Tentukan jadwal prosesi akad nikah / pemberkatan serta resepsi.</p>
+              <p class="text-xs text-gray-500 mt-1">{{ t('event_header_desc') }}</p>
             </div>
 
             <!-- Akad Nikah / Pemberkatan -->
             <div class="border-t border-gray-100 pt-6">
               <div class="flex items-center justify-between mb-4">
                 <h4 class="text-sm font-bold text-emerald-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <span>💍</span> Akad Nikah / Pemberkatan
+                  <span>💍</span> {{ t('akad_title') }}
                 </h4>
                 <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
                   {{ akadTimeSummary }}
@@ -233,7 +255,7 @@
               
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Tanggal Akad <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('akad_date') }} <span class="text-red-500">*</span></label>
                   <input
                     v-model="form.event.akad_date"
                     type="date"
@@ -242,7 +264,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Waktu Prosesi Akad <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('akad_time_label') }} <span class="text-red-500">*</span></label>
                   <div class="flex items-center gap-2">
                     <div class="flex-1">
                       <input
@@ -252,7 +274,7 @@
                         class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
-                    <span class="text-xs text-gray-500 font-semibold">s/d</span>
+                    <span class="text-xs text-gray-500 font-semibold">{{ t('to_time') }}</span>
                     <div class="flex-1">
                       <input
                         v-model="form.event.akad_time_end"
@@ -277,7 +299,7 @@
                         v-model="form.event.akad_is_until_end"
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span>Sampai Selesai</span>
+                      <span>{{ t('until_finish') }}</span>
                     </label>
                     <div class="flex gap-1">
                       <button
@@ -304,7 +326,7 @@
             <div class="border-t border-gray-100 pt-6">
               <div class="flex items-center justify-between mb-4">
                 <h4 class="text-sm font-bold text-indigo-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <span>🎉</span> Resepsi Pernikahan
+                  <span>🎉</span> {{ t('reception_title') }}
                 </h4>
                 <span class="text-xs font-semibold text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">
                   {{ receptionTimeSummary }}
@@ -313,7 +335,7 @@
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Tanggal Resepsi <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('reception_date') }} <span class="text-red-500">*</span></label>
                   <input
                     v-model="form.event.reception_date"
                     type="date"
@@ -322,7 +344,7 @@
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Waktu Resepsi <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('reception_time_label') }} <span class="text-red-500">*</span></label>
                   <div class="flex items-center gap-2">
                     <div class="flex-1">
                       <input
@@ -332,7 +354,7 @@
                         class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                       />
                     </div>
-                    <span class="text-xs text-gray-500 font-semibold">s/d</span>
+                    <span class="text-xs text-gray-500 font-semibold">{{ t('to_time') }}</span>
                     <div class="flex-1">
                       <input
                         v-model="form.event.reception_time_end"
@@ -357,7 +379,7 @@
                         v-model="form.event.reception_is_until_end"
                         class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
-                      <span>Sampai Selesai</span>
+                      <span>{{ t('until_finish') }}</span>
                     </label>
                     <div class="flex gap-1">
                       <button
@@ -385,9 +407,9 @@
               <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
                 <div>
                   <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>📍</span> Lokasi Acara & Navigasi Maps
+                    <span>📍</span> {{ t('location_title') }}
                   </h4>
-                  <p class="text-xs text-gray-500 mt-0.5">Tentukan lokasi akad dan resepsi (apakah sama atau berbeda tempat).</p>
+                  <p class="text-xs text-gray-500 mt-0.5">{{ t('location_desc') }}</p>
                 </div>
 
                 <!-- Toggle Sama / Beda Lokasi -->
@@ -398,7 +420,7 @@
                     class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all"
                     :class="form.event.is_same_location ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
                   >
-                    1 Lokasi (Sama)
+                    {{ t('same_location') }}
                   </button>
                   <button
                     type="button"
@@ -406,7 +428,7 @@
                     class="px-3 py-1.5 text-xs font-semibold rounded-lg transition-all"
                     :class="!form.event.is_same_location ? 'bg-white text-blue-700 shadow-xs' : 'text-gray-600 hover:text-gray-900'"
                   >
-                    2 Lokasi (Beda)
+                    {{ t('diff_location') }}
                   </button>
                 </div>
               </div>
@@ -415,30 +437,30 @@
               <div v-if="form.event.is_same_location" class="space-y-4 bg-gray-50/70 p-4 sm:p-5 rounded-2xl border border-gray-200">
                 <div class="flex items-center gap-2 text-xs font-bold text-blue-800 mb-1">
                   <span>🏛️</span>
-                  <span>Lokasi Akad & Resepsi (Bersama)</span>
+                  <span>{{ t('shared_location_title') }}</span>
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Tempat / Gedung / Masjid <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('shared_venue_name') }} <span class="text-red-500">*</span></label>
                   <input
                     v-model="form.event.venue_name"
                     type="text"
                     required
-                    placeholder="Contoh: Grand Ballroom Hotel Mulia Senayan"
+                    :placeholder="t('shared_venue_ph')"
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Alamat Lengkap <span class="text-red-500">*</span></label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('full_address') }} <span class="text-red-500">*</span></label>
                   <textarea
                     v-model="form.event.address"
                     rows="2"
                     required
-                    placeholder="Jl. Asia Afrika No. 8, Gelora, Tanah Abang, Jakarta Pusat"
+                    :placeholder="t('shared_address_ph')"
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs font-semibold text-gray-700 mb-1">Link Google Maps (URL Navigasi)</label>
+                  <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('maps_link') }}</label>
                   <input
                     v-model="form.event.maps_url"
                     type="url"
@@ -446,7 +468,7 @@
                     class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                   />
                   <p class="text-[11px] text-gray-500 mt-1">
-                    Buka Google Maps, cari lokasi acara, klik Bagikan (Share) lalu salin tautan singkatnya.
+                    {{ t('maps_hint') }}
                   </p>
                 </div>
               </div>
@@ -457,30 +479,30 @@
                 <div class="space-y-4 bg-emerald-50/50 p-4 sm:p-5 rounded-2xl border border-emerald-200">
                   <div class="flex items-center gap-2 text-xs font-bold text-emerald-800 mb-1">
                     <span>💍</span>
-                    <span>1. Lokasi Akad Nikah / Pemberkatan</span>
+                    <span>{{ t('akad_loc_title') }}</span>
                   </div>
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Tempat / Masjid / Gereja <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('akad_venue_name') }} <span class="text-red-500">*</span></label>
                     <input
                       v-model="form.event.akad_venue_name"
                       type="text"
                       required
-                      placeholder="Contoh: Masjid Agung Al-Azhar Kebayoran Baru"
+                      :placeholder="t('akad_venue_ph')"
                       class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                     />
                   </div>
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Alamat Lengkap Akad <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('full_address') }} <span class="text-red-500">*</span></label>
                     <textarea
                       v-model="form.event.akad_address"
                       rows="2"
                       required
-                      placeholder="Jl. Sisingamangaraja No. 1, Selong, Kebayoran Baru, Jakarta Selatan"
+                      :placeholder="t('akad_address_ph')"
                       class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                     />
                   </div>
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Link Google Maps Lokasi Akad</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('akad_maps_link') }}</label>
                     <input
                       v-model="form.event.akad_maps_url"
                       type="url"
@@ -494,30 +516,30 @@
                 <div class="space-y-4 bg-indigo-50/50 p-4 sm:p-5 rounded-2xl border border-indigo-200">
                   <div class="flex items-center gap-2 text-xs font-bold text-indigo-800 mb-1">
                     <span>🎉</span>
-                    <span>2. Lokasi Resepsi Pernikahan</span>
+                    <span>{{ t('reception_loc_title') }}</span>
                   </div>
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Gedung / Hotel / Ballroom <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('reception_venue_name') }} <span class="text-red-500">*</span></label>
                     <input
                       v-model="form.event.reception_venue_name"
                       type="text"
                       required
-                      placeholder="Contoh: Grand Ballroom Hotel Mulia Senayan"
+                      :placeholder="t('reception_venue_ph')"
                       class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                     />
                   </div>
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Alamat Lengkap Resepsi <span class="text-red-500">*</span></label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('full_address') }} <span class="text-red-500">*</span></label>
                     <textarea
                       v-model="form.event.reception_address"
                       rows="2"
                       required
-                      placeholder="Jl. Asia Afrika No. 8, Gelora, Tanah Abang, Jakarta Pusat"
+                      :placeholder="t('reception_address_ph')"
                       class="w-full rounded-xl border border-gray-300 px-3.5 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                     />
                   </div>
                   <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-1">Link Google Maps Lokasi Resepsi</label>
+                    <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('reception_maps_link') }}</label>
                     <input
                       v-model="form.event.reception_maps_url"
                       type="url"
@@ -539,15 +561,15 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4 4 4 0 014-4h4a4 4 0 014 4 4 4 0 01-4 4H7zm0 0l9.657-9.657a2 2 0 012.828 0l1.414 1.414a2 2 0 010 2.828L11 21H7z" />
                   </svg>
                 </span>
-                Pilihan Tema & Desain
+                {{ t('theme_header') }}
               </h3>
-              <p class="text-xs text-gray-500 mt-1">Pilih template desain undangan dan atur warna aksen utama.</p>
+              <p class="text-xs text-gray-500 mt-1">{{ t('theme_header_desc') }}</p>
             </div>
 
             <!-- Template Picker -->
             <div class="border-t border-gray-100 pt-6">
               <label class="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">
-                Pilih Template Desain <span class="text-red-500">*</span>
+                {{ t('choose_template') }} <span class="text-red-500">*</span>
               </label>
 
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -568,7 +590,7 @@
                       class="w-full h-full object-cover"
                       @error="(e: any) => e.target.style.display = 'none'"
                     />
-                    <span v-else class="text-xs text-gray-400 font-medium">Preview Desain</span>
+                    <span v-else class="text-xs text-gray-400 font-medium">{{ t('preview_design') }}</span>
                   </div>
 
                   <div class="flex items-center justify-between">
@@ -592,10 +614,10 @@
             <!-- Color Picker -->
             <div class="border-t border-gray-100 pt-6">
               <label class="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-2">
-                Warna Aksen Utama (Primary Color)
+                {{ t('primary_color_title') }}
               </label>
               <p class="text-xs text-gray-500 mb-4">
-                Warna ini akan menjadi aksen tombol, judul, dan dekorasi pada undangan digital Anda.
+                {{ t('primary_color_desc') }}
               </p>
 
               <div class="flex flex-wrap items-center gap-3 mb-4">
@@ -631,7 +653,7 @@
                     class="w-full rounded-xl border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                 </div>
-                <span class="text-xs text-gray-500">Pilih warna kustom dengan color picker</span>
+                <span class="text-xs text-gray-500">{{ t('color_picker_hint') }}</span>
               </div>
             </div>
           </div>
@@ -645,10 +667,10 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                   </svg>
                 </span>
-                Fitur Paket & Konten Tambahan
+                {{ t('features_header') }}
               </h3>
               <p class="text-xs text-gray-500 mt-1">
-                Formulir berikut aktif secara dinamis menyesuaikan paket langganan Anda.
+                {{ t('features_header_desc') }}
               </p>
             </div>
 
@@ -656,19 +678,19 @@
             <div v-if="features.has_story" class="border-t border-gray-100 pt-6">
               <div class="flex items-center justify-between mb-3">
                 <label class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                  <span>📖</span> Kisah Cinta / Love Story
+                  <span>📖</span> {{ t('love_story_title') }}
                 </label>
                 <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  Fitur Aktif
+                  {{ t('active_feature_badge') }}
                 </span>
               </div>
               <p class="text-xs text-gray-500 mb-3">
-                Ceritakan kisah perjalanan cinta Anda berdua (awal perkenalan, momen berkesan, hingga lamaran).
+                {{ t('love_story_desc') }}
               </p>
               <textarea
                 v-model="form.story"
                 rows="5"
-                placeholder="Tuliskan kisah cinta Anda di sini..."
+                :placeholder="t('love_story_ph')"
                 class="w-full rounded-xl border border-gray-300 p-3.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
@@ -677,14 +699,14 @@
             <div v-if="features.has_gallery" class="border-t border-gray-100 pt-6">
               <div class="flex items-center justify-between mb-3">
                 <label class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                  <span>📸</span> Galeri Foto (Google Drive Links)
+                  <span>📸</span> {{ t('gallery_title') }}
                 </label>
                 <span class="text-[11px] font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-                  Maks. {{ galleryLimit }} Foto
+                  {{ t('gallery_max', { limit: galleryLimit }) }}
                 </span>
               </div>
               <p class="text-xs text-gray-500 mb-4">
-                Sematkan tautan publik foto prewedding dari Google Drive / direct link gambar (Pastikan akses diset "Siapa saja yang memiliki link").
+                {{ t('gallery_desc') }}
               </p>
 
               <!-- Dynamic Gallery Rows -->
@@ -698,14 +720,14 @@
                   <input
                     v-model="form.gallery[index]"
                     type="url"
-                    placeholder="https://drive.google.com/file/d/... atau https://..."
+                    placeholder="https://drive.google.com/file/d/... or https://..."
                     class="flex-1 rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
                   />
                   <button
                     type="button"
                     @click="removeGalleryRow(index)"
                     class="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
-                    title="Hapus baris foto"
+                    :title="t('remove_photo_title')"
                   >
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -724,7 +746,7 @@
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                   </svg>
-                  Tambah Link Foto ({{ form.gallery.length }} / {{ galleryLimit }})
+                  {{ t('add_photo_btn', { current: form.gallery.length, limit: galleryLimit }) }}
                 </button>
               </div>
             </div>
@@ -733,14 +755,14 @@
             <div v-if="features.has_gift" class="border-t border-gray-100 pt-6">
               <div class="flex items-center justify-between mb-3">
                 <label class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
-                  <span>🎁</span> Amplop Digital & Hadiah Pernikahan
+                  <span>🎁</span> {{ t('gifts_title') }}
                 </label>
                 <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  Fitur Aktif
+                  {{ t('active_feature_badge') }}
                 </span>
               </div>
               <p class="text-xs text-gray-500 mb-4">
-                Informasi rekening bank atau dompet digital untuk para tamu yang ingin mengirimkan hadiah kasih. Anda dapat menambahkan lebih dari 1 rekening/e-wallet.
+                {{ t('gifts_desc') }}
               </p>
 
               <!-- List Rekening -->
@@ -752,7 +774,7 @@
                 >
                   <div class="flex items-center justify-between mb-3">
                     <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-white text-gray-700 border border-gray-200 shadow-2xs">
-                      💳 Rekening / E-Wallet #{{ index + 1 }}
+                      💳 {{ t('account_badge') }} #{{ index + 1 }}
                     </span>
                     <button
                       v-if="form.gifts.length > 1"
@@ -763,13 +785,13 @@
                       <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
-                      Hapus
+                      {{ t('remove_account') }}
                     </button>
                   </div>
 
                   <!-- Quick Bank Select -->
                   <div class="mb-3">
-                    <span class="text-[11px] font-semibold text-gray-500 block mb-1.5">Pilihan Cepat:</span>
+                    <span class="text-[11px] font-semibold text-gray-500 block mb-1.5">{{ t('quick_choice') }}</span>
                     <div class="flex flex-wrap gap-1.5">
                       <button
                         v-for="b in ['BCA', 'Mandiri', 'BRI', 'BNI', 'BSI', 'CIMB Niaga', 'GoPay', 'OVO', 'DANA', 'ShopeePay', 'QRIS']"
@@ -786,17 +808,17 @@
 
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
-                      <label class="block text-xs font-semibold text-gray-700 mb-1">Nama Bank / e-Wallet <span class="text-red-500">*</span></label>
+                      <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('bank_name') }} <span class="text-red-500">*</span></label>
                       <input
                         v-model="item.bank_name"
                         type="text"
                         required
-                        placeholder="Contoh: BCA / Mandiri / GoPay"
+                        :placeholder="t('bank_name_ph')"
                         class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                       />
                     </div>
                     <div>
-                      <label class="block text-xs font-semibold text-gray-700 mb-1">Nomor Rekening / No. HP <span class="text-red-500">*</span></label>
+                      <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('account_number') }} <span class="text-red-500">*</span></label>
                       <input
                         v-model="item.account_number"
                         type="text"
@@ -806,23 +828,23 @@
                       />
                     </div>
                     <div>
-                      <label class="block text-xs font-semibold text-gray-700 mb-1">Atas Nama Pemilik <span class="text-red-500">*</span></label>
+                      <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('account_holder') }} <span class="text-red-500">*</span></label>
                       <input
                         v-model="item.account_holder"
                         type="text"
                         required
-                        placeholder="Contoh: Dimas Pratama"
+                        :placeholder="t('account_holder_ph')"
                         class="w-full rounded-xl border border-gray-300 px-3.5 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
                       />
                     </div>
                   </div>
 
                   <div class="mt-2.5">
-                    <label class="block text-[11px] font-medium text-gray-500 mb-1">Catatan Tambahan (Opsional)</label>
+                    <label class="block text-[11px] font-medium text-gray-500 mb-1">{{ t('account_notes') }}</label>
                     <input
                       v-model="item.notes"
                       type="text"
-                      placeholder="Contoh: Rekening Mempelai Pria / Khusus Dompet Digital"
+                      :placeholder="t('account_notes_ph')"
                       class="w-full rounded-lg border border-gray-200 px-3 py-1.5 text-xs text-gray-600 bg-white focus:outline-none focus:border-blue-400"
                     />
                   </div>
@@ -839,7 +861,7 @@
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                   </svg>
-                  <span>Tambah Rekening / Dompet Digital Baru</span>
+                  <span>{{ t('add_account_btn') }}</span>
                 </button>
               </div>
             </div>
@@ -847,35 +869,35 @@
             <!-- Other Active Features Summary -->
             <div class="border-t border-gray-100 pt-6">
               <span class="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">
-                Fitur Unggulan Lainnya yang Otomatis Aktif
+                {{ t('other_auto_features') }}
               </span>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div v-if="features.has_countdown" class="flex items-center gap-2 p-3 rounded-xl bg-blue-50/60 border border-blue-100">
                   <span class="text-base">⏳</span>
                   <div>
-                    <div class="text-xs font-bold text-gray-800">Countdown Timer</div>
-                    <div class="text-[10px] text-gray-500">Hitung mundur hari H</div>
+                    <div class="text-xs font-bold text-gray-800">{{ t('countdown_title') }}</div>
+                    <div class="text-[10px] text-gray-500">{{ t('countdown_desc') }}</div>
                   </div>
                 </div>
                 <div v-if="features.has_maps" class="flex items-center gap-2 p-3 rounded-xl bg-emerald-50/60 border border-emerald-100">
                   <span class="text-base">🗺️</span>
                   <div>
-                    <div class="text-xs font-bold text-gray-800">Navigasi Maps</div>
-                    <div class="text-[10px] text-gray-500">Panduan rute Google Maps</div>
+                    <div class="text-xs font-bold text-gray-800">{{ t('maps_feature_title') }}</div>
+                    <div class="text-[10px] text-gray-500">{{ t('maps_feature_desc') }}</div>
                   </div>
                 </div>
                 <div v-if="features.has_rsvp" class="flex items-center gap-2 p-3 rounded-xl bg-purple-50/60 border border-purple-100">
                   <span class="text-base">📝</span>
                   <div>
-                    <div class="text-xs font-bold text-gray-800">RSVP Online</div>
-                    <div class="text-[10px] text-gray-500">Konfirmasi kehadiran tamu</div>
+                    <div class="text-xs font-bold text-gray-800">{{ t('rsvp_feature_title') }}</div>
+                    <div class="text-[10px] text-gray-500">{{ t('rsvp_feature_desc') }}</div>
                   </div>
                 </div>
                 <div v-if="features.has_qr" class="flex items-center gap-2 p-3 rounded-xl bg-amber-50/60 border border-amber-100">
                   <span class="text-base">📲</span>
                   <div>
-                    <div class="text-xs font-bold text-gray-800">QR Check-in Tamu</div>
-                    <div class="text-[10px] text-gray-500">Sistem buku tamu digital</div>
+                    <div class="text-xs font-bold text-gray-800">{{ t('qr_feature_title') }}</div>
+                    <div class="text-[10px] text-gray-500">{{ t('qr_feature_desc') }}</div>
                   </div>
                 </div>
               </div>
@@ -898,7 +920,7 @@
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
-            <span class="hidden sm:inline">Sebelumnya</span>
+            <span class="hidden sm:inline">{{ t('btn_prev') }}</span>
           </button>
 
           <button
@@ -907,7 +929,7 @@
             @click="activeTab = tabs[currentTabIndex + 1].id"
             class="px-3.5 py-2 rounded-xl text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-200 hover:bg-blue-100 transition-colors flex items-center gap-1"
           >
-            <span>Selanjutnya</span>
+            <span>{{ t('btn_next') }}</span>
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
@@ -921,7 +943,7 @@
           class="px-6 py-2.5 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800 shadow-md hover:shadow-lg disabled:opacity-50 flex items-center gap-2 transition-all ml-auto"
         >
           <div v-if="saving" class="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-          <span>{{ saving ? 'Menyimpan Data...' : 'Simpan Data Undangan' }}</span>
+          <span>{{ saving ? t('btn_saving') : t('btn_save') }}</span>
         </button>
       </div>
     </div>
@@ -943,6 +965,262 @@ const route = useRoute()
 const toast = useToast()
 const clientSetupService = useClientSetupService()
 
+// Language switcher (EN & ID)
+const langCookie = useCookie<'en' | 'id'>('client_setup_lang', { default: () => 'id', maxAge: 60 * 60 * 24 * 30 })
+const lang = ref<'en' | 'id'>(langCookie.value || 'id')
+watch(lang, (newLang) => {
+  langCookie.value = newLang
+})
+
+const translations: Record<'id' | 'en', Record<string, string>> = {
+  id: {
+    portal_title: 'Setup Undangan Digital',
+    portal_subtitle: 'Harsava Wedding Invitation Portal',
+    active_pkg: 'Paket Aktif',
+    verifying_title: 'Memverifikasi Akses Klien...',
+    verifying_desc: 'Mohon tunggu selagi kami memvalidasi token akses Anda.',
+    invalid_token_title: 'Link Akses Tidak Valid',
+    invalid_token_default: 'Token akses tidak ditemukan atau link sudah kedaluwarsa. Silakan periksa kembali link yang Anda terima melalui WhatsApp atau email.',
+    back_to_home: 'Kembali ke Beranda',
+    client_portal: 'Portal Klien',
+    welcome: 'Selamat Datang',
+    welcome_default_name: 'Calon Mempelai',
+    welcome_desc: 'Lengkapi formulir di bawah ini untuk memulai pembuatan dan kustomisasi undangan digital Anda.',
+    tab_couple: 'Data Mempelai',
+    tab_event: 'Waktu & Lokasi',
+    tab_theme: 'Tema & Desain',
+    tab_features: 'Fitur Tambahan',
+    couple_header: 'Data Calon Mempelai',
+    couple_header_desc: 'Masukkan informasi lengkap pasangan pengantin pria dan wanita.',
+    groom_title: 'Mempelai Pria (Groom)',
+    groom_full_name: 'Nama Lengkap Pria',
+    groom_full_name_ph: 'Contoh: Muhammad Dimas Pratama, S.T.',
+    groom_nickname: 'Nama Panggilan Pria',
+    groom_nickname_ph: 'Contoh: Dimas',
+    groom_parents: 'Nama Orang Tua Pria',
+    groom_parents_ph: 'Putra dari Bpk. Bambang & Ibu Sri',
+    groom_ig: 'Akun Instagram Pria',
+    bride_title: 'Mempelai Wanita (Bride)',
+    bride_full_name: 'Nama Lengkap Wanita',
+    bride_full_name_ph: 'Contoh: Anisa Rahmawati, S.Ked.',
+    bride_nickname: 'Nama Panggilan Wanita',
+    bride_nickname_ph: 'Contoh: Anisa',
+    bride_parents: 'Nama Orang Tua Wanita',
+    bride_parents_ph: 'Putri dari Bpk. Haryono & Ibu Endang',
+    bride_ig: 'Akun Instagram Wanita',
+    event_header: 'Data Waktu & Lokasi Acara',
+    event_header_desc: 'Tentukan jadwal prosesi akad nikah / pemberkatan serta resepsi.',
+    akad_title: 'Akad Nikah / Pemberkatan',
+    time_not_set: 'Waktu belum diatur',
+    at_time: 'Pukul',
+    until_finish: 'Sampai Selesai',
+    akad_date: 'Tanggal Akad',
+    akad_time_label: 'Waktu Prosesi Akad',
+    to_time: 's/d',
+    reception_title: 'Resepsi Pernikahan',
+    reception_date: 'Tanggal Resepsi',
+    reception_time_label: 'Waktu Resepsi',
+    location_title: 'Lokasi Acara & Navigasi Maps',
+    location_desc: 'Tentukan lokasi akad dan resepsi (apakah sama atau berbeda tempat).',
+    same_location: '1 Lokasi (Sama)',
+    diff_location: '2 Lokasi (Beda)',
+    shared_location_title: 'Lokasi Akad & Resepsi (Bersama)',
+    shared_venue_name: 'Nama Tempat / Gedung / Masjid',
+    shared_venue_ph: 'Contoh: Grand Ballroom Hotel Mulia Senayan',
+    full_address: 'Alamat Lengkap',
+    shared_address_ph: 'Jl. Asia Afrika No. 8, Gelora, Tanah Abang, Jakarta Pusat',
+    maps_link: 'Link Google Maps (URL Navigasi)',
+    maps_hint: 'Buka Google Maps, cari lokasi acara, klik Bagikan (Share) lalu salin tautan singkatnya.',
+    akad_loc_title: '1. Lokasi Akad Nikah / Pemberkatan',
+    akad_venue_name: 'Nama Tempat / Masjid / Gereja',
+    akad_venue_ph: 'Contoh: Masjid Agung Al-Azhar Kebayoran Baru',
+    akad_address_ph: 'Jl. Sisingamangaraja No. 1, Selong, Kebayoran Baru, Jakarta Selatan',
+    akad_maps_link: 'Link Google Maps Lokasi Akad',
+    reception_loc_title: '2. Lokasi Resepsi Pernikahan',
+    reception_venue_name: 'Nama Gedung / Hotel / Ballroom',
+    reception_venue_ph: 'Contoh: Grand Ballroom Hotel Mulia Senayan',
+    reception_address_ph: 'Jl. Asia Afrika No. 8, Gelora, Tanah Abang, Jakarta Pusat',
+    reception_maps_link: 'Link Google Maps Lokasi Resepsi',
+    theme_header: 'Pilihan Tema & Desain',
+    theme_header_desc: 'Pilih template desain undangan dan atur warna aksen utama.',
+    choose_template: 'Pilih Template Desain',
+    preview_design: 'Preview Desain',
+    primary_color_title: 'Warna Aksen Utama (Primary Color)',
+    primary_color_desc: 'Warna ini akan menjadi aksen tombol, judul, dan dekorasi pada undangan digital Anda.',
+    color_picker_hint: 'Pilih warna kustom dengan color picker',
+    features_header: 'Fitur Paket & Konten Tambahan',
+    features_header_desc: 'Formulir berikut aktif secara dinamis menyesuaikan paket langganan Anda.',
+    active_feature_badge: 'Fitur Aktif',
+    love_story_title: 'Kisah Cinta / Love Story',
+    love_story_desc: 'Ceritakan kisah perjalanan cinta Anda berdua (awal perkenalan, momen berkesan, hingga lamaran).',
+    love_story_ph: 'Tuliskan kisah cinta Anda di sini...',
+    gallery_title: 'Galeri Foto (Google Drive Links)',
+    gallery_max: 'Maks. {limit} Foto',
+    gallery_desc: 'Sematkan tautan publik foto prewedding dari Google Drive / direct link gambar (Pastikan akses diset "Siapa saja yang memiliki link").',
+    remove_photo_title: 'Hapus baris foto',
+    add_photo_btn: 'Tambah Link Foto ({current} / {limit})',
+    gifts_title: 'Amplop Digital & Hadiah Pernikahan',
+    gifts_desc: 'Informasi rekening bank atau dompet digital untuk para tamu yang ingin mengirimkan hadiah kasih. Anda dapat menambahkan lebih dari 1 rekening/e-wallet.',
+    account_badge: 'Rekening / E-Wallet',
+    remove_account: 'Hapus',
+    quick_choice: 'Pilihan Cepat:',
+    bank_name: 'Nama Bank / e-Wallet',
+    bank_name_ph: 'Contoh: BCA / Mandiri / GoPay',
+    account_number: 'Nomor Rekening / No. HP',
+    account_holder: 'Atas Nama Pemilik',
+    account_holder_ph: 'Contoh: Dimas Pratama',
+    account_notes: 'Catatan Tambahan (Opsional)',
+    account_notes_ph: 'Contoh: Rekening Mempelai Pria / Khusus Dompet Digital',
+    add_account_btn: 'Tambah Rekening / Dompet Digital Baru',
+    other_auto_features: 'Fitur Unggulan Lainnya yang Otomatis Aktif',
+    countdown_title: 'Countdown Timer',
+    countdown_desc: 'Hitung mundur hari H',
+    maps_feature_title: 'Navigasi Maps',
+    maps_feature_desc: 'Panduan rute Google Maps',
+    rsvp_feature_title: 'RSVP Online',
+    rsvp_feature_desc: 'Konfirmasi kehadiran tamu',
+    qr_feature_title: 'QR Check-in Tamu',
+    qr_feature_desc: 'Sistem buku tamu digital',
+    btn_prev: 'Sebelumnya',
+    btn_next: 'Selanjutnya',
+    btn_save: 'Simpan Data Undangan',
+    btn_saving: 'Menyimpan Data...',
+    toast_fill_couple: 'Mohon lengkapi Nama Mempelai terlebih dahulu.',
+    toast_invalid_token: 'Token akses tidak valid.',
+    toast_local_fallback: 'Data berhasil disimpan secara lokal di browser Anda (Endpoint backend sedang disiapkan).',
+    toast_save_success: 'Data undangan berhasil disimpan!',
+    toast_save_error: 'Gagal menyimpan data undangan.'
+  },
+  en: {
+    portal_title: 'Digital Invitation Setup',
+    portal_subtitle: 'Harsava Wedding Invitation Portal',
+    active_pkg: 'Active Package',
+    verifying_title: 'Verifying Client Access...',
+    verifying_desc: 'Please wait while we validate your access token.',
+    invalid_token_title: 'Invalid Access Link',
+    invalid_token_default: 'Access token not found or link has expired. Please check the official link you received via WhatsApp or email.',
+    back_to_home: 'Back to Home',
+    client_portal: 'Client Portal',
+    welcome: 'Welcome',
+    welcome_default_name: 'Happy Couple',
+    welcome_desc: 'Fill out the form below to begin creating and customizing your digital wedding invitation.',
+    tab_couple: 'Couple Info',
+    tab_event: 'Time & Venue',
+    tab_theme: 'Theme & Design',
+    tab_features: 'Additional Features',
+    couple_header: 'Bride & Groom Information',
+    couple_header_desc: 'Enter complete information for both the groom and the bride.',
+    groom_title: 'Groom Details',
+    groom_full_name: 'Groom Full Name',
+    groom_full_name_ph: 'e.g. Johnathan Smith, B.Sc.',
+    groom_nickname: 'Groom Nickname',
+    groom_nickname_ph: 'e.g. John',
+    groom_parents: 'Groom Parents\' Names',
+    groom_parents_ph: 'Son of Mr. Robert & Mrs. Sarah',
+    groom_ig: 'Groom Instagram Username',
+    bride_title: 'Bride Details',
+    bride_full_name: 'Bride Full Name',
+    bride_full_name_ph: 'e.g. Emily Watson, M.D.',
+    bride_nickname: 'Bride Nickname',
+    bride_nickname_ph: 'e.g. Emily',
+    bride_parents: 'Bride Parents\' Names',
+    bride_parents_ph: 'Daughter of Mr. Michael & Mrs. Laura',
+    bride_ig: 'Bride Instagram Username',
+    event_header: 'Event Schedule & Venue',
+    event_header_desc: 'Specify the schedule for holy matrimony / akad and wedding reception.',
+    akad_title: 'Holy Matrimony / Akad Nikah',
+    time_not_set: 'Time not set',
+    at_time: 'At',
+    until_finish: 'Until Finish',
+    akad_date: 'Matrimony / Akad Date',
+    akad_time_label: 'Matrimony / Akad Time',
+    to_time: 'to',
+    reception_title: 'Wedding Reception',
+    reception_date: 'Reception Date',
+    reception_time_label: 'Reception Time',
+    location_title: 'Venue Location & Maps Navigation',
+    location_desc: 'Specify ceremony and reception locations (whether at the same venue or different venues).',
+    same_location: '1 Venue (Same Location)',
+    diff_location: '2 Venues (Different)',
+    shared_location_title: 'Ceremony & Reception Venue (Combined)',
+    shared_venue_name: 'Venue / Building / Hall Name',
+    shared_venue_ph: 'e.g. Grand Ballroom Mulia Hotel',
+    full_address: 'Full Address',
+    shared_address_ph: '8th Asia Afrika St., Central Jakarta',
+    maps_link: 'Google Maps Link (Navigation URL)',
+    maps_hint: 'Open Google Maps, find your venue, click Share, then copy the short link.',
+    akad_loc_title: '1. Ceremony / Akad Nikah Venue',
+    akad_venue_name: 'Place / Mosque / Church Name',
+    akad_venue_ph: 'e.g. Al-Azhar Grand Mosque',
+    akad_address_ph: '1st Sisingamangaraja St., South Jakarta',
+    akad_maps_link: 'Ceremony Google Maps Link',
+    reception_loc_title: '2. Reception Venue',
+    reception_venue_name: 'Building / Hotel / Ballroom Name',
+    reception_venue_ph: 'e.g. Grand Ballroom Mulia Hotel',
+    reception_address_ph: '8th Asia Afrika St., Central Jakarta',
+    reception_maps_link: 'Reception Google Maps Link',
+    theme_header: 'Theme & Design Selection',
+    theme_header_desc: 'Select your preferred invitation design template and accent colors.',
+    choose_template: 'Choose Design Template',
+    preview_design: 'Design Preview',
+    primary_color_title: 'Primary Accent Color',
+    primary_color_desc: 'This color accents buttons, headers, and decorative elements in your digital invitation.',
+    color_picker_hint: 'Pick a custom color using color picker',
+    features_header: 'Package Features & Additional Content',
+    features_header_desc: 'The fields below are enabled dynamically according to your selected package.',
+    active_feature_badge: 'Active Feature',
+    love_story_title: 'Love Story / Journey',
+    love_story_desc: 'Tell the story of your love journey (how you met, memorable milestones, and the proposal).',
+    love_story_ph: 'Write your romantic love story here...',
+    gallery_title: 'Photo Gallery (Google Drive Links)',
+    gallery_max: 'Max {limit} Photos',
+    gallery_desc: 'Embed public pre-wedding photo links from Google Drive or direct image URLs (make sure sharing permission is set to "Anyone with the link").',
+    remove_photo_title: 'Remove photo row',
+    add_photo_btn: 'Add Photo Link ({current} / {limit})',
+    gifts_title: 'Digital Gift & Cash Registry',
+    gifts_desc: 'Bank account or e-wallet details for guests wishing to send wedding gifts. You can add more than 1 account.',
+    account_badge: 'Account / E-Wallet',
+    remove_account: 'Remove',
+    quick_choice: 'Quick Select:',
+    bank_name: 'Bank / E-Wallet Name',
+    bank_name_ph: 'e.g. BCA / Mandiri / PayPal',
+    account_number: 'Account / Phone Number',
+    account_holder: 'Account Holder Name',
+    account_holder_ph: 'e.g. Johnathan Smith',
+    account_notes: 'Additional Note (Optional)',
+    account_notes_ph: 'e.g. Groom\'s Account / Digital Wallet only',
+    add_account_btn: 'Add New Bank / Digital Wallet Account',
+    other_auto_features: 'Other Automatically Included Features',
+    countdown_title: 'Countdown Timer',
+    countdown_desc: 'Countdown to the big day',
+    maps_feature_title: 'Maps Navigation',
+    maps_feature_desc: 'Interactive Google Maps directions',
+    rsvp_feature_title: 'Online RSVP',
+    rsvp_feature_desc: 'Guest attendance confirmation',
+    qr_feature_title: 'Guest QR Check-in',
+    qr_feature_desc: 'Digital guestbook system',
+    btn_prev: 'Previous',
+    btn_next: 'Next',
+    btn_save: 'Save Invitation Data',
+    btn_saving: 'Saving Data...',
+    toast_fill_couple: 'Please complete Bride & Groom information first.',
+    toast_invalid_token: 'Invalid access token.',
+    toast_local_fallback: 'Data saved locally in your browser (Backend endpoint is being prepared).',
+    toast_save_success: 'Invitation data saved successfully!',
+    toast_save_error: 'Failed to save invitation data.'
+  }
+}
+
+function t(key: string, params?: Record<string, string | number>): string {
+  let val = translations[lang.value]?.[key] || translations['id']?.[key] || key
+  if (params) {
+    for (const [k, v] of Object.entries(params)) {
+      val = val.replace(`{${k}}`, String(v))
+    }
+  }
+  return val
+}
+
 // Token from query parameter
 const tokenCookie = useCookie<string>('client_setup_token', { maxAge: 60 * 60 * 24 * 7 })
 const rawToken = computed(() => String(route.query.token || route.query.auth || tokenCookie.value || ''))
@@ -953,14 +1231,14 @@ const authErrorMessage = ref('')
 const verifyData = ref<ClientAuthVerifyData | null>(null)
 const saving = ref(false)
 
-const tabs = [
-  { id: 'bride_groom', label: 'Data Mempelai', step: 1 },
-  { id: 'event_details', label: 'Waktu & Lokasi', step: 2 },
-  { id: 'theme_design', label: 'Tema & Desain', step: 3 },
-  { id: 'features_dynamic', label: 'Fitur Tambahan', step: 4 }
-]
+const tabs = computed(() => [
+  { id: 'bride_groom', label: t('tab_couple'), step: 1 },
+  { id: 'event_details', label: t('tab_event'), step: 2 },
+  { id: 'theme_design', label: t('tab_theme'), step: 3 },
+  { id: 'features_dynamic', label: t('tab_features'), step: 4 }
+])
 const activeTab = ref('bride_groom')
-const currentTabIndex = computed(() => tabs.findIndex(t => t.id === activeTab.value))
+const currentTabIndex = computed(() => tabs.value.findIndex(t => t.id === activeTab.value))
 
 // Color Presets
 const colorPresets = [
@@ -1059,19 +1337,19 @@ const form = ref({
 
 // Time Summary Computed
 const akadTimeSummary = computed(() => {
-  if (!form.value.event.akad_time_start) return 'Waktu belum diatur'
+  if (!form.value.event.akad_time_start) return t('time_not_set')
   if (form.value.event.akad_is_until_end) {
-    return `Pukul ${form.value.event.akad_time_start} ${form.value.event.akad_timezone} - Selesai`
+    return `${t('at_time')} ${form.value.event.akad_time_start} ${form.value.event.akad_timezone} - ${t('until_finish')}`
   }
-  return `Pukul ${form.value.event.akad_time_start} - ${form.value.event.akad_time_end || 'Selesai'} ${form.value.event.akad_timezone}`
+  return `${t('at_time')} ${form.value.event.akad_time_start} - ${form.value.event.akad_time_end || t('until_finish')} ${form.value.event.akad_timezone}`
 })
 
 const receptionTimeSummary = computed(() => {
-  if (!form.value.event.reception_time_start) return 'Waktu belum diatur'
+  if (!form.value.event.reception_time_start) return t('time_not_set')
   if (form.value.event.reception_is_until_end) {
-    return `Pukul ${form.value.event.reception_time_start} ${form.value.event.reception_timezone} - Selesai`
+    return `${t('at_time')} ${form.value.event.reception_time_start} ${form.value.event.reception_timezone} - ${t('until_finish')}`
   }
-  return `Pukul ${form.value.event.reception_time_start} - ${form.value.event.reception_time_end || 'Selesai'} ${form.value.event.reception_timezone}`
+  return `${t('at_time')} ${form.value.event.reception_time_start} - ${form.value.event.reception_time_end || t('until_finish')} ${form.value.event.reception_timezone}`
 })
 
 function setAkadPreset(start: string, end: string, isUntilEnd: boolean) {
@@ -1206,7 +1484,7 @@ async function verifyClientAccess() {
     }
   } catch (err: any) {
     authError.value = true
-    authErrorMessage.value = handleApiError(err).message || 'Link Akses Tidak Valid atau sudah kedaluwarsa.'
+    authErrorMessage.value = handleApiError(err).message || t('invalid_token_default')
   } finally {
     checkingToken.value = false
   }
@@ -1215,14 +1493,14 @@ async function verifyClientAccess() {
 async function handleSaveInvitation() {
   // Validate basic required fields
   if (!form.value.groom.full_name || !form.value.bride.full_name) {
-    toast.error('Mohon lengkapi Nama Mempelai terlebih dahulu.')
+    toast.error(t('toast_fill_couple'))
     activeTab.value = 'bride_groom'
     return
   }
 
   const token = rawToken.value.trim()
   if (!token) {
-    toast.error('Token akses tidak valid.')
+    toast.error(t('toast_invalid_token'))
     return
   }
 
@@ -1269,12 +1547,12 @@ async function handleSaveInvitation() {
     const saveRes = await clientSetupService.saveInvitation(token, payload)
     
     if (saveRes?.is_local_fallback) {
-      toast.info('Data berhasil disimpan secara lokal di browser Anda (Endpoint backend sedang disiapkan).')
+      toast.info(t('toast_local_fallback'))
     } else {
-      toast.success('Data undangan berhasil disimpan!')
+      toast.success(t('toast_save_success'))
     }
   } catch (err: any) {
-    toast.error(handleApiError(err).message || 'Gagal menyimpan data undangan.')
+    toast.error(handleApiError(err).message || t('toast_save_error'))
   } finally {
     saving.value = false
   }
