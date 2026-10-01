@@ -1,12 +1,19 @@
 import type { ApiResponse } from '~/types/api'
-import type { Template } from '~/types/template'
+import type { Template, TemplateFormData } from '~/types/template'
 
 export function useTemplateService() {
   const api = useApi()
 
   return {
-    
-    getTrashedTemplates(params?: { page?: number; per_page?: number; search?: string; sort?: string; order?: string }) {
+    getTrashedTemplates(params?: {
+      page?: number
+      per_page?: number
+      search?: string
+      status?: string
+      is_active?: boolean | string | number
+      sort?: string
+      order?: string
+    }) {
       return api.get<any>('/admin/templates/trash', params as any)
     },
     restoreTemplate(id: string) {
@@ -24,18 +31,31 @@ export function useTemplateService() {
     bulkForceDeleteTemplates(ids: string[]) {
       return api.post<ApiResponse<{ success_count: number }>>('/admin/templates/bulk-force-delete', { ids })
     },
-  
-    getTemplates(params?: { page?: number; per_page?: number; search?: string; sort?: string; order?: string }) {
+
+    getTemplates(params?: {
+      page?: number
+      per_page?: number
+      search?: string
+      status?: string
+      is_active?: boolean | string | number
+      sort?: string
+      order?: string
+    }) {
       return api.get<any>('/admin/templates', params as any)
     },
     getTemplate(id: string) {
       return api.get<ApiResponse<Template>>(`/admin/templates/${id}`)
     },
-    createTemplate(data: { name: string; nuxt_component: string; thumbnail_url: string }) {
+    createTemplate(data: Partial<TemplateFormData> | Record<string, any>) {
       return api.post<ApiResponse<Template>>('/admin/templates', data)
     },
-    updateTemplate(id: string, data: { name?: string; nuxt_component?: string; thumbnail_url?: string }) {
-      return api.patch<ApiResponse<Template>>(`/admin/templates/${id}`, data)
+    updateTemplate(id: string, data: Partial<TemplateFormData> | Record<string, any>) {
+      return api.put<ApiResponse<Template>>(`/admin/templates/${id}`, data).catch(async (err) => {
+        if (err?.response?.status === 405) {
+          return await api.patch<ApiResponse<Template>>(`/admin/templates/${id}`, data)
+        }
+        throw err
+      })
     },
     deleteTemplate(id: string) {
       return api.delete<ApiResponse<null>>(`/admin/templates/${id}`)
