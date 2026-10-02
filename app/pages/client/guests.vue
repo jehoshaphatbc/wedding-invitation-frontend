@@ -127,6 +127,14 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
+            <button
+              type="button"
+              @click="openTemplateModal"
+              class="px-3.5 py-2.5 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1.5 backdrop-blur-xs"
+            >
+              <span>💬</span>
+              <span>{{ t('btn_template_setting') }}</span>
+            </button>
             <a
               v-if="hasQrFeature"
               :href="scannerUrl"
@@ -608,30 +616,148 @@
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-gray-700 mb-1">{{ t('wa_msg_label') }}</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-gray-700">{{ t('wa_msg_label') }}</label>
+              <button
+                type="button"
+                @click="openTemplateModal"
+                class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
+              >
+                <span>✏️</span>
+                <span>{{ t('btn_edit_global_template') }}</span>
+              </button>
+            </div>
             <textarea
               :value="getShareMessage(shareGuest)"
               readonly
-              rows="5"
-              class="w-full rounded-xl border border-gray-300 p-3 text-xs font-sans bg-gray-50 text-gray-800"
+              rows="6"
+              class="w-full rounded-xl border border-gray-300 p-3 text-xs font-sans bg-gray-50 text-gray-800 select-all focus:outline-none"
             />
+            <p class="text-[11px] text-gray-500 mt-1">
+              {{ t('template_hint_applied') }}
+            </p>
           </div>
 
           <div class="flex items-center justify-between gap-3 pt-3 border-t border-gray-200">
             <button
               type="button"
               @click="copyShareMessage(shareGuest)"
-              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition-colors"
+              class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
             >
               {{ t('btn_copy_message') }}
             </button>
             <button
               type="button"
               @click="openWhatsAppDirect(shareGuest)"
-              class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5"
+              class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
             >
               <span>📲</span>
               <span>{{ t('btn_open_whatsapp') }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL 4: Unified WhatsApp Message Template -->
+    <div v-if="showTemplateModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[92vh] overflow-y-auto">
+        <div class="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">💬</span>
+            <div>
+              <h3 class="text-base font-bold text-gray-900">{{ t('template_modal_title') }}</h3>
+              <p class="text-xs text-gray-500">{{ t('template_modal_desc') }}</p>
+            </div>
+          </div>
+          <button
+            type="button"
+            @click="showTemplateModal = false"
+            class="text-gray-400 hover:text-gray-600 p-1 rounded-lg cursor-pointer"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div class="space-y-4">
+          <!-- Placeholder Tag Chips -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-700 mb-1.5">{{ t('template_chips_label') }}</label>
+            <div class="flex flex-wrap gap-1.5">
+              <button
+                type="button"
+                @click="insertPlaceholder('{nama_tamu}')"
+                class="px-2.5 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-xs font-mono font-medium transition-colors border border-blue-200 flex items-center gap-1 cursor-pointer"
+                title="Nama tamu undangan"
+              >
+                <span>+</span>
+                <span>{nama_tamu}</span>
+              </button>
+              <button
+                type="button"
+                @click="insertPlaceholder('{link_undangan}')"
+                class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-lg text-xs font-mono font-medium transition-colors border border-indigo-200 flex items-center gap-1 cursor-pointer"
+                title="Tautan undangan khusus tamu"
+              >
+                <span>+</span>
+                <span>{link_undangan}</span>
+              </button>
+              <button
+                type="button"
+                @click="insertPlaceholder('{nama_mempelai}')"
+                class="px-2.5 py-1 bg-purple-50 hover:bg-purple-100 text-purple-700 rounded-lg text-xs font-mono font-medium transition-colors border border-purple-200 flex items-center gap-1 cursor-pointer"
+                title="Nama pasangan mempelai"
+              >
+                <span>+</span>
+                <span>{nama_mempelai}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Template Textarea -->
+          <div>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-xs font-semibold text-gray-700">{{ t('template_textarea_label') }}</label>
+              <button
+                type="button"
+                @click="resetTemplateToDefault"
+                class="text-xs text-amber-600 hover:text-amber-700 font-semibold cursor-pointer"
+              >
+                {{ t('btn_reset_default') }}
+              </button>
+            </div>
+            <textarea
+              ref="templateTextareaRef"
+              v-model="templateDraft"
+              rows="7"
+              :placeholder="t('template_textarea_ph')"
+              class="w-full rounded-xl border border-gray-300 p-3 text-xs font-sans focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+            />
+          </div>
+
+          <!-- Live Sample Preview -->
+          <div>
+            <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">{{ t('template_sample_preview') }}</label>
+            <div class="p-3 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 whitespace-pre-wrap font-sans max-h-36 overflow-y-auto select-all">
+              {{ renderedSamplePreview }}
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex justify-end gap-3 pt-3 border-t border-gray-200 mt-4">
+            <button
+              type="button"
+              @click="showTemplateModal = false"
+              class="px-4 py-2 text-xs font-semibold text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl cursor-pointer"
+            >
+              {{ t('btn_cancel') }}
+            </button>
+            <button
+              type="button"
+              @click="saveTemplateDraft"
+              class="px-5 py-2 text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl flex items-center gap-2 cursor-pointer shadow-sm"
+            >
+              {{ t('btn_save_template') }}
             </button>
           </div>
         </div>
@@ -746,6 +872,18 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     btn_open_whatsapp: 'Buka WhatsApp',
     confirm_delete_title: 'Hapus Tamu',
     confirm_delete_msg: 'Apakah Anda yakin ingin menghapus tamu \'{name}\' dari daftar undangan?',
+    btn_template_setting: 'Template Pesan',
+    btn_edit_global_template: 'Ubah Template (Semua Tamu)',
+    template_hint_applied: 'Pesan ini otomatis menggunakan template pesan yang sama untuk semua tamu undangan.',
+    template_modal_title: 'Template Pesan WhatsApp',
+    template_modal_desc: 'Atur satu format template pesan yang otomatis diterapkan ke seluruh daftar tamu.',
+    template_chips_label: 'Klik untuk Sisipkan Tag Dinamis:',
+    template_textarea_label: 'Format Template Pesan',
+    template_textarea_ph: 'Tulis template pesan di sini...',
+    template_sample_preview: 'Pratinjau Hasil Pesan (Contoh Tamu):',
+    btn_reset_default: 'Reset ke Standar',
+    btn_save_template: 'Simpan Template untuk Semua Tamu',
+    toast_template_saved: 'Template pesan undangan berhasil disimpan untuk semua tamu!',
     toast_link_copied: 'Tautan undangan personal berhasil disalin!',
     toast_msg_copied: 'Teks pesan undangan berhasil disalin!',
     toast_bulk_success: '{count} tamu berhasil ditambahkan!',
@@ -821,6 +959,18 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     btn_open_whatsapp: 'Open WhatsApp',
     confirm_delete_title: 'Delete Guest',
     confirm_delete_msg: 'Are you sure you want to delete guest \'{name}\' from the guest list?',
+    btn_template_setting: 'Message Template',
+    btn_edit_global_template: 'Edit Template (All Guests)',
+    template_hint_applied: 'This message automatically uses the unified template for all invited guests.',
+    template_modal_title: 'WhatsApp Message Template',
+    template_modal_desc: 'Configure one unified message template applied to all guests.',
+    template_chips_label: 'Click to Insert Dynamic Placeholder:',
+    template_textarea_label: 'Message Template Format',
+    template_textarea_ph: 'Compose your invitation message template here...',
+    template_sample_preview: 'Live Message Preview (Sample Guest):',
+    btn_reset_default: 'Reset to Default',
+    btn_save_template: 'Save Template for All Guests',
+    toast_template_saved: 'Invitation message template saved for all guests!',
     toast_link_copied: 'Personal invitation link copied to clipboard!',
     toast_msg_copied: 'Invitation message text copied to clipboard!',
     toast_bulk_success: '{count} guests added successfully!',
@@ -1004,15 +1154,93 @@ function getGuestInvitationUrl(guest: ClientGuest): string {
   return `${origin}/invitation/${invitationSlug.value}?${params.toString()}`
 }
 
+// Unified WhatsApp Message Template State
+const customMessageTemplate = ref<string>('')
+const templateDraft = ref<string>('')
+const showTemplateModal = ref(false)
+const templateTextareaRef = ref<HTMLTextAreaElement | null>(null)
+
+function getDefaultTemplate(): string {
+  if (lang.value === 'en') {
+    return `Dear {guest_name},\n\nYou are cordially invited to celebrate the wedding of {couple_name}.\n\nPlease open your personalized digital invitation and confirm your RSVP here:\n{invitation_link}\n\nWe look forward to celebrating this special day with you! Thank you.`
+  }
+  return `Halo {nama_tamu},\n\nTanpa mengurangi rasa hormat, perkenankan kami mengundang Anda untuk hadir di momen bahagia pernikahan kami ({nama_mempelai}).\n\nBuka tautan undangan digital personal dan konfirmasi kehadiran Anda di sini:\n{link_undangan}\n\nMerupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu. Terima kasih.`
+}
+
+function loadCustomTemplate() {
+  if (typeof window === 'undefined') return
+  try {
+    const token = rawToken.value.trim()
+    const stored = (token && localStorage.getItem(`client_wa_template_${token}`)) || localStorage.getItem('client_wa_template_default')
+    if (stored) {
+      customMessageTemplate.value = stored
+    }
+  } catch {}
+}
+
+function openTemplateModal() {
+  templateDraft.value = customMessageTemplate.value || getDefaultTemplate()
+  showTemplateModal.value = true
+}
+
+function resetTemplateToDefault() {
+  templateDraft.value = getDefaultTemplate()
+}
+
+function insertPlaceholder(placeholder: string) {
+  const el = templateTextareaRef.value
+  if (!el) {
+    templateDraft.value += (templateDraft.value ? ' ' : '') + placeholder
+    return
+  }
+  const start = el.selectionStart ?? templateDraft.value.length
+  const end = el.selectionEnd ?? templateDraft.value.length
+  const current = templateDraft.value
+  templateDraft.value = current.substring(0, start) + placeholder + current.substring(end)
+  nextTick(() => {
+    el.focus()
+    el.selectionStart = el.selectionEnd = start + placeholder.length
+  })
+}
+
+function saveTemplateDraft() {
+  customMessageTemplate.value = templateDraft.value.trim()
+  if (typeof window !== 'undefined') {
+    try {
+      const token = rawToken.value.trim()
+      if (token) {
+        localStorage.setItem(`client_wa_template_${token}`, customMessageTemplate.value)
+      }
+      localStorage.setItem('client_wa_template_default', customMessageTemplate.value)
+    } catch {}
+  }
+  toast.success(t('toast_template_saved'))
+  showTemplateModal.value = false
+}
+
+// Sample preview for Template Editor Modal
+const renderedSamplePreview = computed(() => {
+  const sampleName = lang.value === 'en' ? 'Johnathan Smith & Partner' : 'Budi Santoso & Pasangan'
+  const tmpl = templateDraft.value || getDefaultTemplate()
+  const origin = typeof window !== 'undefined' ? window.location.origin : 'https://domain.com'
+  const sampleUrl = `${origin}/invitation/${invitationSlug.value}?u=${encodeURIComponent(sampleName)}`
+  const sampleCouple = verifyData.value?.client?.name || (lang.value === 'en' ? 'Romeo & Juliet' : 'Dimas & Anisa')
+  
+  return tmpl
+    .replace(/{(?:nama_tamu|guest_name|name)}/gi, sampleName)
+    .replace(/{(?:link_undangan|invitation_link|link|url)}/gi, sampleUrl)
+    .replace(/{(?:nama_mempelai|couple_name|mempelai)}/gi, sampleCouple)
+})
+
 function getShareMessage(guest: ClientGuest): string {
   const url = getGuestInvitationUrl(guest)
-  const clientName = verifyData.value?.client?.name || 'Mempelai'
-  
-  if (lang.value === 'en') {
-    return `Dear ${guest.name},\n\nYou are cordially invited to celebrate the wedding of ${clientName}.\n\nPlease open your personalized digital invitation and confirm your RSVP here:\n${url}\n\nWe look forward to celebrating this special day with you!`
-  }
-  
-  return `Halo ${guest.name},\n\nTanpa mengurangi rasa hormat, perkenankan kami mengundang Anda untuk hadir di momen bahagia pernikahan ${clientName}.\n\nBuka tautan undangan digital personal dan konfirmasi kehadiran Anda di sini:\n${url}\n\nMerupakan suatu kehormatan dan kebahagiaan bagi kami apabila Anda berkenan hadir dan memberikan doa restu.`
+  const clientName = verifyData.value?.client?.name || (lang.value === 'en' ? 'The Couple' : 'Mempelai')
+  const tmpl = customMessageTemplate.value || getDefaultTemplate()
+
+  return tmpl
+    .replace(/{(?:nama_tamu|guest_name|name)}/gi, guest.name || '')
+    .replace(/{(?:link_undangan|invitation_link|link|url)}/gi, url)
+    .replace(/{(?:nama_mempelai|couple_name|mempelai)}/gi, clientName)
 }
 
 async function copyGuestLink(guest: ClientGuest) {
@@ -1201,6 +1429,7 @@ async function handleDeleteGuest() {
 }
 
 onMounted(() => {
+  loadCustomTemplate()
   verifyClientAccess()
 })
 </script>
