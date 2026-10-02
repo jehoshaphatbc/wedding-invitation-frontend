@@ -96,7 +96,7 @@
               </th>
               <th class="px-4 py-3">WhatsApp</th>
               <th class="px-4 py-3">Total Spent</th>
-              <th class="px-4 py-3 text-center">Latest Order</th>
+              <th class="px-4 py-3 text-center">Setup Status</th>
               <th class="px-4 py-3 cursor-pointer hover:bg-gray-100" @click="toggleSort('created_at')">
                 Joined Date <span v-if="sortBy === 'created_at'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
@@ -179,25 +179,46 @@
                       {{ getClientOrdersCount(client) }} Orders
                     </div>
                   </td>
-                  <td class="px-4 py-3 text-center">
-                    <span
-                      v-if="getClientLatestStatus(client) === 'paid'"
-                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200"
+                  <td class="px-4 py-3 text-center whitespace-nowrap">
+                    <button
+                      v-if="getClientSetupStatus(client).status === 'filled'"
+                      type="button"
+                      @click.stop="openSetupViewForClient(client)"
+                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 transition-all shadow-2xs cursor-pointer active:scale-95"
+                      :title="getClientSetupStatus(client).tooltip"
                     >
-                      ✓ Paid
-                    </span>
-                    <span
-                      v-else-if="getClientLatestStatus(client) === 'unpaid'"
-                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 border border-yellow-200"
+                      <span class="font-bold">✓</span>
+                      <span>{{ getClientSetupStatus(client).label }}</span>
+                    </button>
+
+                    <button
+                      v-else-if="getClientSetupStatus(client).status === 'pending'"
+                      type="button"
+                      @click.stop="openSetupViewForClient(client)"
+                      class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300 transition-all shadow-2xs cursor-pointer active:scale-95"
+                      :title="getClientSetupStatus(client).tooltip"
                     >
-                      ⏳ Unpaid
-                    </span>
+                      <span>📝</span>
+                      <span>{{ getClientSetupStatus(client).label }}</span>
+                    </button>
+
                     <span
-                      v-else-if="getClientLatestStatus(client) === 'expired'"
-                      class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 border border-gray-200"
+                      v-else-if="getClientSetupStatus(client).status === 'unpaid'"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200"
+                      :title="getClientSetupStatus(client).tooltip"
+                    >
+                      <span>⏳</span>
+                      <span>Unpaid</span>
+                    </span>
+
+                    <span
+                      v-else-if="getClientSetupStatus(client).status === 'expired'"
+                      class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200"
+                      :title="getClientSetupStatus(client).tooltip"
                     >
                       ✕ Expired
                     </span>
+
                     <span v-else class="text-gray-400 text-xs italic">-</span>
                   </td>
                   <td class="px-4 py-3 text-gray-600 text-xs whitespace-nowrap">
@@ -671,6 +692,7 @@
       :show="showSetupViewModal"
       :order="selectedOrderForView"
       :client="selectedClientForView"
+      @loaded="handleSetupDataLoaded"
       @close="showSetupViewModal = false"
     />
   </div>
@@ -710,6 +732,18 @@ function openSetupViewForClient(client: Client) {
   const targetOrder = client.orders?.find(o => o.status === 'paid' && o.form_token) || client.orders?.[0] || null
   selectedOrderForView.value = targetOrder
   showSetupViewModal.value = true
+}
+
+function handleSetupDataLoaded(invitation: any) {
+  if (selectedOrderForView.value) {
+    selectedOrderForView.value.invitation = invitation
+  }
+  if (selectedClientForView.value && selectedClientForView.value.orders) {
+    const target = selectedClientForView.value.orders.find(o => o.id === selectedOrderForView.value?.id)
+    if (target) {
+      target.invitation = invitation
+    }
+  }
 }
 
 // Expandable rows state
@@ -804,6 +838,110 @@ function getClientTotalSpent(client: Client): number {
 function getClientLatestStatus(client: Client): string | null {
   if (!client.orders || client.orders.length === 0) return null
   return client.orders[0]?.status || null
+}
+
+interface ClientSetupStatusInfo {
+  status: 'filled' | 'pending' | 'unpaid' | 'expired' | 'no_order'
+  label: string
+  class: string
+  icon: string
+  tooltip: string
+}
+
+function checkOrderInvitationFilled(order?: Order | null, client?: Client | null): boolean {
+  if (!order) return false
+
+  // 1. Direct invitation object from backend relation or client
+  const anyOrder = order as any
+  const inv = anyOrder.invitation || (client as any)?.invitation
+  if (inv) {
+    if (inv.title && inv.title !== 'Draft Undangan' && inv.title !== '') return true
+    if (inv.groom && (inv.groom.full_name || inv.groom.nickname)) return true
+    if (inv.bride && (inv.bride.full_name || inv.bride.nickname)) return true
+    if (inv.status === 'published' || inv.status === 'completed' || inv.status === 'submitted') return true
+    if (inv.id && (inv.event || inv.theme)) return true
+  }
+
+  // 2. Specific flags from order
+  if (anyOrder.has_invitation || anyOrder.is_setup_completed || anyOrder.invitation_status === 'completed' || anyOrder.invitation_status === 'submitted') {
+    return true
+  }
+
+  // 3. Local storage check for local drafts / offline test
+  if (typeof window !== 'undefined' && window.localStorage) {
+    const token = order.form_token || anyOrder.id
+    if (token) {
+      try {
+        const raw = localStorage.getItem(`client_invitation_draft_${token}`)
+        if (raw) {
+          const parsed = JSON.parse(raw)
+          if (parsed && (parsed.groom?.full_name || parsed.bride?.full_name || parsed.title)) {
+            return true
+          }
+        }
+      } catch {}
+    }
+  }
+
+  return false
+}
+
+function getClientSetupStatus(client: Client): ClientSetupStatusInfo {
+  if (!client.orders || client.orders.length === 0) {
+    return {
+      status: 'no_order',
+      label: 'No Order',
+      class: 'bg-gray-100 text-gray-500 border-gray-200',
+      icon: '-',
+      tooltip: 'Client has no registered orders yet'
+    }
+  }
+
+  // Find paid order (or fallback to latest order)
+  const paidOrder = client.orders.find(o => o.status === 'paid')
+  const latestOrder = client.orders[0]
+  const targetOrder = paidOrder || latestOrder
+
+  if (!paidOrder && targetOrder.status === 'unpaid') {
+    return {
+      status: 'unpaid',
+      label: 'Unpaid',
+      class: 'bg-gray-100 text-gray-600 border-gray-200',
+      icon: '⏳',
+      tooltip: 'Order invoice is unpaid. Setup form will be activated after payment.'
+    }
+  }
+
+  if (!paidOrder && targetOrder.status === 'expired') {
+    return {
+      status: 'expired',
+      label: 'Expired',
+      class: 'bg-rose-50 text-rose-700 border-rose-200',
+      icon: '✕',
+      tooltip: 'Order invoice has expired.'
+    }
+  }
+
+  // If order is paid, check if setup form data has been filled
+  const hasFilledInvitation = checkOrderInvitationFilled(targetOrder, client)
+
+  if (hasFilledInvitation) {
+    return {
+      status: 'filled',
+      label: 'Data Terisi',
+      class: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300',
+      icon: '✓',
+      tooltip: 'Invitation setup data has been filled. Click to view setup details.'
+    }
+  }
+
+  return {
+    status: 'pending',
+    label: 'Belum Terisi',
+    class: 'bg-amber-50 text-amber-800 hover:bg-amber-100 border-amber-300',
+    icon: '📝',
+    tooltip: 'Client has paid, but invitation form is not filled yet. Click to view setup details or copy link.'
+  }
 }
 
 function openOrderPayment(order: Order) {

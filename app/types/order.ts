@@ -48,6 +48,7 @@ export interface Order {
   package_name?: string
   magic_link?: string | null
   scanner_link?: string | null
+  invitation?: any
 }
 
 export interface PaginationMeta {

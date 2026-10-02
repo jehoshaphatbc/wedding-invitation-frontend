@@ -313,6 +313,7 @@ const props = defineProps<{
 
 defineEmits<{
   (e: 'close'): void
+  (e: 'loaded', data: any): void
 }>()
 
 const toast = useToast()
@@ -382,13 +383,19 @@ async function fetchSetupData() {
       const res = await clientSetupService.verifyToken(token)
       if (res?.invitation) {
         invitationData.value = res.invitation
+        if (props.order) props.order.invitation = res.invitation
+        emit('loaded', res.invitation)
       }
     } catch (e) {
       // Fallback check local storage
       if (typeof window !== 'undefined' && window.localStorage) {
         try {
           const raw = localStorage.getItem(`client_invitation_draft_${token}`)
-          if (raw) invitationData.value = JSON.parse(raw)
+          if (raw) {
+            invitationData.value = JSON.parse(raw)
+            if (props.order) props.order.invitation = invitationData.value
+            emit('loaded', invitationData.value)
+          }
         } catch {}
       }
     } finally {
