@@ -111,26 +111,45 @@
       </div>
 
       <!-- Authorized Content -->
-      <div v-else class="space-y-6">
-        <!-- Header Banner -->
-        <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 rounded-2xl p-6 text-white shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/20 text-white mb-2 backdrop-blur-xs">
+      <div v-else class="space-y-5 sm:space-y-6">
+        <!-- Header Banner (Mobile-First Redesign) -->
+        <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 rounded-2xl p-5 sm:p-6 text-white shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div class="max-w-xl">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/20 text-white mb-2 backdrop-blur-xs">
               <span>👥</span> {{ t('guest_management_badge') }}
             </div>
-            <h2 class="text-xl sm:text-2xl font-bold">
+            <h2 class="text-xl sm:text-2xl font-bold leading-tight">
               {{ t('header_title') }}
             </h2>
-            <p class="text-xs sm:text-sm text-blue-100 mt-1 max-w-xl">
+            <p class="text-xs sm:text-sm text-blue-100 mt-1">
               {{ t('header_subtitle') }}
             </p>
           </div>
 
-          <div class="flex flex-wrap items-center gap-2">
+          <!-- Action Buttons (Responsive Grid on Mobile, Flex on Desktop) -->
+          <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full md:w-auto shrink-0">
+            <button
+              type="button"
+              @click="openBulkModal"
+              class="px-3.5 py-2.5 bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+            >
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+              </svg>
+              <span>{{ t('btn_bulk_add') }}</span>
+            </button>
+            <button
+              type="button"
+              @click="openSingleCreateModal"
+              class="px-3.5 py-2.5 bg-blue-500/60 hover:bg-blue-500/80 border border-white/30 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
+            >
+              <span>+</span>
+              <span>{{ t('btn_single_add') }}</span>
+            </button>
             <button
               type="button"
               @click="openTemplateModal"
-              class="px-3.5 py-2.5 bg-white/20 hover:bg-white/30 border border-white/30 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1.5 backdrop-blur-xs"
+              class="px-3.5 py-2.5 bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 backdrop-blur-xs cursor-pointer text-center"
             >
               <span>💬</span>
               <span>{{ t('btn_template_setting') }}</span>
@@ -139,88 +158,74 @@
               v-if="hasQrFeature"
               :href="scannerUrl"
               target="_blank"
-              class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1.5"
+              class="px-3.5 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
             >
               <span>📲</span>
-              <span>{{ t('btn_open_scanner') }}</span>
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-              </svg>
+              <span class="truncate">{{ t('btn_open_scanner') }}</span>
             </a>
-            <button
-              type="button"
-              @click="openBulkModal"
-              class="px-4 py-2.5 bg-white text-blue-700 hover:bg-blue-50 font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1.5"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-              </svg>
-              <span>{{ t('btn_bulk_add') }}</span>
-            </button>
-            <button
-              type="button"
-              @click="openSingleCreateModal"
-              class="px-4 py-2.5 bg-blue-500/50 hover:bg-blue-500/70 border border-white/30 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1.5"
-            >
-              <span>+</span>
-              <span>{{ t('btn_single_add') }}</span>
-            </button>
           </div>
         </div>
 
-        <!-- Metric KPI Cards -->
+        <!-- Metric KPI Cards (With Attendance Progress Bar) -->
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <!-- Total Guests -->
-          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200 shadow-2xs">
+          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200/90 shadow-2xs hover:shadow-xs transition-shadow">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ t('stat_total_guests') }}</span>
+              <span class="text-[11px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ t('stat_total_guests') }}</span>
               <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
                 👥
               </span>
             </div>
-            <div class="mt-3 flex items-baseline gap-2">
+            <div class="mt-2.5 flex items-baseline gap-1.5">
               <span class="text-2xl sm:text-3xl font-extrabold text-gray-900">{{ totalGuests }}</span>
               <span class="text-xs text-gray-500">{{ t('label_people') }}</span>
             </div>
           </div>
 
           <!-- Total Hadir -->
-          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-100 shadow-2xs">
+          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-200/80 shadow-2xs hover:shadow-xs transition-shadow">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-emerald-700 uppercase tracking-wider">{{ t('stat_attending') }}</span>
+              <span class="text-[11px] sm:text-xs font-semibold text-emerald-700 uppercase tracking-wider">{{ t('stat_attending') }}</span>
               <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
                 ✓
               </span>
             </div>
-            <div class="mt-3 flex items-baseline gap-2">
+            <div class="mt-2.5 flex items-baseline gap-1.5">
               <span class="text-2xl sm:text-3xl font-extrabold text-emerald-600">{{ totalHadir }}</span>
               <span class="text-xs text-gray-500">{{ t('label_people') }} ({{ hadirPercentage }}%)</span>
+            </div>
+            <!-- Progress Bar Attendance -->
+            <div class="w-full bg-emerald-100 rounded-full h-1.5 mt-2.5 overflow-hidden">
+              <div
+                class="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                :style="{ width: `${hadirPercentage}%` }"
+              />
             </div>
           </div>
 
           <!-- Total Tidak Hadir -->
-          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-red-100 shadow-2xs">
+          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-rose-200/80 shadow-2xs hover:shadow-xs transition-shadow">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-red-700 uppercase tracking-wider">{{ t('stat_not_attending') }}</span>
-              <span class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center font-bold text-sm">
+              <span class="text-[11px] sm:text-xs font-semibold text-rose-700 uppercase tracking-wider">{{ t('stat_not_attending') }}</span>
+              <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm">
                 ✕
               </span>
             </div>
-            <div class="mt-3 flex items-baseline gap-2">
-              <span class="text-2xl sm:text-3xl font-extrabold text-red-600">{{ totalTidakHadir }}</span>
+            <div class="mt-2.5 flex items-baseline gap-1.5">
+              <span class="text-2xl sm:text-3xl font-extrabold text-rose-600">{{ totalTidakHadir }}</span>
               <span class="text-xs text-gray-500">{{ t('label_people') }}</span>
             </div>
           </div>
 
           <!-- Total Pending -->
-          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-amber-100 shadow-2xs">
+          <div class="bg-white rounded-2xl p-4 sm:p-5 border border-amber-200/80 shadow-2xs hover:shadow-xs transition-shadow">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-semibold text-amber-700 uppercase tracking-wider">{{ t('stat_pending') }}</span>
+              <span class="text-[11px] sm:text-xs font-semibold text-amber-700 uppercase tracking-wider">{{ t('stat_pending') }}</span>
               <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">
                 ⏳
               </span>
             </div>
-            <div class="mt-3 flex items-baseline gap-2">
+            <div class="mt-2.5 flex items-baseline gap-1.5">
               <span class="text-2xl sm:text-3xl font-extrabold text-amber-600">{{ totalPending }}</span>
               <span class="text-xs text-gray-500">{{ t('label_people') }}</span>
             </div>
@@ -253,14 +258,14 @@
                 v-model="searchQuery"
                 type="text"
                 :placeholder="t('search_placeholder')"
-                class="w-full rounded-xl border border-gray-300 pl-9 pr-3 py-1.5 text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                class="w-full rounded-xl border border-gray-300 pl-9 pr-3 py-2 text-base sm:text-xs focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
             <button
               type="button"
               @click="loadGuests"
               :disabled="loadingList"
-              class="p-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+              class="p-2 sm:p-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
               :title="t('btn_refresh')"
             >
               <svg class="w-4 h-4" :class="{ 'animate-spin': loadingList }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -289,133 +294,251 @@
               <button
                 type="button"
                 @click="openBulkModal"
-                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition-colors"
+                class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold transition-colors shadow-xs active:scale-95"
               >
                 {{ t('btn_bulk_add') }}
               </button>
             </div>
           </div>
 
-          <!-- Table View (Desktop & Tablet) -->
-          <div v-else class="overflow-x-auto">
-            <table class="w-full text-left text-xs sm:text-sm">
-              <thead class="bg-gray-50/75 border-b border-gray-200 text-gray-600 uppercase text-[11px] font-bold">
-                <tr>
-                  <th class="px-4 py-3 w-10 text-center">#</th>
-                  <th class="px-4 py-3">{{ t('col_name') }}</th>
-                  <th class="px-4 py-3">{{ t('col_phone') }}</th>
-                  <th class="px-4 py-3 text-center">{{ t('col_pax') }}</th>
-                  <th class="px-4 py-3">{{ t('col_rsvp') }}</th>
-                  <th class="px-4 py-3">{{ t('col_checkin') }}</th>
-                  <th class="px-4 py-3 text-right">{{ t('col_actions') }}</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-gray-100">
-                <tr
-                  v-for="(guest, idx) in filteredGuests"
-                  :key="guest.id"
-                  class="hover:bg-blue-50/30 transition-colors"
-                >
-                  <td class="px-4 py-3.5 text-center text-gray-400 text-xs font-mono">
-                    {{ idx + 1 }}
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <div class="font-bold text-gray-900 flex items-center gap-2">
-                      <span>{{ guest.name }}</span>
+          <!-- Dual-View Container: Mobile Cards (md:hidden) and Desktop Table (hidden md:block) -->
+          <div v-else>
+            <!-- Mobile Guest Cards View (Shown on screens < 768px) -->
+            <div class="md:hidden divide-y divide-gray-100">
+              <div
+                v-for="(guest, idx) in filteredGuests"
+                :key="guest.id"
+                class="p-4 transition-colors hover:bg-blue-50/20 space-y-3"
+              >
+                <!-- Card Header: #, Name, Pax Badge -->
+                <div class="flex items-start justify-between gap-2">
+                  <div class="flex items-start gap-2.5 min-w-0">
+                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-lg bg-gray-100 text-gray-500 font-mono text-xs font-bold shrink-0 mt-0.5">
+                      {{ idx + 1 }}
+                    </span>
+                    <div class="min-w-0">
+                      <h4 class="font-bold text-gray-900 text-sm leading-snug break-words">
+                        {{ guest.name }}
+                      </h4>
+                      <p v-if="guest.phone" class="text-xs text-gray-600 font-mono mt-0.5 flex items-center gap-1">
+                        <span>📱</span>
+                        <span>{{ guest.phone }}</span>
+                      </p>
+                      <p v-else class="text-[11px] text-gray-400 italic mt-0.5">
+                        {{ t('col_no_phone') || '-' }}
+                      </p>
                     </div>
-                    <div v-if="guest.qr_token" class="text-[10px] text-gray-400 font-mono mt-0.5">
-                      QR: {{ guest.qr_token }}
-                    </div>
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <div v-if="guest.phone" class="flex items-center gap-1.5 font-mono text-xs text-gray-700">
-                      <span>{{ guest.phone }}</span>
-                    </div>
-                    <span v-else class="text-gray-400 text-xs italic">-</span>
-                  </td>
-                  <td class="px-4 py-3.5 text-center">
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">
-                      {{ guest.pax || 1 }} {{ t('label_pax') }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <span
-                      class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border"
-                      :class="getRsvpBadgeClass(guest.rsvp_status)"
-                    >
-                      <span>{{ getRsvpEmoji(guest.rsvp_status) }}</span>
-                      <span>{{ getRsvpLabel(guest.rsvp_status) }}</span>
-                    </span>
-                  </td>
-                  <td class="px-4 py-3.5">
-                    <span
-                      v-if="guest.actual_attendance"
-                      class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    >
-                      <span>✓</span>
-                      <span>{{ t('status_checked_in') }}</span>
-                    </span>
-                    <span
-                      v-else
-                      class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-500 border border-gray-200"
-                    >
-                      {{ t('status_not_checked_in') }}
-                    </span>
-                  </td>
-                  <td class="px-4 py-3.5 text-right whitespace-nowrap">
-                    <div class="inline-flex items-center gap-1 justify-end">
-                      <!-- Share WhatsApp button -->
-                      <button
-                        type="button"
-                        @click="openShareModal(guest)"
-                        class="p-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
-                        :title="t('btn_share_wa')"
-                      >
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/>
-                        </svg>
-                      </button>
+                  </div>
 
-                      <!-- Copy Invitation Link button -->
-                      <button
-                        type="button"
-                        @click="copyGuestLink(guest)"
-                        class="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
-                        :title="t('btn_copy_link')"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                      </button>
+                  <!-- Pax Pill -->
+                  <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200 shrink-0">
+                    {{ guest.pax || 1 }} {{ t('label_pax') }}
+                  </span>
+                </div>
 
-                      <!-- Edit Button -->
-                      <button
-                        type="button"
-                        @click="openEditModal(guest)"
-                        class="p-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                        :title="t('btn_edit')"
-                      >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
+                <!-- Status Badges: RSVP & Attendance -->
+                <div class="flex items-center flex-wrap gap-2 text-xs">
+                  <span
+                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border"
+                    :class="getRsvpBadgeClass(guest.rsvp_status)"
+                  >
+                    <span>{{ getRsvpEmoji(guest.rsvp_status) }}</span>
+                    <span>{{ getRsvpLabel(guest.rsvp_status) }}</span>
+                  </span>
 
-                      <!-- Delete Button -->
-                      <button
-                        type="button"
-                        @click="confirmDelete(guest)"
-                        class="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
-                        :title="t('btn_delete')"
+                  <span
+                    v-if="guest.actual_attendance"
+                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
+                  >
+                    <span>✓</span>
+                    <span>{{ t('status_checked_in') }}</span>
+                  </span>
+                  <span
+                    v-else
+                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-500 border border-gray-200"
+                  >
+                    {{ t('status_not_checked_in') }}
+                  </span>
+
+                  <span v-if="guest.qr_token" class="text-[10px] text-gray-400 font-mono ml-auto">
+                    QR: {{ guest.qr_token.substring(0, 8) }}...
+                  </span>
+                </div>
+
+                <!-- Mobile Action Buttons (Grid 2x2 with clear touch targets) -->
+                <div class="grid grid-cols-2 gap-2 pt-2 border-t border-gray-50">
+                  <!-- Share WA -->
+                  <button
+                    type="button"
+                    @click="openShareModal(guest)"
+                    class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-green-50 hover:bg-green-100 text-green-700 text-xs font-semibold transition-colors active:scale-95"
+                  >
+                    <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/>
+                    </svg>
+                    <span>WhatsApp</span>
+                  </button>
+
+                  <!-- Copy Link -->
+                  <button
+                    type="button"
+                    @click="copyGuestLink(guest)"
+                    class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-semibold transition-colors active:scale-95"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ t('btn_copy_url') }}</span>
+                  </button>
+
+                  <!-- Edit -->
+                  <button
+                    type="button"
+                    @click="openEditModal(guest)"
+                    class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold transition-colors active:scale-95"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                    <span>{{ t('btn_edit') }}</span>
+                  </button>
+
+                  <!-- Delete -->
+                  <button
+                    type="button"
+                    @click="confirmDelete(guest)"
+                    class="flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold transition-colors active:scale-95"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    <span>{{ t('btn_delete') }}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Table View (Desktop & Tablet: hidden on mobile) -->
+            <div class="hidden md:block overflow-x-auto">
+              <table class="w-full text-left text-xs sm:text-sm">
+                <thead class="bg-gray-50/75 border-b border-gray-200 text-gray-600 uppercase text-[11px] font-bold">
+                  <tr>
+                    <th class="px-4 py-3 w-10 text-center">#</th>
+                    <th class="px-4 py-3">{{ t('col_name') }}</th>
+                    <th class="px-4 py-3">{{ t('col_phone') }}</th>
+                    <th class="px-4 py-3 text-center">{{ t('col_pax') }}</th>
+                    <th class="px-4 py-3">{{ t('col_rsvp') }}</th>
+                    <th class="px-4 py-3">{{ t('col_checkin') }}</th>
+                    <th class="px-4 py-3 text-right">{{ t('col_actions') }}</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                  <tr
+                    v-for="(guest, idx) in filteredGuests"
+                    :key="guest.id"
+                    class="hover:bg-blue-50/30 transition-colors"
+                  >
+                    <td class="px-4 py-3.5 text-center text-gray-400 text-xs font-mono">
+                      {{ idx + 1 }}
+                    </td>
+                    <td class="px-4 py-3.5">
+                      <div class="font-bold text-gray-900 flex items-center gap-2">
+                        <span>{{ guest.name }}</span>
+                      </div>
+                      <div v-if="guest.qr_token" class="text-[10px] text-gray-400 font-mono mt-0.5">
+                        QR: {{ guest.qr_token }}
+                      </div>
+                    </td>
+                    <td class="px-4 py-3.5">
+                      <div v-if="guest.phone" class="flex items-center gap-1.5 font-mono text-xs text-gray-700">
+                        <span>{{ guest.phone }}</span>
+                      </div>
+                      <span v-else class="text-gray-400 text-xs italic">-</span>
+                    </td>
+                    <td class="px-4 py-3.5 text-center">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-bold bg-gray-100 text-gray-700 border border-gray-200">
+                        {{ guest.pax || 1 }} {{ t('label_pax') }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3.5">
+                      <span
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border"
+                        :class="getRsvpBadgeClass(guest.rsvp_status)"
                       >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                        <span>{{ getRsvpEmoji(guest.rsvp_status) }}</span>
+                        <span>{{ getRsvpLabel(guest.rsvp_status) }}</span>
+                      </span>
+                    </td>
+                    <td class="px-4 py-3.5">
+                      <span
+                        v-if="guest.actual_attendance"
+                        class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
+                      >
+                        <span>✓</span>
+                        <span>{{ t('status_checked_in') }}</span>
+                      </span>
+                      <span
+                        v-else
+                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-gray-100 text-gray-500 border border-gray-200"
+                      >
+                        {{ t('status_not_checked_in') }}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                      <div class="inline-flex items-center gap-1 justify-end">
+                        <!-- Share WhatsApp button -->
+                        <button
+                          type="button"
+                          @click="openShareModal(guest)"
+                          class="p-1.5 rounded-lg bg-green-50 text-green-700 hover:bg-green-100 transition-colors"
+                          :title="t('btn_share_wa')"
+                        >
+                          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/>
+                          </svg>
+                        </button>
+
+                        <!-- Copy Invitation Link button -->
+                        <button
+                          type="button"
+                          @click="copyGuestLink(guest)"
+                          class="p-1.5 rounded-lg bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
+                          :title="t('btn_copy_link')"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+
+                        <!-- Edit Button -->
+                        <button
+                          type="button"
+                          @click="openEditModal(guest)"
+                          class="p-1.5 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+                          :title="t('btn_edit')"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          </svg>
+                        </button>
+
+                        <!-- Delete Button -->
+                        <button
+                          type="button"
+                          @click="confirmDelete(guest)"
+                          class="p-1.5 rounded-lg bg-red-50 text-red-600 hover:bg-red-100 transition-colors"
+                          :title="t('btn_delete')"
+                        >
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       </div>
@@ -838,6 +961,7 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     empty_guests_search: 'Tidak ada tamu yang cocok dengan kata kunci pencarian.',
     col_name: 'Nama Tamu',
     col_phone: 'Nomor WhatsApp',
+    col_no_phone: 'Belum ada nomor HP',
     col_pax: 'Jumlah Pax',
     col_rsvp: 'Status RSVP',
     col_checkin: 'Kehadiran Fisik',
@@ -925,6 +1049,7 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     empty_guests_search: 'No guests match your search criteria.',
     col_name: 'Guest Name',
     col_phone: 'WhatsApp / Phone',
+    col_no_phone: 'No phone number',
     col_pax: 'Pax',
     col_rsvp: 'RSVP Status',
     col_checkin: 'Event Check-in',
