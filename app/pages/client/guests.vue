@@ -42,25 +42,42 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs (Setup vs Guests) -->
+      <!-- Navigation Tabs (Setup vs Guests vs Scanner) -->
       <div class="border-t border-gray-100 bg-white">
-        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex gap-6">
-          <NuxtLink
-            :to="`/client/setup?token=${encodeURIComponent(rawToken)}`"
-            class="py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition-colors"
-          >
-            <span>📝</span>
-            <span>{{ t('nav_setup') }}</span>
-          </NuxtLink>
-          <div
-            class="py-3 text-xs sm:text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-1.5 cursor-default"
-          >
-            <span>👥</span>
-            <span>{{ t('nav_guests') }}</span>
-            <span v-if="totalGuests > 0" class="ml-1 px-2 py-0.5 text-[11px] rounded-full bg-blue-100 text-blue-700 font-bold">
-              {{ totalGuests }}
-            </span>
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+          <div class="flex gap-6">
+            <NuxtLink
+              :to="`/client/setup?token=${encodeURIComponent(rawToken)}`"
+              class="py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition-colors"
+            >
+              <span>📝</span>
+              <span>{{ t('nav_setup') }}</span>
+            </NuxtLink>
+            <div
+              class="py-3 text-xs sm:text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-1.5 cursor-default"
+            >
+              <span>👥</span>
+              <span>{{ t('nav_guests') }}</span>
+              <span v-if="totalGuests > 0" class="ml-1 px-2 py-0.5 text-[11px] rounded-full bg-blue-100 text-blue-700 font-bold">
+                {{ totalGuests }}
+              </span>
+            </div>
           </div>
+
+          <!-- Scanner Button in Nav Bar (Shown if package has QR) -->
+          <a
+            v-if="hasQrFeature"
+            :href="scannerUrl"
+            target="_blank"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors shadow-2xs"
+          >
+            <span>📲</span>
+            <span class="hidden sm:inline">{{ t('nav_scanner') }}</span>
+            <span class="sm:hidden">Scanner</span>
+            <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
         </div>
       </div>
     </header>
@@ -110,6 +127,18 @@
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
+            <a
+              v-if="hasQrFeature"
+              :href="scannerUrl"
+              target="_blank"
+              class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center gap-1.5"
+            >
+              <span>📲</span>
+              <span>{{ t('btn_open_scanner') }}</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            </a>
             <button
               type="button"
               @click="openBulkModal"
@@ -653,6 +682,7 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     portal_subtitle: 'Harsava Wedding Invitation Portal',
     nav_setup: 'Setup Undangan',
     nav_guests: 'Buku Tamu & RSVP',
+    nav_scanner: 'Scanner Check-in',
     verifying_title: 'Memverifikasi Akses Klien...',
     verifying_desc: 'Mohon tunggu selagi kami memvalidasi token akses Anda.',
     invalid_token_title: 'Link Akses Tidak Valid',
@@ -663,6 +693,7 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     header_subtitle: 'Kelola daftar tamu undangan Anda, pantau respon RSVP secara real-time, dan bagikan tautan undangan personal via WhatsApp.',
     btn_bulk_add: 'Tambah Tamu Massal',
     btn_single_add: 'Tambah 1 Tamu',
+    btn_open_scanner: 'Buka QR Scanner',
     btn_refresh: 'Segarkan data tamu',
     stat_total_guests: 'Total Tamu',
     stat_attending: 'Konfirmasi Hadir',
@@ -726,6 +757,7 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     portal_subtitle: 'Harsava Wedding Invitation Portal',
     nav_setup: 'Invitation Setup',
     nav_guests: 'Guest List & RSVP',
+    nav_scanner: 'Check-in Scanner',
     verifying_title: 'Verifying Client Access...',
     verifying_desc: 'Please wait while we validate your access token.',
     invalid_token_title: 'Invalid Access Link',
@@ -736,6 +768,7 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     header_subtitle: 'Manage your guest entries, track real-time RSVP responses, and share personalized invitation links via WhatsApp.',
     btn_bulk_add: 'Bulk Add Guests',
     btn_single_add: 'Add Guest',
+    btn_open_scanner: 'Open QR Scanner',
     btn_refresh: 'Refresh guest list',
     stat_total_guests: 'Total Guests',
     stat_attending: 'Attending',
@@ -814,6 +847,51 @@ const checkingToken = ref(true)
 const authError = ref(false)
 const authErrorMessage = ref('')
 const verifyData = ref<ClientAuthVerifyData | null>(null)
+
+// Dynamic Features Config from verify response
+const features = computed(() => {
+  return verifyData.value?.features_config || {
+    has_story: true,
+    has_gallery: true,
+    gallery_limit: 10,
+    has_gift: true,
+    has_countdown: true,
+    has_maps: true,
+    has_rsvp: true,
+    has_qr: true
+  }
+})
+
+// QR Scanner Feature Availability & URLs
+const hasQrFeature = computed(() => {
+  return Boolean(
+    features.value?.has_qr ||
+    verifyData.value?.features_config?.has_qr ||
+    verifyData.value?.package?.features_config?.has_qr ||
+    verifyData.value?.order?.package?.features_config?.has_qr ||
+    verifyData.value?.scanner_token ||
+    verifyData.value?.order?.scanner_token ||
+    verifyData.value?.scanner_link ||
+    verifyData.value?.order?.scanner_link
+  )
+})
+
+const scannerUrl = computed(() => {
+  const tokenVal = verifyData.value?.scanner_token || verifyData.value?.order?.scanner_token
+  const linkVal = verifyData.value?.scanner_link || verifyData.value?.order?.scanner_link
+  if (linkVal) return linkVal
+  if (tokenVal && typeof window !== 'undefined') {
+    return `${window.location.origin}/checkin/scanner/${tokenVal}`
+  }
+  const orderId = verifyData.value?.order?.id
+  if (orderId && typeof window !== 'undefined') {
+    return `${window.location.origin}/checkin/${orderId}/scanner`
+  }
+  if (typeof window !== 'undefined' && rawToken.value) {
+    return `${window.location.origin}/checkin/scanner?token=${encodeURIComponent(rawToken.value)}`
+  }
+  return '#'
+})
 
 // Guest List State
 const guests = ref<ClientGuest[]>([])

@@ -42,22 +42,39 @@
         </div>
       </div>
 
-      <!-- Navigation Tabs (Setup vs Guests) -->
+      <!-- Navigation Tabs (Setup vs Guests vs Scanner) -->
       <div class="border-t border-gray-100 bg-white">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 flex gap-6">
-          <div
-            class="py-3 text-xs sm:text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-1.5 cursor-default"
-          >
-            <span>📝</span>
-            <span>{{ t('nav_setup') }}</span>
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 flex items-center justify-between">
+          <div class="flex gap-6">
+            <div
+              class="py-3 text-xs sm:text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-1.5 cursor-default"
+            >
+              <span>📝</span>
+              <span>{{ t('nav_setup') }}</span>
+            </div>
+            <NuxtLink
+              :to="`/client/guests?token=${encodeURIComponent(rawToken)}`"
+              class="py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition-colors"
+            >
+              <span>👥</span>
+              <span>{{ t('nav_guests') }}</span>
+            </NuxtLink>
           </div>
-          <NuxtLink
-            :to="`/client/guests?token=${encodeURIComponent(rawToken)}`"
-            class="py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition-colors"
+
+          <!-- Scanner Button in Nav Bar (Shown if package has QR) -->
+          <a
+            v-if="hasQrFeature"
+            :href="scannerUrl"
+            target="_blank"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors shadow-2xs"
           >
-            <span>👥</span>
-            <span>{{ t('nav_guests') }}</span>
-          </NuxtLink>
+            <span>📲</span>
+            <span class="hidden sm:inline">{{ t('nav_scanner') }}</span>
+            <span class="sm:hidden">Scanner</span>
+            <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+            </svg>
+          </a>
         </div>
       </div>
     </header>
@@ -104,9 +121,23 @@
                 {{ t('welcome_desc') }}
               </p>
             </div>
-            <div v-if="verifyData?.package" class="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs border border-white/20">
-              <span class="text-blue-200 block text-[10px] uppercase font-bold">{{ t('active_pkg') }}</span>
-              <span class="font-bold text-white">{{ verifyData.package.name }}</span>
+            <div class="flex flex-wrap items-center gap-2">
+              <a
+                v-if="hasQrFeature"
+                :href="scannerUrl"
+                target="_blank"
+                class="bg-amber-500 hover:bg-amber-400 text-white font-bold px-3 py-2 rounded-xl text-xs shadow-sm transition-colors flex items-center gap-1.5"
+              >
+                <span>📲</span>
+                <span>{{ t('btn_open_scanner') }}</span>
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                </svg>
+              </a>
+              <div v-if="verifyData?.package" class="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl text-xs border border-white/20">
+                <span class="text-blue-200 block text-[10px] uppercase font-bold">{{ t('active_pkg') }}</span>
+                <span class="font-bold text-white">{{ verifyData.package.name }}</span>
+              </div>
             </div>
           </div>
         </div>
@@ -885,6 +916,58 @@
               </div>
             </div>
 
+            <!-- QR Scanner Check-in Feature Card (v-if hasQrFeature) -->
+            <div v-if="hasQrFeature" class="border-t border-gray-100 pt-6">
+              <div class="flex items-center justify-between mb-3">
+                <label class="text-sm font-bold text-gray-800 uppercase tracking-wider flex items-center gap-1.5">
+                  <span>📲</span> {{ t('qr_scanner_title') }}
+                </label>
+                <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                  {{ t('active_feature_badge') }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mb-4">
+                {{ t('qr_scanner_desc') }}
+              </p>
+
+              <div class="bg-gradient-to-r from-amber-50 via-orange-50 to-amber-50 border border-amber-200 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-start sm:items-center gap-3.5">
+                  <div class="w-12 h-12 rounded-xl bg-amber-500 text-white flex items-center justify-center text-2xl shadow-sm flex-shrink-0">
+                    📲
+                  </div>
+                  <div>
+                    <div class="text-sm font-bold text-gray-900">{{ t('scanner_app_title') }}</div>
+                    <div class="text-xs text-gray-600 mt-0.5">
+                      {{ t('scanner_app_hint') }}
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 flex-shrink-0">
+                  <button
+                    type="button"
+                    @click="copyScannerUrl"
+                    class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-white border border-amber-300 text-amber-800 hover:bg-amber-100 transition-colors flex items-center gap-1.5 shadow-2xs"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    <span>{{ t('btn_copy_scanner') }}</span>
+                  </button>
+                  <a
+                    :href="scannerUrl"
+                    target="_blank"
+                    class="px-4 py-2 rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 active:bg-amber-800 text-white shadow-xs transition-colors flex items-center gap-1.5"
+                  >
+                    <span>{{ t('btn_open_scanner') }}</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </div>
+
             <!-- Other Active Features Summary -->
             <div class="border-t border-gray-100 pt-6">
               <span class="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">
@@ -910,13 +993,6 @@
                   <div>
                     <div class="text-xs font-bold text-gray-800">{{ t('rsvp_feature_title') }}</div>
                     <div class="text-[10px] text-gray-500">{{ t('rsvp_feature_desc') }}</div>
-                  </div>
-                </div>
-                <div v-if="features.has_qr" class="flex items-center gap-2 p-3 rounded-xl bg-amber-50/60 border border-amber-100">
-                  <span class="text-base">📲</span>
-                  <div>
-                    <div class="text-xs font-bold text-gray-800">{{ t('qr_feature_title') }}</div>
-                    <div class="text-[10px] text-gray-500">{{ t('qr_feature_desc') }}</div>
                   </div>
                 </div>
               </div>
@@ -1105,7 +1181,14 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     btn_prev: 'Sebelumnya',
     btn_next: 'Selanjutnya',
     btn_save: 'Simpan Data Undangan',
-    btn_saving: 'Menyimpan Data...',
+    nav_scanner: 'Scanner Check-in',
+    qr_scanner_title: 'QR Code Scanner & Buku Tamu Digital',
+    qr_scanner_desc: 'Fitur scanner check-in untuk memindai QR code tamu di hari H acara dan mencatat kehadiran secara langsung.',
+    scanner_app_title: 'Buka Aplikasi QR Scanner Tamu',
+    scanner_app_hint: 'Buka kamera browser smartphone panitia penerima tamu untuk mulai memindai QR code tamu di pintu masuk venue.',
+    btn_open_scanner: 'Buka QR Scanner',
+    btn_copy_scanner: 'Salin Link Scanner',
+    toast_scanner_copied: 'Tautan QR Scanner berhasil disalin ke clipboard!',
     toast_fill_couple: 'Mohon lengkapi Nama Mempelai terlebih dahulu.',
     toast_invalid_token: 'Token akses tidak valid.',
     toast_local_fallback: 'Data berhasil disimpan secara lokal di browser Anda (Endpoint backend sedang disiapkan).',
@@ -1117,6 +1200,7 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     portal_subtitle: 'Harsava Wedding Invitation Portal',
     nav_setup: 'Invitation Setup',
     nav_guests: 'Guest List & RSVP',
+    nav_scanner: 'Check-in Scanner',
     active_pkg: 'Active Package',
     verifying_title: 'Verifying Client Access...',
     verifying_desc: 'Please wait while we validate your access token.',
@@ -1222,6 +1306,13 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     rsvp_feature_desc: 'Guest attendance confirmation',
     qr_feature_title: 'Guest QR Check-in',
     qr_feature_desc: 'Digital guestbook system',
+    qr_scanner_title: 'QR Code Scanner & Digital Guestbook',
+    qr_scanner_desc: 'Check-in scanner tool to scan guest QR codes on the event day and record live attendance.',
+    scanner_app_title: 'Open Event QR Scanner Tool',
+    scanner_app_hint: 'Open reception smartphone camera browser to start scanning guest QR codes at venue entrance.',
+    btn_open_scanner: 'Open QR Scanner',
+    btn_copy_scanner: 'Copy Scanner Link',
+    toast_scanner_copied: 'QR Scanner link copied to clipboard!',
     btn_prev: 'Previous',
     btn_next: 'Next',
     btn_save: 'Save Invitation Data',
@@ -1412,9 +1503,55 @@ const features = computed(() => {
     has_gift: true,
     has_countdown: true,
     has_maps: true,
-    has_rsvp: true
+    has_rsvp: true,
+    has_qr: true
   }
 })
+
+// QR Scanner Feature Availability & URLs
+const hasQrFeature = computed(() => {
+  return Boolean(
+    features.value?.has_qr ||
+    verifyData.value?.features_config?.has_qr ||
+    verifyData.value?.package?.features_config?.has_qr ||
+    verifyData.value?.order?.package?.features_config?.has_qr ||
+    verifyData.value?.scanner_token ||
+    verifyData.value?.order?.scanner_token ||
+    verifyData.value?.scanner_link ||
+    verifyData.value?.order?.scanner_link
+  )
+})
+
+const scannerUrl = computed(() => {
+  const tokenVal = verifyData.value?.scanner_token || verifyData.value?.order?.scanner_token
+  const linkVal = verifyData.value?.scanner_link || verifyData.value?.order?.scanner_link
+  if (linkVal) return linkVal
+  if (tokenVal && typeof window !== 'undefined') {
+    return `${window.location.origin}/checkin/scanner/${tokenVal}`
+  }
+  const orderId = verifyData.value?.order?.id
+  if (orderId && typeof window !== 'undefined') {
+    return `${window.location.origin}/checkin/${orderId}/scanner`
+  }
+  if (typeof window !== 'undefined' && rawToken.value) {
+    return `${window.location.origin}/checkin/scanner?token=${encodeURIComponent(rawToken.value)}`
+  }
+  return '#'
+})
+
+async function copyScannerUrl() {
+  if (!scannerUrl.value || scannerUrl.value === '#') return
+  try {
+    if (navigator?.clipboard) {
+      await navigator.clipboard.writeText(scannerUrl.value)
+      toast.success(t('toast_scanner_copied'))
+    } else {
+      toast.success(`URL: ${scannerUrl.value}`)
+    }
+  } catch {
+    toast.error('Gagal menyalin tautan scanner.')
+  }
+}
 
 const galleryLimit = computed(() => {
   return features.value.gallery_limit || 10

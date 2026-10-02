@@ -3,6 +3,8 @@ import type { ApiResponse } from '~/types/api'
 export interface ClientAuthVerifyData {
   valid: boolean
   token: string
+  scanner_token?: string | null
+  scanner_link?: string | null
   client?: {
     id: string
     name: string
@@ -13,6 +15,10 @@ export interface ClientAuthVerifyData {
     id: string
     invoice_number: string
     package_name?: string
+    scanner_token?: string | null
+    scanner_link?: string | null
+    status?: string
+    [key: string]: any
   }
   package?: {
     id: string
@@ -69,6 +75,8 @@ export function useClientSetupService() {
           return {
             valid: true,
             token,
+            scanner_token: data?.scanner_token || data?.order?.scanner_token || null,
+            scanner_link: data?.scanner_link || data?.order?.scanner_link || null,
             client: data?.client || data?.order?.client,
             order: data?.order,
             package: data?.package || data?.order?.package,
@@ -87,6 +95,8 @@ export function useClientSetupService() {
         return {
           valid: true,
           token,
+          scanner_token: 'scnt_sample_qr_token',
+          scanner_link: null,
           client: {
             id: 'client-active',
             name: 'Klien Harsava',
