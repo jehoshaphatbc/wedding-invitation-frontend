@@ -41,6 +41,25 @@
           </div>
         </div>
       </div>
+
+      <!-- Navigation Tabs (Setup vs Guests) -->
+      <div class="border-t border-gray-100 bg-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 flex gap-6">
+          <div
+            class="py-3 text-xs sm:text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-1.5 cursor-default"
+          >
+            <span>📝</span>
+            <span>{{ t('nav_setup') }}</span>
+          </div>
+          <NuxtLink
+            :to="`/client/guests?token=${encodeURIComponent(rawToken)}`"
+            class="py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition-colors"
+          >
+            <span>👥</span>
+            <span>{{ t('nav_guests') }}</span>
+          </NuxtLink>
+        </div>
+      </div>
     </header>
 
     <!-- Main Container -->
@@ -976,6 +995,8 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
   id: {
     portal_title: 'Setup Undangan Digital',
     portal_subtitle: 'Harsava Wedding Invitation Portal',
+    nav_setup: 'Setup Undangan',
+    nav_guests: 'Buku Tamu & RSVP',
     active_pkg: 'Paket Aktif',
     verifying_title: 'Memverifikasi Akses Klien...',
     verifying_desc: 'Mohon tunggu selagi kami memvalidasi token akses Anda.',
@@ -1094,6 +1115,8 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
   en: {
     portal_title: 'Digital Invitation Setup',
     portal_subtitle: 'Harsava Wedding Invitation Portal',
+    nav_setup: 'Invitation Setup',
+    nav_guests: 'Guest List & RSVP',
     active_pkg: 'Active Package',
     verifying_title: 'Verifying Client Access...',
     verifying_desc: 'Please wait while we validate your access token.',
