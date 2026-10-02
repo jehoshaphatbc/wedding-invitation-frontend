@@ -657,23 +657,85 @@
               <p class="text-xs text-gray-500 mt-1">{{ t('theme_header_desc') }}</p>
             </div>
 
+            <!-- WARNING & NOTICE BANNER -->
+            <!-- State 1: Locked (When editing an already saved invitation) -->
+            <div
+              v-if="isTemplateLocked"
+              class="p-4 sm:p-5 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-950 flex items-start gap-3.5 shadow-2xs"
+            >
+              <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center text-lg shrink-0 mt-0.5 shadow-2xs">
+                🔒
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="text-xs sm:text-sm font-bold text-amber-900">
+                    {{ t('template_locked_title') }}
+                  </h4>
+                  <span class="px-2 py-0.5 rounded-full bg-amber-200/80 text-amber-800 text-[10px] font-bold">
+                    {{ t('badge_permanent') }}
+                  </span>
+                </div>
+                <p class="text-xs text-amber-900/80 mt-1 leading-relaxed">
+                  {{ t('template_locked_desc') }}
+                </p>
+              </div>
+            </div>
+
+            <!-- State 2: Permanent Notice (Before saving for the first time) -->
+            <div
+              v-else
+              class="p-4 sm:p-5 rounded-2xl bg-rose-50/90 border border-rose-200 text-rose-950 flex items-start gap-3.5 shadow-2xs"
+            >
+              <div class="w-9 h-9 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg shrink-0 mt-0.5 shadow-2xs">
+                ⚠️
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <h4 class="text-xs sm:text-sm font-bold text-rose-900">
+                    {{ t('template_warning_title') }}
+                  </h4>
+                  <span class="px-2 py-0.5 rounded-md bg-rose-600 text-white text-[10px] font-extrabold tracking-wide uppercase shadow-2xs">
+                    {{ t('badge_permanent') }}
+                  </span>
+                </div>
+                <p class="text-xs text-rose-900/85 mt-1 leading-relaxed">
+                  {{ t('template_warning_desc') }}
+                </p>
+              </div>
+            </div>
+
             <!-- Template Picker -->
             <div class="border-t border-gray-100 pt-5 sm:pt-6">
-              <label class="block text-xs font-bold text-gray-800 uppercase tracking-wider mb-3">
-                {{ t('choose_template') }} <span class="text-red-500">*</span>
-              </label>
+              <div class="flex items-center justify-between mb-3">
+                <label class="block text-xs font-bold text-gray-800 uppercase tracking-wider">
+                  {{ t('choose_template') }} <span class="text-red-500">*</span>
+                </label>
+                <span
+                  v-if="isTemplateLocked"
+                  class="text-xs text-amber-700 font-semibold flex items-center gap-1"
+                >
+                  <span>🔒</span> {{ t('badge_locked') }}
+                </span>
+              </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div
                   v-for="tpl in availableTemplates"
                   :key="tpl.id"
-                  @click="selectTemplate(tpl)"
-                  class="relative cursor-pointer rounded-2xl border-2 p-3 sm:p-3.5 transition-all flex flex-col justify-between"
-                  :class="form.theme.template_component === tpl.nuxt_component
-                    ? 'border-blue-600 bg-blue-50/50 shadow-sm ring-2 ring-blue-100'
-                    : 'border-gray-200 hover:border-gray-300 bg-white'"
+                  @click="!isTemplateLocked && selectTemplate(tpl)"
+                  class="relative rounded-2xl border-2 p-3 sm:p-3.5 transition-all flex flex-col justify-between"
+                  :class="[
+                    isTemplateSelected(tpl)
+                      ? isTemplateLocked
+                        ? 'border-amber-500 bg-amber-50/30 shadow-xs ring-2 ring-amber-100'
+                        : 'border-blue-600 bg-blue-50/40 shadow-xs ring-2 ring-blue-100 cursor-pointer'
+                      : isTemplateLocked
+                        ? 'border-gray-200 bg-gray-50/80 opacity-50 cursor-not-allowed'
+                        : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50/50 bg-white cursor-pointer active:scale-[0.99]'
+                  ]"
                 >
-                  <div class="aspect-4/3 rounded-xl bg-gray-100 overflow-hidden mb-3 border border-gray-200 flex items-center justify-center relative">
+                  <!-- Preview Box Container with Stylized Mockup -->
+                  <div class="h-36 sm:h-40 rounded-xl overflow-hidden mb-3 border border-gray-200 relative flex items-center justify-center">
                     <img
                       v-if="tpl.thumbnail_url"
                       :src="tpl.thumbnail_url"
@@ -681,28 +743,92 @@
                       class="w-full h-full object-cover"
                       @error="(e: any) => e.target.style.display = 'none'"
                     />
-                    <span v-else class="text-xs text-gray-400 font-medium">{{ t('preview_design') }}</span>
-                    
-                    <span
-                      v-if="form.theme.template_component === tpl.nuxt_component"
-                      class="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-600 text-white shadow-xs"
+
+                    <!-- Rich Stylized Preview Mockups when thumbnail is empty -->
+                    <div
+                      v-else-if="tpl.nuxt_component === 'TemplateRomanticFloral'"
+                      class="w-full h-full bg-gradient-to-br from-rose-50 via-pink-50/70 to-amber-50 flex flex-col items-center justify-center p-3 text-center border-t-2 border-rose-300"
                     >
-                      ✓ Terpilih
+                      <span class="text-2xl mb-1 drop-shadow-xs">🌸</span>
+                      <div class="font-serif font-bold text-[11px] text-rose-950 uppercase tracking-widest">The Wedding Of</div>
+                      <div class="font-serif italic text-sm text-rose-800 font-bold mt-0.5 truncate max-w-[90%]">
+                        {{ form.groom.nickname || 'Dimas' }} & {{ form.bride.nickname || 'Anisa' }}
+                      </div>
+                      <div class="text-[9px] text-rose-500 mt-1 font-mono tracking-wider">ROMANTIC FLORAL</div>
+                    </div>
+
+                    <div
+                      v-else-if="tpl.nuxt_component === 'TemplateClassicElegance'"
+                      class="w-full h-full bg-gradient-to-br from-amber-50 via-stone-50 to-amber-100/60 flex flex-col items-center justify-center p-3 text-center border-t-2 border-amber-400"
+                    >
+                      <span class="text-2xl mb-1 drop-shadow-xs">💍</span>
+                      <div class="font-serif font-bold text-[10px] text-stone-900 uppercase tracking-widest">Wedding Celebration</div>
+                      <div class="font-serif text-sm text-stone-800 font-bold mt-0.5 truncate max-w-[90%]">
+                        {{ form.groom.nickname || 'Dimas' }} & {{ form.bride.nickname || 'Anisa' }}
+                      </div>
+                      <div class="text-[9px] text-amber-700 mt-1 font-mono tracking-wider">CLASSIC ELEGANCE</div>
+                    </div>
+
+                    <div
+                      v-else
+                      class="w-full h-full bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 flex flex-col items-center justify-center p-3 text-center border-t-2 border-slate-400"
+                    >
+                      <span class="text-2xl mb-1 drop-shadow-xs">✨</span>
+                      <div class="font-sans font-extrabold text-[10px] text-slate-800 uppercase tracking-widest">Save The Date</div>
+                      <div class="font-sans text-sm text-slate-900 font-bold mt-0.5 truncate max-w-[90%]">
+                        {{ form.groom.nickname || 'Dimas' }} & {{ form.bride.nickname || 'Anisa' }}
+                      </div>
+                      <div class="text-[9px] text-slate-500 mt-1 font-mono tracking-wider">MODERN MINIMALIST</div>
+                    </div>
+
+                    <!-- Top Right Badge -->
+                    <span
+                      v-if="isTemplateSelected(tpl) && isTemplateLocked"
+                      class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-600 text-white shadow-xs flex items-center gap-1 z-10"
+                    >
+                      <span>🔒</span>
+                      <span>{{ t('badge_locked') }}</span>
+                    </span>
+                    <span
+                      v-else-if="isTemplateSelected(tpl)"
+                      class="absolute top-2.5 right-2.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-600 text-white shadow-xs flex items-center gap-1 z-10"
+                    >
+                      <span>✓</span>
+                      <span>{{ t('badge_selected') }}</span>
+                    </span>
+                    <span
+                      v-else-if="isTemplateLocked"
+                      class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-full text-[9px] font-semibold bg-gray-200/90 text-gray-500 flex items-center gap-1 z-10"
+                    >
+                      <span>🔒</span>
+                      <span>{{ t('badge_unavailable') }}</span>
                     </span>
                   </div>
 
-                  <div class="flex items-center justify-between">
-                    <div>
-                      <div class="font-bold text-sm text-gray-900">{{ tpl.name }}</div>
-                      <div class="text-[11px] text-gray-500 font-mono">{{ tpl.nuxt_component }}</div>
+                  <!-- Template Meta & Selector Indicator -->
+                  <div class="flex items-center justify-between gap-2 pt-1">
+                    <div class="min-w-0">
+                      <div class="font-bold text-sm text-gray-900 truncate">{{ tpl.name }}</div>
+                      <div class="text-[11px] text-gray-500 font-mono truncate">{{ tpl.nuxt_component }}</div>
                     </div>
+
                     <div
-                      class="w-6 h-6 rounded-full flex items-center justify-center text-xs"
-                      :class="form.theme.template_component === tpl.nuxt_component ? 'bg-blue-600 text-white' : 'border border-gray-300'"
+                      class="w-6 h-6 rounded-full flex items-center justify-center text-xs shrink-0 transition-colors"
+                      :class="[
+                        isTemplateSelected(tpl)
+                          ? isTemplateLocked
+                            ? 'bg-amber-600 text-white shadow-xs'
+                            : 'bg-blue-600 text-white shadow-xs'
+                          : isTemplateLocked
+                            ? 'bg-gray-100 text-gray-400 border border-gray-300'
+                            : 'border border-gray-300 bg-white'
+                      ]"
                     >
-                      <svg v-if="form.theme.template_component === tpl.nuxt_component" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg v-if="isTemplateSelected(tpl) && !isTemplateLocked" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
                       </svg>
+                      <span v-else-if="isTemplateSelected(tpl) && isTemplateLocked" class="text-[11px]">🔒</span>
+                      <span v-else-if="isTemplateLocked" class="text-[10px]">✕</span>
                     </div>
                   </div>
                 </div>
@@ -1196,6 +1322,15 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     theme_header_desc: 'Pilih template desain undangan dan atur warna aksen utama.',
     choose_template: 'Pilih Template Desain',
     preview_design: 'Preview Desain',
+    template_warning_title: 'PENTING: Pilihan Template Desain Bersifat Permanen',
+    template_warning_desc: 'Template undangan yang Anda pilih TIDAK DAPAT DIUBAH LAGI setelah formulir ini disimpan/disubmit. Pastikan Anda telah memilih template yang benar-benar sesuai dengan konsep pernikahan Anda.',
+    template_locked_title: 'Template Desain Telah Terkunci (Permanen)',
+    template_locked_desc: 'Template undangan ini telah disimpan dan dikunci secara permanen. Anda tidak dapat mengganti template ini lagi, namun Anda tetap dapat menyesuaikan warna aksen utama serta detail acara lainnya.',
+    badge_permanent: 'Permanen',
+    badge_selected: 'Terpilih',
+    badge_locked: 'Terkunci',
+    badge_unavailable: 'Terkunci',
+    locked_template_notice: 'Template desain sudah dikunci permanen dan tidak dapat diubah lagi.',
     primary_color_title: 'Warna Aksen Utama (Primary Color)',
     primary_color_desc: 'Warna ini akan menjadi aksen tombol, judul, dan dekorasi pada undangan digital Anda.',
     color_picker_hint: 'Pilih warna kustom dengan color picker',
@@ -1324,6 +1459,15 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     theme_header_desc: 'Select your preferred invitation design template and accent colors.',
     choose_template: 'Choose Design Template',
     preview_design: 'Design Preview',
+    template_warning_title: 'IMPORTANT: Template Selection is Permanent',
+    template_warning_desc: 'The invitation design template you select CANNOT BE CHANGED once this form is submitted or saved. Please ensure you choose the template that best fits your wedding concept.',
+    template_locked_title: 'Design Template is Permanently Locked',
+    template_locked_desc: 'This invitation template has been previously saved and permanently locked. You cannot switch to another template, but you can still adjust the primary accent color and other details.',
+    badge_permanent: 'Permanent',
+    badge_selected: 'Selected',
+    badge_locked: 'Locked',
+    badge_unavailable: 'Locked',
+    locked_template_notice: 'The design template is permanently locked and cannot be changed.',
     primary_color_title: 'Primary Accent Color',
     primary_color_desc: 'This color accents buttons, headers, and decorative elements in your digital invitation.',
     color_picker_hint: 'Pick a custom color using color picker',
@@ -1444,6 +1588,31 @@ const availableTemplates = [
     thumbnail_url: ''
   }
 ]
+
+// State to track if template has already been saved and is permanently locked
+const hasSubmittedInvitation = ref(false)
+const originalTemplateTheme = ref<{ template_id: string; template_component: string } | null>(null)
+
+const isTemplateLocked = computed(() => {
+  if (hasSubmittedInvitation.value) return true
+  const inv = verifyData.value?.invitation
+  if (!inv) return false
+  return Boolean(
+    inv.id ||
+    inv.title ||
+    inv.theme?.template_component ||
+    originalTemplateTheme.value?.template_component
+  )
+})
+
+function isTemplateSelected(tpl: { id?: string; nuxt_component?: string }) {
+  if (!tpl) return false
+  return (
+    form.value.theme.template_component === tpl.nuxt_component ||
+    form.value.theme.template_id === tpl.id ||
+    form.value.theme.template_id === tpl.nuxt_component
+  )
+}
 
 // Reactive Form State
 const form = ref({
@@ -1617,6 +1786,10 @@ const galleryLimit = computed(() => {
 })
 
 function selectTemplate(tpl: typeof availableTemplates[0]) {
+  if (isTemplateLocked.value) {
+    toast.error(t('locked_template_notice'))
+    return
+  }
   form.value.theme.template_id = tpl.id
   form.value.theme.template_component = tpl.nuxt_component
 }
@@ -1676,8 +1849,26 @@ async function verifyClientAccess() {
           is_same_location: inv.event.is_same_location ?? true
         }
       }
-      if (inv.theme) form.value.theme = { ...form.value.theme, ...inv.theme }
-      if (inv.story) form.value.story = inv.story
+      if (inv.theme) {
+        form.value.theme = { ...form.value.theme, ...inv.theme }
+        if (inv.theme.template_component || inv.theme.template_id) {
+          originalTemplateTheme.value = {
+            template_id: inv.theme.template_id || '',
+            template_component: inv.theme.template_component || ''
+          }
+          const matched = availableTemplates.find(
+            t => t.nuxt_component === inv.theme.template_component || t.id === inv.theme.template_id
+          )
+          if (matched) {
+            form.value.theme.template_id = matched.id
+            form.value.theme.template_component = matched.nuxt_component
+            originalTemplateTheme.value = {
+              template_id: matched.id,
+              template_component: matched.nuxt_component
+            }
+          }
+        }
+      }
       if (Array.isArray(inv.gallery) && inv.gallery.length > 0) form.value.gallery = [...inv.gallery]
 
       // Populate gifts
@@ -1750,6 +1941,12 @@ async function handleSaveInvitation() {
     const title = form.value.title || `Pernikahan ${groomNick} & ${brideNick}`
     const slug = form.value.slug || `${groomNick}-${brideNick}`.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 
+    // Strict enforcement: if template is locked, preserve original template theme
+    if (isTemplateLocked.value && originalTemplateTheme.value?.template_component) {
+      form.value.theme.template_id = originalTemplateTheme.value.template_id || form.value.theme.template_id
+      form.value.theme.template_component = originalTemplateTheme.value.template_component
+    }
+
     const payload = {
       title,
       slug,
@@ -1765,6 +1962,15 @@ async function handleSaveInvitation() {
 
     const saveRes = await clientSetupService.saveInvitation(token, payload)
     
+    // Mark template as permanently locked upon first successful save
+    hasSubmittedInvitation.value = true
+    if (!originalTemplateTheme.value) {
+      originalTemplateTheme.value = {
+        template_id: form.value.theme.template_id,
+        template_component: form.value.theme.template_component
+      }
+    }
+
     if (saveRes?.is_local_fallback) {
       toast.info(t('toast_local_fallback'))
     } else {
