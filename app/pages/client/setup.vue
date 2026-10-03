@@ -796,7 +796,7 @@
                       ? 'bg-blue-600 text-white shadow-xs'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
                   >
-                    <span>{{ t(cat.nameKey) }}</span>
+                    <span>{{ cat.label }}</span>
                     <span
                       class="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
                       :class="selectedTemplateCategory === cat.id ? 'bg-white/25 text-white' : 'bg-gray-200 text-gray-700'"
@@ -853,10 +853,10 @@
                   <div class="h-36 sm:h-40 rounded-xl overflow-hidden mb-3 border border-gray-200 relative flex items-center justify-center">
                     <img
                       v-if="tpl.thumbnail_url"
-                      :src="tpl.thumbnail_url"
+                      :src="resolveImageUrl(tpl.thumbnail_url)"
                       :alt="tpl.name"
                       class="w-full h-full object-cover"
-                      @error="(e: any) => e.target.style.display = 'none'"
+                      @error="tpl.thumbnail_url = ''"
                     />
 
                     <!-- Rich Stylized Preview Mockups matching screenshot design -->
@@ -1789,17 +1789,46 @@ const colorPresets = [
   { name: 'Charcoal', hex: '#27272A' }
 ]
 
-// Available Template Options with Categories and Cover Presets
-const templateCategories = [
-  { id: 'all', nameKey: 'cat_all' },
-  { id: 'romantic', nameKey: 'cat_romantic' },
-  { id: 'classic', nameKey: 'cat_classic' },
-  { id: 'minimalist', nameKey: 'cat_minimalist' },
-  { id: 'rustic', nameKey: 'cat_rustic' },
-  { id: 'islamic', nameKey: 'cat_islamic' }
-]
+const templateService = useTemplateService()
+const config = useRuntimeConfig()
+const apiBase = (config.public.apiBase as string || '').replace(/\/api\/v1\/?$/, '')
 
-const availableTemplates = [
+function resolveImageUrl(path?: string) {
+  if (!path) return ''
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('blob:') || path.startsWith('data:')) return path
+  return `${apiBase}${path.startsWith('/') ? '' : '/'}${path}`
+}
+
+function getCategoryGradient(cat?: string) {
+  const c = (cat || '').toLowerCase()
+  if (c.includes('romantic') || c.includes('floral')) return 'from-rose-50 via-pink-50/70 to-amber-50'
+  if (c.includes('classic') || c.includes('elegant')) return 'from-amber-50 via-stone-50 to-amber-100/60'
+  if (c.includes('minimal')) return 'from-slate-50 via-gray-50 to-zinc-100'
+  if (c.includes('rustic') || c.includes('nature') || c.includes('dark')) return 'from-stone-900 via-amber-950 to-stone-800'
+  if (c.includes('islamic') || c.includes('tradisi')) return 'from-emerald-50 via-green-50/50 to-amber-100/50'
+  return 'from-sky-50 via-indigo-50/40 to-slate-50'
+}
+
+function getCategoryBorder(cat?: string) {
+  const c = (cat || '').toLowerCase()
+  if (c.includes('romantic') || c.includes('floral')) return 'border-rose-300'
+  if (c.includes('classic') || c.includes('elegant')) return 'border-amber-400'
+  if (c.includes('minimal')) return 'border-slate-400'
+  if (c.includes('rustic') || c.includes('nature') || c.includes('dark')) return 'border-amber-700'
+  if (c.includes('islamic') || c.includes('tradisi')) return 'border-emerald-400'
+  return 'border-blue-300'
+}
+
+function getCategoryIconType(cat?: string) {
+  const c = (cat || '').toLowerCase()
+  if (c.includes('romantic') || c.includes('floral')) return 'flower'
+  if (c.includes('classic') || c.includes('elegant')) return 'star'
+  if (c.includes('rustic') || c.includes('nature') || c.includes('dark')) return 'leaf'
+  return 'sparkles'
+}
+
+// Default Fallback Templates in case database is empty or offline
+const defaultTemplatesFallback = [
   {
     id: 'tpl-1',
     name: 'Romantic Floral',
@@ -1922,37 +1951,97 @@ const availableTemplates = [
   }
 ]
 
+// Dynamic templates fetched from Database
+const availableTemplates = ref<any[]>([...defaultTemplatesFallback])
+const loadingTemplates = ref(true)
+
+async function fetchDatabaseTemplates() {
+  loadingTemplates.value = true
+  try {
+    const res = await templateService.getPublicTemplates({ is_active: true, per_page: 50 })
+    const list = res?.data || (Array.isArray(res) ? res : [])
+    if (Array.isArray(list) && list.length > 0) {
+      availableTemplates.value = list.map((t: any) => ({
+        id: t.id,
+        name: t.name,
+        category: (t.category || 'classic').toLowerCase(),
+        nuxt_component: t.nuxt_component,
+        thumbnail_url: t.thumbnail_url || '',
+        preview_header: (t.name || '').toLowerCase().includes('wedding') ? 'Wedding Invitation' : 'The Wedding Of',
+        preview_tag: (t.name || 'TEMPLATE').toUpperCase(),
+        gradient: getCategoryGradient(t.category),
+        border_accent: getCategoryBorder(t.category),
+        header_color: 'text-gray-900',
+        couple_color: 'text-gray-800',
+        tag_color: 'text-gray-600',
+        icon_type: getCategoryIconType(t.category)
+      }))
+
+      // If form.theme is already populated, synchronize selection
+      if (form.value.theme.template_component || form.value.theme.template_id) {
+        const found = availableTemplates.value.find(
+          tpl => tpl.id === form.value.theme.template_id || tpl.nuxt_component === form.value.theme.template_component
+        )
+        if (found) {
+          form.value.theme.template_id = found.id
+          form.value.theme.template_component = found.nuxt_component
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Failed to fetch templates from database API, using fallback templates:', err)
+  } finally {
+    loadingTemplates.value = false
+  }
+}
+
 // Search, Filter, and Pagination for Template Selection
 const templateSearch = ref('')
 const selectedTemplateCategory = ref('all')
 const templateCurrentPage = ref(1)
 const templatePageSize = 6
 
+const templateCategories = computed(() => {
+  const catSet = new Set<string>()
+  availableTemplates.value.forEach(tpl => {
+    if (tpl.category) catSet.add(tpl.category.toLowerCase())
+  })
+
+  const list: Array<{ id: string; label: string }> = [{ id: 'all', label: t('cat_all') }]
+  catSet.forEach(c => {
+    const key = `cat_${c}`
+    const label = t(key) !== key ? t(key) : (c.charAt(0).toUpperCase() + c.slice(1))
+    list.push({ id: c, label })
+  })
+  return list
+})
+
 const categoryCounts = computed(() => {
-  const counts: Record<string, number> = { all: availableTemplates.length }
-  availableTemplates.forEach(tpl => {
+  const counts: Record<string, number> = { all: availableTemplates.value.length }
+  availableTemplates.value.forEach(tpl => {
     if (tpl.category) {
-      counts[tpl.category] = (counts[tpl.category] || 0) + 1
+      const c = tpl.category.toLowerCase()
+      counts[c] = (counts[c] || 0) + 1
     }
   })
   return counts
 })
 
 const filteredTemplates = computed(() => {
-  let list = availableTemplates
+  let list = availableTemplates.value
 
   // Filter by category
   if (selectedTemplateCategory.value && selectedTemplateCategory.value !== 'all') {
-    list = list.filter(tpl => tpl.category === selectedTemplateCategory.value)
+    list = list.filter(tpl => (tpl.category || '').toLowerCase() === selectedTemplateCategory.value.toLowerCase())
   }
 
   // Filter by search query
   const q = templateSearch.value.trim().toLowerCase()
   if (q) {
     list = list.filter(tpl => {
-      const nameMatch = tpl.name.toLowerCase().includes(q)
-      const compMatch = tpl.nuxt_component.toLowerCase().includes(q)
-      const catMatch = tpl.category.toLowerCase().includes(q)
+      const nameMatch = (tpl.name || '').toLowerCase().includes(q)
+      const compMatch = (tpl.nuxt_component || '').toLowerCase().includes(q)
+      const catMatch = (tpl.category || '').toLowerCase().includes(q)
       return nameMatch || compMatch || catMatch
     })
   }
@@ -2171,7 +2260,7 @@ const galleryLimit = computed(() => {
   return features.value.gallery_limit || 10
 })
 
-function selectTemplate(tpl: typeof availableTemplates[0]) {
+function selectTemplate(tpl: (typeof availableTemplates.value)[0]) {
   if (isTemplateLocked.value) {
     toast.error(t('locked_template_notice'))
     return
@@ -2237,7 +2326,7 @@ async function verifyClientAccess() {
       }
       if (inv.theme) {
         form.value.theme = { ...form.value.theme, ...inv.theme }
-        const matched = availableTemplates.find(
+        const matched = availableTemplates.value.find(
           t => t.nuxt_component === inv.theme.template_component || t.id === inv.theme.template_id
         )
         if (matched) {
@@ -2372,7 +2461,8 @@ async function handleSaveInvitation() {
   }
 }
 
-onMounted(() => {
+onMounted(async () => {
+  await fetchDatabaseTemplates()
   verifyClientAccess()
 })
 </script>

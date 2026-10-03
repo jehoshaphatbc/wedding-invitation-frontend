@@ -32,6 +32,15 @@ export function useTemplateService() {
       return api.post<ApiResponse<{ success_count: number }>>('/admin/templates/bulk-force-delete', { ids })
     },
 
+    getPublicTemplates(params?: {
+      search?: string
+      category?: string
+      is_active?: boolean | string | number
+      page?: number
+      per_page?: number
+    }) {
+      return api.get<any>('/templates', params as any)
+    },
     getTemplates(params?: {
       page?: number
       per_page?: number
