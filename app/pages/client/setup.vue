@@ -744,7 +744,7 @@
 
             <!-- Template Picker -->
             <div class="border-t border-gray-100 pt-5 sm:pt-6">
-              <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center justify-between mb-2">
                 <label class="block text-xs font-bold text-gray-800 uppercase tracking-wider">
                   {{ t('choose_template') }} <span class="text-red-500">*</span>
                 </label>
@@ -759,9 +759,83 @@
                 </span>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <!-- Search Bar & Category Filter Pills -->
+              <div class="space-y-3 mb-4 mt-2">
+                <!-- Search Box -->
+                <div class="relative w-full sm:max-w-md">
+                  <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input
+                    v-model="templateSearch"
+                    type="text"
+                    :placeholder="t('search_template_ph')"
+                    class="w-full rounded-xl border border-gray-300 pl-9 pr-8 py-2 text-xs sm:text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 bg-white"
+                  />
+                  <button
+                    v-if="templateSearch"
+                    type="button"
+                    @click="templateSearch = ''"
+                    class="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 rounded-full cursor-pointer"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                  </button>
+                </div>
+
+                <!-- Category Pills (Horizontal Scroll on Mobile) -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+                  <button
+                    v-for="cat in templateCategories"
+                    :key="cat.id"
+                    type="button"
+                    @click="selectedTemplateCategory = cat.id"
+                    class="px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                    :class="selectedTemplateCategory === cat.id
+                      ? 'bg-blue-600 text-white shadow-xs'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'"
+                  >
+                    <span>{{ t(cat.nameKey) }}</span>
+                    <span
+                      class="px-1.5 py-0.5 rounded-full text-[10px] font-bold"
+                      :class="selectedTemplateCategory === cat.id ? 'bg-white/25 text-white' : 'bg-gray-200 text-gray-700'"
+                    >
+                      {{ categoryCounts[cat.id] || 0 }}
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Empty State when filter or search returns 0 -->
+              <div
+                v-if="filteredTemplates.length === 0"
+                class="rounded-2xl border-2 border-dashed border-gray-200 p-8 text-center bg-gray-50/50"
+              >
+                <div class="w-12 h-12 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center mx-auto mb-3">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                  </svg>
+                </div>
+                <h4 class="text-sm font-bold text-gray-900">{{ t('empty_templates_title') }}</h4>
+                <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
+                  {{ t('empty_templates_desc') }}
+                </p>
+                <div class="mt-4">
+                  <button
+                    type="button"
+                    @click="templateSearch = ''; selectedTemplateCategory = 'all'"
+                    class="px-3.5 py-1.5 text-xs font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-xl transition-colors cursor-pointer"
+                  >
+                    {{ t('btn_reset_filter') }}
+                  </button>
+                </div>
+              </div>
+
+              <!-- Template Grid (Displays up to 6 per page) -->
+              <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div
-                  v-for="tpl in availableTemplates"
+                  v-for="tpl in paginatedTemplates"
                   :key="tpl.id"
                   @click="!isTemplateLocked && selectTemplate(tpl)"
                   class="relative rounded-2xl border-2 p-3 sm:p-3.5 transition-all flex flex-col justify-between"
@@ -775,7 +849,7 @@
                         : 'border-gray-200 hover:border-blue-300 hover:bg-gray-50/50 bg-white cursor-pointer active:scale-[0.99]'
                   ]"
                 >
-                  <!-- Preview Box Container with Stylized Mockup -->
+                  <!-- Preview Box Container with Stylized Cover Mockup -->
                   <div class="h-36 sm:h-40 rounded-xl overflow-hidden mb-3 border border-gray-200 relative flex items-center justify-center">
                     <img
                       v-if="tpl.thumbnail_url"
@@ -785,47 +859,34 @@
                       @error="(e: any) => e.target.style.display = 'none'"
                     />
 
-                    <!-- Rich Stylized Preview Mockups when thumbnail is empty -->
-                    <div
-                      v-else-if="tpl.nuxt_component === 'TemplateRomanticFloral'"
-                      class="w-full h-full bg-gradient-to-br from-rose-50 via-pink-50/70 to-amber-50 flex flex-col items-center justify-center p-3 text-center border-t-2 border-rose-300"
-                    >
-                      <svg class="w-6 h-6 text-rose-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                      </svg>
-                      <div class="font-serif font-bold text-[11px] text-rose-950 uppercase tracking-widest">The Wedding Of</div>
-                      <div class="font-serif italic text-sm text-rose-800 font-bold mt-0.5 truncate max-w-[90%]">
-                        {{ form.groom.nickname || 'Dimas' }} & {{ form.bride.nickname || 'Anisa' }}
-                      </div>
-                      <div class="text-[9px] text-rose-500 mt-1 font-mono tracking-wider">ROMANTIC FLORAL</div>
-                    </div>
-
-                    <div
-                      v-else-if="tpl.nuxt_component === 'TemplateClassicElegance'"
-                      class="w-full h-full bg-gradient-to-br from-amber-50 via-stone-50 to-amber-100/60 flex flex-col items-center justify-center p-3 text-center border-t-2 border-amber-400"
-                    >
-                      <svg class="w-6 h-6 text-amber-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
-                      <div class="font-serif font-bold text-[10px] text-stone-900 uppercase tracking-widest">Wedding Celebration</div>
-                      <div class="font-serif text-sm text-stone-800 font-bold mt-0.5 truncate max-w-[90%]">
-                        {{ form.groom.nickname || 'Dimas' }} & {{ form.bride.nickname || 'Anisa' }}
-                      </div>
-                      <div class="text-[9px] text-amber-700 mt-1 font-mono tracking-wider">CLASSIC ELEGANCE</div>
-                    </div>
-
+                    <!-- Rich Stylized Preview Mockups matching screenshot design -->
                     <div
                       v-else
-                      class="w-full h-full bg-gradient-to-br from-slate-50 via-gray-50 to-zinc-100 flex flex-col items-center justify-center p-3 text-center border-t-2 border-slate-400"
+                      class="w-full h-full bg-gradient-to-br flex flex-col items-center justify-center p-3 text-center border-t-2"
+                      :class="[tpl.gradient, tpl.border_accent]"
                     >
-                      <svg class="w-6 h-6 text-slate-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg v-if="tpl.icon_type === 'flower'" class="w-6 h-6 text-rose-500 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                      </svg>
+                      <svg v-else-if="tpl.icon_type === 'star'" class="w-6 h-6 text-amber-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                      </svg>
+                      <svg v-else-if="tpl.icon_type === 'leaf'" class="w-6 h-6 text-emerald-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M12 21a9 9 0 01-9-9c0-4.97 4.03-9 9-9 4.97 0 9 4.03 9 9-4.97 0-9 4.03-9 9z" />
+                      </svg>
+                      <svg v-else class="w-6 h-6 text-slate-600 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                       </svg>
-                      <div class="font-sans font-extrabold text-[10px] text-slate-800 uppercase tracking-widest">Save The Date</div>
-                      <div class="font-sans text-sm text-slate-900 font-bold mt-0.5 truncate max-w-[90%]">
+
+                      <div class="font-serif font-bold text-[10px] uppercase tracking-widest" :class="tpl.header_color">
+                        {{ tpl.preview_header }}
+                      </div>
+                      <div class="font-serif italic text-sm font-bold mt-0.5 truncate max-w-[90%]" :class="tpl.couple_color">
                         {{ form.groom.nickname || 'Dimas' }} & {{ form.bride.nickname || 'Anisa' }}
                       </div>
-                      <div class="text-[9px] text-slate-500 mt-1 font-mono tracking-wider">MODERN MINIMALIST</div>
+                      <div class="text-[9px] mt-1 font-mono tracking-wider" :class="tpl.tag_color">
+                        {{ tpl.preview_tag }}
+                      </div>
                     </div>
 
                     <!-- Top Right Badge -->
@@ -888,6 +949,63 @@
                       </svg>
                     </div>
                   </div>
+                </div>
+              </div>
+
+              <!-- Pagination Controls (Rendered if total templates exceed 6) -->
+              <div
+                v-if="filteredTemplates.length > templatePageSize"
+                class="flex flex-col sm:flex-row items-center justify-between gap-3 mt-4 pt-4 border-t border-gray-100"
+              >
+                <div class="text-xs text-gray-500 font-medium">
+                  {{
+                    t('showing_templates', {
+                      start: (templateCurrentPage - 1) * templatePageSize + 1,
+                      end: Math.min(templateCurrentPage * templatePageSize, filteredTemplates.length),
+                      total: filteredTemplates.length
+                    })
+                  }}
+                </div>
+
+                <div class="inline-flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    :disabled="templateCurrentPage <= 1"
+                    @click="templateCurrentPage--"
+                    class="px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                    </svg>
+                    <span>{{ t('btn_prev') }}</span>
+                  </button>
+
+                  <div class="flex items-center gap-1">
+                    <button
+                      v-for="p in totalTemplatePages"
+                      :key="p"
+                      type="button"
+                      @click="templateCurrentPage = p"
+                      class="w-7 h-7 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                      :class="templateCurrentPage === p
+                        ? 'bg-blue-600 text-white shadow-2xs'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'"
+                    >
+                      {{ p }}
+                    </button>
+                  </div>
+
+                  <button
+                    type="button"
+                    :disabled="templateCurrentPage >= totalTemplatePages"
+                    @click="templateCurrentPage++"
+                    class="px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer flex items-center gap-1"
+                  >
+                    <span>{{ t('btn_next') }}</span>
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                    </svg>
+                  </button>
                 </div>
               </div>
             </div>
@@ -1462,7 +1580,19 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     toast_invalid_token: 'Token akses tidak valid.',
     toast_local_fallback: 'Data berhasil disimpan secara lokal di browser Anda (Endpoint backend sedang disiapkan).',
     toast_save_success: 'Data undangan berhasil disimpan!',
-    toast_save_error: 'Gagal menyimpan data undangan.'
+    toast_save_error: 'Gagal menyimpan data undangan.',
+    search_template_ph: 'Cari nama tema atau kategori desain...',
+    cat_all: 'Semua Kategori',
+    cat_romantic: 'Romantic & Floral',
+    cat_classic: 'Classic & Elegant',
+    cat_minimalist: 'Modern Minimalist',
+    cat_rustic: 'Rustic & Nature',
+    cat_islamic: 'Islami & Tradisi',
+    empty_templates_title: 'Tidak Ada Template Ditemukan',
+    empty_templates_desc: 'Coba ubah kata kunci pencarian atau pilih kategori lain.',
+    btn_reset_filter: 'Reset Filter',
+    showing_templates: 'Menampilkan {start} - {end} dari {total} template',
+    page_of: 'Halaman {current} dari {total}'
   },
   en: {
     portal_title: 'Digital Invitation Setup',
@@ -1599,7 +1729,19 @@ const translations: Record<'id' | 'en', Record<string, string>> = {
     toast_invalid_token: 'Invalid access token.',
     toast_local_fallback: 'Data saved locally in your browser (Backend endpoint is being prepared).',
     toast_save_success: 'Invitation data saved successfully!',
-    toast_save_error: 'Failed to save invitation data.'
+    toast_save_error: 'Failed to save invitation data.',
+    search_template_ph: 'Search theme name or category...',
+    cat_all: 'All Categories',
+    cat_romantic: 'Romantic & Floral',
+    cat_classic: 'Classic & Elegant',
+    cat_minimalist: 'Modern Minimalist',
+    cat_rustic: 'Rustic & Nature',
+    cat_islamic: 'Islamic & Traditional',
+    empty_templates_title: 'No Templates Found',
+    empty_templates_desc: 'Try adjusting your search keyword or selecting another category.',
+    btn_reset_filter: 'Reset Filter',
+    showing_templates: 'Showing {start} - {end} of {total} templates',
+    page_of: 'Page {current} of {total}'
   }
 }
 
@@ -1647,27 +1789,189 @@ const colorPresets = [
   { name: 'Charcoal', hex: '#27272A' }
 ]
 
-// Available Template Options
+// Available Template Options with Categories and Cover Presets
+const templateCategories = [
+  { id: 'all', nameKey: 'cat_all' },
+  { id: 'romantic', nameKey: 'cat_romantic' },
+  { id: 'classic', nameKey: 'cat_classic' },
+  { id: 'minimalist', nameKey: 'cat_minimalist' },
+  { id: 'rustic', nameKey: 'cat_rustic' },
+  { id: 'islamic', nameKey: 'cat_islamic' }
+]
+
 const availableTemplates = [
   {
     id: 'tpl-1',
     name: 'Romantic Floral',
+    category: 'romantic',
     nuxt_component: 'TemplateRomanticFloral',
-    thumbnail_url: ''
+    thumbnail_url: '',
+    preview_header: 'The Wedding Of',
+    preview_tag: 'ROMANTIC FLORAL',
+    gradient: 'from-rose-50 via-pink-50/70 to-amber-50',
+    border_accent: 'border-rose-300',
+    header_color: 'text-rose-950',
+    couple_color: 'text-rose-800',
+    tag_color: 'text-rose-500',
+    icon_type: 'flower'
   },
   {
     id: 'tpl-2',
     name: 'Classic Elegance',
+    category: 'classic',
     nuxt_component: 'TemplateClassicElegance',
-    thumbnail_url: ''
+    thumbnail_url: '',
+    preview_header: 'Wedding Celebration',
+    preview_tag: 'CLASSIC ELEGANCE',
+    gradient: 'from-amber-50 via-stone-50 to-amber-100/60',
+    border_accent: 'border-amber-400',
+    header_color: 'text-stone-900',
+    couple_color: 'text-stone-800',
+    tag_color: 'text-amber-700',
+    icon_type: 'star'
   },
   {
     id: 'tpl-3',
     name: 'Modern Minimalist',
+    category: 'minimalist',
     nuxt_component: 'TemplateModernMinimalist',
-    thumbnail_url: ''
+    thumbnail_url: '',
+    preview_header: 'Save The Date',
+    preview_tag: 'MODERN MINIMALIST',
+    gradient: 'from-slate-50 via-gray-50 to-zinc-100',
+    border_accent: 'border-slate-400',
+    header_color: 'text-slate-800',
+    couple_color: 'text-slate-900',
+    tag_color: 'text-slate-500',
+    icon_type: 'sparkles'
+  },
+  {
+    id: 'tpl-4',
+    name: 'Botanical Garden',
+    category: 'romantic',
+    nuxt_component: 'TemplateBotanicalGarden',
+    thumbnail_url: '',
+    preview_header: 'Wedding Invitation',
+    preview_tag: 'BOTANICAL GARDEN',
+    gradient: 'from-emerald-50 via-teal-50/60 to-lime-50',
+    border_accent: 'border-emerald-300',
+    header_color: 'text-emerald-950',
+    couple_color: 'text-emerald-800',
+    tag_color: 'text-emerald-600',
+    icon_type: 'leaf'
+  },
+  {
+    id: 'tpl-5',
+    name: 'Royal Heritage',
+    category: 'classic',
+    nuxt_component: 'TemplateRoyalHeritage',
+    thumbnail_url: '',
+    preview_header: 'The Royal Union',
+    preview_tag: 'ROYAL HERITAGE',
+    gradient: 'from-indigo-50 via-purple-50/60 to-amber-50',
+    border_accent: 'border-indigo-300',
+    header_color: 'text-indigo-950',
+    couple_color: 'text-indigo-900',
+    tag_color: 'text-indigo-600',
+    icon_type: 'star'
+  },
+  {
+    id: 'tpl-6',
+    name: 'Nordic Clean',
+    category: 'minimalist',
+    nuxt_component: 'TemplateNordicClean',
+    thumbnail_url: '',
+    preview_header: 'Special Celebration',
+    preview_tag: 'NORDIC CLEAN',
+    gradient: 'from-sky-50 via-slate-50 to-cyan-50',
+    border_accent: 'border-sky-300',
+    header_color: 'text-sky-950',
+    couple_color: 'text-sky-900',
+    tag_color: 'text-sky-600',
+    icon_type: 'sparkles'
+  },
+  {
+    id: 'tpl-7',
+    name: 'Rustic Autumn',
+    category: 'rustic',
+    nuxt_component: 'TemplateRusticAutumn',
+    thumbnail_url: '',
+    preview_header: 'Together Forever',
+    preview_tag: 'RUSTIC AUTUMN',
+    gradient: 'from-orange-50 via-amber-50/70 to-yellow-50',
+    border_accent: 'border-amber-400',
+    header_color: 'text-amber-950',
+    couple_color: 'text-amber-900',
+    tag_color: 'text-amber-700',
+    icon_type: 'leaf'
+  },
+  {
+    id: 'tpl-8',
+    name: 'Golden Islamic',
+    category: 'islamic',
+    nuxt_component: 'TemplateGoldenIslamic',
+    thumbnail_url: '',
+    preview_header: 'Walimatul Ursy',
+    preview_tag: 'GOLDEN ISLAMIC',
+    gradient: 'from-emerald-50 via-green-50/50 to-amber-100/50',
+    border_accent: 'border-emerald-400',
+    header_color: 'text-emerald-950',
+    couple_color: 'text-emerald-900',
+    tag_color: 'text-emerald-700',
+    icon_type: 'star'
   }
 ]
+
+// Search, Filter, and Pagination for Template Selection
+const templateSearch = ref('')
+const selectedTemplateCategory = ref('all')
+const templateCurrentPage = ref(1)
+const templatePageSize = 6
+
+const categoryCounts = computed(() => {
+  const counts: Record<string, number> = { all: availableTemplates.length }
+  availableTemplates.forEach(tpl => {
+    if (tpl.category) {
+      counts[tpl.category] = (counts[tpl.category] || 0) + 1
+    }
+  })
+  return counts
+})
+
+const filteredTemplates = computed(() => {
+  let list = availableTemplates
+
+  // Filter by category
+  if (selectedTemplateCategory.value && selectedTemplateCategory.value !== 'all') {
+    list = list.filter(tpl => tpl.category === selectedTemplateCategory.value)
+  }
+
+  // Filter by search query
+  const q = templateSearch.value.trim().toLowerCase()
+  if (q) {
+    list = list.filter(tpl => {
+      const nameMatch = tpl.name.toLowerCase().includes(q)
+      const compMatch = tpl.nuxt_component.toLowerCase().includes(q)
+      const catMatch = tpl.category.toLowerCase().includes(q)
+      return nameMatch || compMatch || catMatch
+    })
+  }
+
+  return list
+})
+
+const totalTemplatePages = computed(() => {
+  return Math.ceil(filteredTemplates.value.length / templatePageSize) || 1
+})
+
+const paginatedTemplates = computed(() => {
+  const start = (templateCurrentPage.value - 1) * templatePageSize
+  return filteredTemplates.value.slice(start, start + templatePageSize)
+})
+
+watch([templateSearch, selectedTemplateCategory], () => {
+  templateCurrentPage.value = 1
+})
 
 // State to track if template has already been saved and is permanently locked
 const hasSubmittedInvitation = ref(false)

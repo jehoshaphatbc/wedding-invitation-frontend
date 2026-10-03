@@ -77,16 +77,33 @@
           />
         </div>
 
-        <div class="flex items-center gap-2">
-          <label class="text-xs font-semibold text-gray-500 whitespace-nowrap">Filter Status:</label>
-          <select
-            v-model="statusFilter"
-            class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
-          >
-            <option value="">All Statuses</option>
-            <option value="active">Active</option>
-            <option value="inactive">Inactive</option>
-          </select>
+        <div class="flex items-center gap-3 flex-wrap">
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold text-gray-500 whitespace-nowrap">Category:</label>
+            <select
+              v-model="categoryFilter"
+              class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+            >
+              <option value="">All Categories</option>
+              <option value="romantic">Romantic & Floral</option>
+              <option value="classic">Classic & Elegant</option>
+              <option value="minimalist">Modern Minimalist</option>
+              <option value="rustic">Rustic & Nature</option>
+              <option value="islamic">Islamic & Traditional</option>
+            </select>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold text-gray-500 whitespace-nowrap">Filter Status:</label>
+            <select
+              v-model="statusFilter"
+              class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+            >
+              <option value="">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -115,6 +132,9 @@
               >
                 Nuxt Component <span v-if="sortBy === 'nuxt_component'">{{ sortOrder === 'asc' ? '↑' : '↓' }}</span>
               </th>
+              <th class="px-4 py-3">
+                Category
+              </th>
               <th
                 class="px-4 py-3 cursor-pointer hover:bg-gray-100"
                 @click="toggleSort('is_active')"
@@ -126,12 +146,12 @@
           </thead>
           <tbody class="divide-y divide-gray-200">
             <tr v-if="loading">
-              <td colspan="6" class="py-12 text-center">
+              <td colspan="7" class="py-12 text-center">
                 <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
               </td>
             </tr>
             <tr v-else-if="!filteredTemplates || filteredTemplates.length === 0">
-              <td colspan="6" class="py-12 text-center text-gray-500">
+              <td colspan="7" class="py-12 text-center text-gray-500">
                 No templates found.
               </td>
             </tr>
@@ -176,6 +196,12 @@
                   <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-medium bg-gray-100 text-gray-800 border border-gray-200">
                     {{ tpl.nuxt_component }}
                   </span>
+                </td>
+                <td class="px-4 py-3">
+                  <span v-if="tpl.category" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 capitalize">
+                    {{ formatCategory(tpl.category) }}
+                  </span>
+                  <span v-else class="text-gray-400 text-xs italic">-</span>
                 </td>
                 <td class="px-4 py-3">
                   <span
@@ -330,6 +356,24 @@
               placeholder="e.g. Classic Elegance"
               class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
+          </div>
+
+          <!-- Input Category -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              Category
+            </label>
+            <select
+              v-model="form.category"
+              class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+            >
+              <option value="">-- Select Category (Optional) --</option>
+              <option value="romantic">Romantic & Floral</option>
+              <option value="classic">Classic & Elegant</option>
+              <option value="minimalist">Modern Minimalist</option>
+              <option value="rustic">Rustic & Nature</option>
+              <option value="islamic">Islamic & Traditional</option>
+            </select>
           </div>
 
           <!-- Input Nuxt Component -->
@@ -557,6 +601,7 @@ const meta = ref<any>(null)
 const loading = ref(true)
 const search = ref('')
 const statusFilter = ref('')
+const categoryFilter = ref('')
 const currentPage = ref(1)
 let searchTimeout: any
 
@@ -580,6 +625,10 @@ const filteredTemplates = computed(() => {
   if (!templates.value) return []
   let result = [...templates.value]
 
+  if (categoryFilter.value) {
+    result = result.filter(t => t.category === categoryFilter.value)
+  }
+
   if (statusFilter.value === 'active') {
     result = result.filter(t => t.is_active === true)
   } else if (statusFilter.value === 'inactive') {
@@ -589,6 +638,18 @@ const filteredTemplates = computed(() => {
   return result
 })
 
+function formatCategory(cat?: string) {
+  if (!cat) return ''
+  const map: Record<string, string> = {
+    romantic: 'Romantic & Floral',
+    classic: 'Classic & Elegant',
+    minimalist: 'Modern Minimalist',
+    rustic: 'Rustic & Nature',
+    islamic: 'Islamic & Traditional'
+  }
+  return map[cat] || cat
+}
+
 const showModal = ref(false)
 const saving = ref(false)
 const editingId = ref<string | null>(null)
@@ -596,6 +657,7 @@ const form = ref<TemplateFormData>({
   name: '',
   nuxt_component: '',
   thumbnail_url: '',
+  category: '',
   is_active: true
 })
 const previewError = ref(false)
@@ -657,6 +719,10 @@ async function loadTemplates() {
       params.status = 'inactive'
     }
 
+    if (categoryFilter.value) {
+      params.category = categoryFilter.value
+    }
+
     const response = viewMode.value === 'active'
       ? await templateService.getTemplates(params)
       : await templateService.getTrashedTemplates(params)
@@ -695,6 +761,7 @@ function openCreateModal() {
     name: '',
     nuxt_component: '',
     thumbnail_url: '',
+    category: '',
     is_active: true
   }
   previewError.value = false
@@ -707,6 +774,7 @@ function openEditModal(tpl: Template) {
     name: tpl.name,
     nuxt_component: tpl.nuxt_component,
     thumbnail_url: tpl.thumbnail_url || '',
+    category: tpl.category || '',
     is_active: tpl.is_active ?? true
   }
   previewError.value = false
@@ -750,6 +818,7 @@ async function saveTemplate() {
       name: form.value.name,
       nuxt_component: form.value.nuxt_component,
       thumbnail_url: form.value.thumbnail_url,
+      category: form.value.category || undefined,
       is_active: form.value.is_active
     }
 
@@ -878,7 +947,7 @@ function goToPage(page: number) {
   loadTemplates()
 }
 
-watch([search, statusFilter], () => {
+watch([search, statusFilter, categoryFilter], () => {
   clearTimeout(searchTimeout)
   searchTimeout = setTimeout(() => {
     currentPage.value = 1
