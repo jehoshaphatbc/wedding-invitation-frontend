@@ -187,7 +187,9 @@
                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-300 transition-all shadow-2xs cursor-pointer active:scale-95"
                       :title="getClientSetupStatus(client).tooltip"
                     >
-                      <span class="font-bold">✓</span>
+                      <svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
                       <span>{{ getClientSetupStatus(client).label }}</span>
                     </button>
 
@@ -198,7 +200,9 @@
                       class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-800 hover:bg-amber-100 border border-amber-300 transition-all shadow-2xs cursor-pointer active:scale-95"
                       :title="getClientSetupStatus(client).tooltip"
                     >
-                      <span>📝</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
                       <span>{{ getClientSetupStatus(client).label }}</span>
                     </button>
 
@@ -207,16 +211,21 @@
                       class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200"
                       :title="getClientSetupStatus(client).tooltip"
                     >
-                      <span>⏳</span>
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
                       <span>Unpaid</span>
                     </span>
 
                     <span
                       v-else-if="getClientSetupStatus(client).status === 'expired'"
-                      class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200"
+                      class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-rose-50 text-rose-700 border border-rose-200"
                       :title="getClientSetupStatus(client).tooltip"
                     >
-                      ✕ Expired
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      <span>Expired</span>
                     </span>
 
                     <span v-else class="text-gray-400 text-xs italic">-</span>
@@ -594,13 +603,13 @@
               WhatsApp Number <span class="text-red-500">*</span>
             </label>
             <div class="relative">
-              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-medium">🇮🇩 +62</span>
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-gray-500 font-semibold font-mono">+62</span>
               <input
                 v-model="form.whatsapp"
                 type="tel"
                 required
                 placeholder="81234567890"
-                class="w-full rounded-lg border border-gray-300 pl-16 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                class="w-full rounded-lg border border-gray-300 pl-14 pr-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
           </div>
@@ -855,15 +864,18 @@ function checkOrderInvitationFilled(order?: Order | null, client?: Client | null
   const anyOrder = order as any
   const inv = anyOrder.invitation || (client as any)?.invitation
   if (inv) {
-    if (inv.title && inv.title !== 'Draft Undangan' && inv.title !== '') return true
-    if (inv.groom && (inv.groom.full_name || inv.groom.nickname)) return true
-    if (inv.bride && (inv.bride.full_name || inv.bride.nickname)) return true
-    if (inv.status === 'published' || inv.status === 'completed' || inv.status === 'submitted') return true
-    if (inv.id && (inv.event || inv.theme)) return true
+    const hasGroom = Boolean(inv.groom && (inv.groom.full_name?.trim() || inv.groom.nickname?.trim()))
+    const hasBride = Boolean(inv.bride && (inv.bride.full_name?.trim() || inv.bride.nickname?.trim()))
+    const hasEvent = Boolean(inv.event && (inv.event.akad_date || inv.event.reception_date || inv.event.venue_name?.trim() || inv.event.address?.trim()))
+    
+    // Only considered filled if real client content (groom/bride names or event details) is present
+    if ((hasGroom || hasBride) && (hasEvent || (hasGroom && hasBride))) {
+      return true
+    }
   }
 
-  // 2. Specific flags from order
-  if (anyOrder.has_invitation || anyOrder.is_setup_completed || anyOrder.invitation_status === 'completed' || anyOrder.invitation_status === 'submitted') {
+  // 2. Explicit completion flag on order (if set by backend process)
+  if (anyOrder.is_setup_completed || anyOrder.invitation_status === 'completed') {
     return true
   }
 
@@ -875,7 +887,9 @@ function checkOrderInvitationFilled(order?: Order | null, client?: Client | null
         const raw = localStorage.getItem(`client_invitation_draft_${token}`)
         if (raw) {
           const parsed = JSON.parse(raw)
-          if (parsed && (parsed.groom?.full_name || parsed.bride?.full_name || parsed.title)) {
+          const hasG = Boolean(parsed.groom && (parsed.groom.full_name?.trim() || parsed.groom.nickname?.trim()))
+          const hasB = Boolean(parsed.bride && (parsed.bride.full_name?.trim() || parsed.bride.nickname?.trim()))
+          if (hasG || hasB) {
             return true
           }
         }
@@ -907,7 +921,7 @@ function getClientSetupStatus(client: Client): ClientSetupStatusInfo {
       status: 'unpaid',
       label: 'Unpaid',
       class: 'bg-gray-100 text-gray-600 border-gray-200',
-      icon: '⏳',
+      icon: 'clock',
       tooltip: 'Order invoice is unpaid. Setup form will be activated after payment.'
     }
   }
@@ -917,7 +931,7 @@ function getClientSetupStatus(client: Client): ClientSetupStatusInfo {
       status: 'expired',
       label: 'Expired',
       class: 'bg-rose-50 text-rose-700 border-rose-200',
-      icon: '✕',
+      icon: 'cross',
       tooltip: 'Order invoice has expired.'
     }
   }
@@ -930,7 +944,7 @@ function getClientSetupStatus(client: Client): ClientSetupStatusInfo {
       status: 'filled',
       label: 'Data Terisi',
       class: 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border-emerald-300',
-      icon: '✓',
+      icon: 'check',
       tooltip: 'Invitation setup data has been filled. Click to view setup details.'
     }
   }
@@ -939,7 +953,7 @@ function getClientSetupStatus(client: Client): ClientSetupStatusInfo {
     status: 'pending',
     label: 'Belum Terisi',
     class: 'bg-amber-50 text-amber-800 hover:bg-amber-100 border-amber-300',
-    icon: '📝',
+    icon: 'document',
     tooltip: 'Client has paid, but invitation form is not filled yet. Click to view setup details or copy link.'
   }
 }

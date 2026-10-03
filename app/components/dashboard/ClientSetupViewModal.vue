@@ -40,7 +40,7 @@
         </div>
 
         <!-- Empty State (No Setup Data Yet) -->
-        <div v-else-if="!invitationData" class="py-12 text-center max-w-sm mx-auto">
+        <div v-else-if="!isInvitationFilled" class="py-12 text-center max-w-sm mx-auto">
           <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-full flex items-center justify-center mx-auto mb-3">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
@@ -50,17 +50,30 @@
           <p class="text-xs text-gray-500 mb-4">
             The client has not filled out or saved their invitation details yet.
           </p>
-          <button
-            v-if="clientFormUrl"
-            type="button"
-            @click="openClientForm"
-            class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs inline-flex items-center gap-1.5"
-          >
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>
-            Open Client Form Link
-          </button>
+          <div class="flex items-center justify-center gap-2">
+            <button
+              v-if="clientFormUrl"
+              type="button"
+              @click="openClientForm"
+              class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-xs inline-flex items-center gap-1.5"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Open Client Form Link
+            </button>
+            <button
+              v-if="clientFormUrl"
+              type="button"
+              @click="copyText(clientFormUrl, 'Client Form Link copied!')"
+              class="px-3 py-2 text-xs font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors inline-flex items-center gap-1"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+              Copy Link
+            </button>
+          </div>
         </div>
 
         <!-- Populated Invitation Data -->
@@ -68,7 +81,10 @@
           <!-- 1. Couple Details -->
           <div class="bg-pink-50/40 border border-pink-100 rounded-xl p-4">
             <h4 class="text-xs font-bold uppercase tracking-wider text-pink-700 mb-3 flex items-center gap-1.5">
-              <span>👰🤵</span> Bride & Groom Details
+              <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+              </svg>
+              Bride & Groom Details
             </h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Groom -->
@@ -104,7 +120,11 @@
           <div class="bg-slate-50 border border-gray-200 rounded-xl p-4 space-y-4">
             <div class="flex items-center justify-between">
               <h4 class="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center gap-1.5">
-                <span>📍</span> Event Schedules & Venues
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Event Schedules & Venues
               </h4>
               <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
                 {{ invitationData.event?.is_same_location ? 'Single Venue' : 'Separate Venues' }}
@@ -114,7 +134,12 @@
             <!-- Matrimony / Akad -->
             <div class="bg-white p-3 rounded-lg border border-gray-200">
               <div class="flex items-center justify-between mb-1">
-                <span class="text-xs font-bold text-emerald-700 uppercase">💍 Holy Matrimony / Akad</span>
+                <span class="text-xs font-bold text-emerald-700 uppercase flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  Holy Matrimony / Akad
+                </span>
                 <span class="text-xs font-semibold text-gray-700">{{ invitationData.event?.akad_date || '-' }}</span>
               </div>
               <p class="text-xs text-gray-600 font-medium">Time: {{ invitationData.event?.akad_time || '-' }}</p>
@@ -138,7 +163,12 @@
             <!-- Reception -->
             <div class="bg-white p-3 rounded-lg border border-gray-200">
               <div class="flex items-center justify-between mb-1">
-                <span class="text-xs font-bold text-indigo-700 uppercase">🎉 Wedding Reception</span>
+                <span class="text-xs font-bold text-indigo-700 uppercase flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                  </svg>
+                  Wedding Reception
+                </span>
                 <span class="text-xs font-semibold text-gray-700">{{ invitationData.event?.reception_date || '-' }}</span>
               </div>
               <p class="text-xs text-gray-600 font-medium">Time: {{ invitationData.event?.reception_time || '-' }}</p>
@@ -164,7 +194,10 @@
           <div class="bg-blue-50/40 border border-blue-100 rounded-xl p-4">
             <div class="flex items-center justify-between mb-3">
               <h4 class="text-xs font-bold uppercase tracking-wider text-blue-800 flex items-center gap-1.5">
-                <span>📸</span> Photo Gallery & Google Drive Links
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Photo Gallery & Google Drive Links
               </h4>
               <span class="text-[11px] font-semibold text-blue-700 bg-white px-2 py-0.5 rounded-full border border-blue-200">
                 {{ galleryLinks.length }} File / Link
@@ -220,7 +253,10 @@
           <!-- 4. Digital Envelope / Bank Accounts -->
           <div class="bg-amber-50/40 border border-amber-100 rounded-xl p-4">
             <h4 class="text-xs font-bold uppercase tracking-wider text-amber-800 mb-3 flex items-center gap-1.5">
-              <span>💳</span> Digital Envelope & Bank Accounts
+              <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+              </svg>
+              Digital Envelope & Bank Accounts
             </h4>
 
             <div v-if="giftList.length === 0" class="text-xs text-gray-400 italic bg-white p-3 rounded-lg border border-amber-100">
@@ -347,6 +383,15 @@ const giftList = computed<any[]>(() => {
   return []
 })
 
+const isInvitationFilled = computed(() => {
+  if (!invitationData.value) return false
+  const inv = invitationData.value
+  const hasGroom = Boolean(inv.groom && (inv.groom.full_name?.trim() || inv.groom.nickname?.trim()))
+  const hasBride = Boolean(inv.bride && (inv.bride.full_name?.trim() || inv.bride.nickname?.trim()))
+  const hasEvent = Boolean(inv.event && (inv.event.akad_date || inv.event.reception_date || inv.event.venue_name?.trim() || inv.event.address?.trim()))
+  return (hasGroom || hasBride) && (hasEvent || (hasGroom && hasBride))
+})
+
 function openClientForm() {
   if (clientFormUrl.value && typeof window !== 'undefined') {
     window.open(clientFormUrl.value, '_blank')
@@ -373,7 +418,9 @@ async function fetchSetupData() {
   // 1. Check if direct invitation object exists in order
   if (props.order?.invitation) {
     invitationData.value = props.order.invitation
-    return
+    if (isInvitationFilled.value) {
+      return
+    }
   }
 
   // 2. If token exists, fetch from verifyToken API / local draft

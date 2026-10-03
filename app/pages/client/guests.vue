@@ -28,7 +28,7 @@
               class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-all"
               :class="lang === 'id' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'"
             >
-              🇮🇩 ID
+              ID
             </button>
             <button
               type="button"
@@ -36,7 +36,7 @@
               class="px-2.5 py-1 text-xs font-semibold rounded-lg transition-all"
               :class="lang === 'en' ? 'bg-white text-gray-900 shadow-xs' : 'text-gray-500 hover:text-gray-900'"
             >
-              🇬🇧 EN
+              EN
             </button>
           </div>
         </div>
@@ -50,13 +50,17 @@
               :to="`/client/setup?token=${encodeURIComponent(rawToken)}`"
               class="py-3 text-xs sm:text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-900 flex items-center gap-1.5 transition-colors"
             >
-              <span>📝</span>
+              <svg class="w-4 h-4 shrink-0 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+              </svg>
               <span>{{ t('nav_setup') }}</span>
             </NuxtLink>
             <div
               class="py-3 text-xs sm:text-sm font-bold border-b-2 border-blue-600 text-blue-600 flex items-center gap-1.5 cursor-default"
             >
-              <span>👥</span>
+              <svg class="w-4 h-4 shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
               <span>{{ t('nav_guests') }}</span>
               <span v-if="totalGuests > 0" class="ml-1 px-2 py-0.5 text-[11px] rounded-full bg-blue-100 text-blue-700 font-bold">
                 {{ totalGuests }}
@@ -71,7 +75,9 @@
             target="_blank"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 transition-colors shadow-2xs"
           >
-            <span>📲</span>
+            <svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+            </svg>
             <span class="hidden sm:inline">{{ t('nav_scanner') }}</span>
             <span class="sm:hidden">Scanner</span>
             <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -116,7 +122,10 @@
         <div class="bg-gradient-to-r from-blue-600 via-indigo-600 to-indigo-700 rounded-2xl p-5 sm:p-6 text-white shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div class="max-w-xl">
             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-white/20 text-white mb-2 backdrop-blur-xs">
-              <span>👥</span> {{ t('guest_management_badge') }}
+              <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+              </svg>
+              <span>{{ t('guest_management_badge') }}</span>
             </div>
             <h2 class="text-xl sm:text-2xl font-bold leading-tight">
               {{ t('header_title') }}
@@ -151,7 +160,9 @@
               @click="openTemplateModal"
               class="px-3.5 py-2.5 bg-white/15 hover:bg-white/25 border border-white/25 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 backdrop-blur-xs cursor-pointer text-center"
             >
-              <span>💬</span>
+              <svg class="w-4 h-4 shrink-0 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
               <span>{{ t('btn_template_setting') }}</span>
             </button>
             <a
@@ -160,7 +171,9 @@
               target="_blank"
               class="px-3.5 py-2.5 bg-amber-500 hover:bg-amber-400 text-white font-bold rounded-xl text-xs sm:text-sm shadow-sm transition-all flex items-center justify-center gap-1.5 cursor-pointer text-center"
             >
-              <span>📲</span>
+              <svg class="w-4 h-4 shrink-0 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+              </svg>
               <span class="truncate">{{ t('btn_open_scanner') }}</span>
             </a>
           </div>
@@ -172,8 +185,10 @@
           <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-200/90 shadow-2xs hover:shadow-xs transition-shadow">
             <div class="flex items-center justify-between">
               <span class="text-[11px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ t('stat_total_guests') }}</span>
-              <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-sm">
-                👥
+              <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                </svg>
               </span>
             </div>
             <div class="mt-2.5 flex items-baseline gap-1.5">
@@ -186,8 +201,10 @@
           <div class="bg-white rounded-2xl p-4 sm:p-5 border border-emerald-200/80 shadow-2xs hover:shadow-xs transition-shadow">
             <div class="flex items-center justify-between">
               <span class="text-[11px] sm:text-xs font-semibold text-emerald-700 uppercase tracking-wider">{{ t('stat_attending') }}</span>
-              <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold text-sm">
-                ✓
+              <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                </svg>
               </span>
             </div>
             <div class="mt-2.5 flex items-baseline gap-1.5">
@@ -207,8 +224,10 @@
           <div class="bg-white rounded-2xl p-4 sm:p-5 border border-rose-200/80 shadow-2xs hover:shadow-xs transition-shadow">
             <div class="flex items-center justify-between">
               <span class="text-[11px] sm:text-xs font-semibold text-rose-700 uppercase tracking-wider">{{ t('stat_not_attending') }}</span>
-              <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center font-bold text-sm">
-                ✕
+              <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
               </span>
             </div>
             <div class="mt-2.5 flex items-baseline gap-1.5">
@@ -221,8 +240,10 @@
           <div class="bg-white rounded-2xl p-4 sm:p-5 border border-amber-200/80 shadow-2xs hover:shadow-xs transition-shadow">
             <div class="flex items-center justify-between">
               <span class="text-[11px] sm:text-xs font-semibold text-amber-700 uppercase tracking-wider">{{ t('stat_pending') }}</span>
-              <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm">
-                ⏳
+              <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
               </span>
             </div>
             <div class="mt-2.5 flex items-baseline gap-1.5">
@@ -283,8 +304,10 @@
           </div>
 
           <div v-else-if="filteredGuests.length === 0" class="p-12 text-center">
-            <div class="w-14 h-14 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">
-              📭
+            <div class="w-14 h-14 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-3">
+              <svg class="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+              </svg>
             </div>
             <h3 class="text-sm font-bold text-gray-800">{{ t('empty_guests_title') }}</h3>
             <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
@@ -320,8 +343,10 @@
                       <h4 class="font-bold text-gray-900 text-sm leading-snug break-words">
                         {{ guest.name }}
                       </h4>
-                      <p v-if="guest.phone" class="text-xs text-gray-600 font-mono mt-0.5 flex items-center gap-1">
-                        <span>📱</span>
+                      <p v-if="guest.phone" class="text-xs text-gray-600 font-mono mt-0.5 flex items-center gap-1.5">
+                        <svg class="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                        </svg>
                         <span>{{ guest.phone }}</span>
                       </p>
                       <p v-else class="text-[11px] text-gray-400 italic mt-0.5">
@@ -339,10 +364,18 @@
                 <!-- Status Badges: RSVP & Attendance -->
                 <div class="flex items-center flex-wrap gap-2 text-xs">
                   <span
-                    class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border"
+                    class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
                     :class="getRsvpBadgeClass(guest.rsvp_status)"
                   >
-                    <span>{{ getRsvpEmoji(guest.rsvp_status) }}</span>
+                    <svg v-if="guest.rsvp_status === 'hadir'" class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
+                    <svg v-else-if="guest.rsvp_status === 'tidak_hadir'" class="w-3 h-3 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                    <svg v-else class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
                     <span>{{ getRsvpLabel(guest.rsvp_status) }}</span>
                   </span>
 
@@ -350,7 +383,9 @@
                     v-if="guest.actual_attendance"
                     class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
                   >
-                    <span>✓</span>
+                    <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                    </svg>
                     <span>{{ t('status_checked_in') }}</span>
                   </span>
                   <span
@@ -462,10 +497,18 @@
                     </td>
                     <td class="px-4 py-3.5">
                       <span
-                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border"
                         :class="getRsvpBadgeClass(guest.rsvp_status)"
                       >
-                        <span>{{ getRsvpEmoji(guest.rsvp_status) }}</span>
+                        <svg v-if="guest.rsvp_status === 'hadir'" class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        <svg v-else-if="guest.rsvp_status === 'tidak_hadir'" class="w-3 h-3 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                        <svg v-else class="w-3 h-3 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
                         <span>{{ getRsvpLabel(guest.rsvp_status) }}</span>
                       </span>
                     </td>
@@ -474,7 +517,9 @@
                         v-if="guest.actual_attendance"
                         class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200"
                       >
-                        <span>✓</span>
+                        <svg class="w-3 h-3 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
                         <span>{{ t('status_checked_in') }}</span>
                       </span>
                       <span
@@ -549,7 +594,11 @@
       <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
           <div class="flex items-center gap-2">
-            <span class="text-xl">📑</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+            </div>
             <h3 class="text-base font-bold text-gray-900">{{ t('bulk_modal_title') }}</h3>
           </div>
           <button
@@ -557,7 +606,9 @@
             @click="showBulkModal = false"
             class="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
           >
-            ✕
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
           </button>
         </div>
 
@@ -616,7 +667,9 @@
             @click="showSingleModal = false"
             class="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
           >
-            ✕
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
           </button>
         </div>
 
@@ -700,7 +753,11 @@
       <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6">
         <div class="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
           <div class="flex items-center gap-2">
-            <span class="text-xl">💌</span>
+            <div class="w-8 h-8 rounded-lg bg-pink-50 text-pink-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              </svg>
+            </div>
             <h3 class="text-base font-bold text-gray-900">{{ t('share_modal_title') }}</h3>
           </div>
           <button
@@ -708,7 +765,9 @@
             @click="showShareModal = false"
             class="text-gray-400 hover:text-gray-600 p-1 rounded-lg"
           >
-            ✕
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
           </button>
         </div>
 
@@ -746,7 +805,9 @@
                 @click="openTemplateModal"
                 class="text-xs text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 hover:underline cursor-pointer"
               >
-                <span>✏️</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/>
+                </svg>
                 <span>{{ t('btn_edit_global_template') }}</span>
               </button>
             </div>
@@ -774,7 +835,9 @@
               @click="openWhatsAppDirect(shareGuest)"
               class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl shadow-xs transition-colors flex items-center gap-1.5 cursor-pointer"
             >
-              <span>📲</span>
+              <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.771-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86.174.086.275.072.376-.043.101-.116.433-.506.549-.68.116-.173.231-.144.39-.086s1.011.477 1.184.564.289.13.332.203c.043.072.043.419-.101.824z"/>
+              </svg>
               <span>{{ t('btn_open_whatsapp') }}</span>
             </button>
           </div>
@@ -787,7 +850,11 @@
       <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 max-h-[92vh] overflow-y-auto">
         <div class="flex items-center justify-between pb-3 border-b border-gray-200 mb-4">
           <div class="flex items-center gap-2">
-            <span class="text-xl">💬</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+              </svg>
+            </div>
             <div>
               <h3 class="text-base font-bold text-gray-900">{{ t('template_modal_title') }}</h3>
               <p class="text-xs text-gray-500">{{ t('template_modal_desc') }}</p>
@@ -798,7 +865,9 @@
             @click="showTemplateModal = false"
             class="text-gray-400 hover:text-gray-600 p-1 rounded-lg cursor-pointer"
           >
-            ✕
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
           </button>
         </div>
 
@@ -1251,12 +1320,6 @@ function getRsvpBadgeClass(status?: string) {
   if (status === 'hadir') return 'bg-emerald-50 text-emerald-700 border-emerald-200'
   if (status === 'tidak_hadir') return 'bg-red-50 text-red-700 border-red-200'
   return 'bg-amber-50 text-amber-700 border-amber-200'
-}
-
-function getRsvpEmoji(status?: string) {
-  if (status === 'hadir') return '✓'
-  if (status === 'tidak_hadir') return '✕'
-  return '⏳'
 }
 
 function getRsvpLabel(status?: string) {
